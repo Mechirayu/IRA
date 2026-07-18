@@ -3,11 +3,11 @@ const memoriesData = [
     { video: "video-snaps/VN20260717_033554.mp4", orientation: "landscape" },
     { video: "video-snaps/VN20260717_033929.mp4", orientation: "landscape" },
     { video: "video-snaps/VN20260717_034038.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_034318.mp4", orientation: "portrait" }, // index 3
+    { video: "video-snaps/VN20260717_034318.mp4", orientation: "portrait", rotate: true }, // index 3
     { video: "video-snaps/VN20260717_034652.mp4", orientation: "landscape" },
     { video: "video-snaps/VN20260717_035013.mp4", orientation: "landscape" },
     { video: "video-snaps/VN20260717_035258.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_042216.mp4", orientation: "portrait" }, // index 7
+    { video: "video-snaps/VN20260717_042216.mp4", orientation: "portrait", rotate: true }, // index 7
     { video: "video-snaps/VN20260717_042620.mp4", orientation: "landscape" },
     { video: "video-snaps/VN20260717_042713.mp4", orientation: "landscape" },
     { video: "video-snaps/VN20260717_042805.mp4", orientation: "landscape" },
@@ -127,7 +127,7 @@ const MediaManager = {
                             video.pause();
                         } catch(e) {} // Ignore autoplay block during warming
                         
-                        const result = { element: video, orientation, isVid: true };
+                        const result = { element: video, orientation, isVid: true, rotate: memory.rotate };
                         this.cache.set(id, result);
                         this.pending.delete(id);
                         if (showLoader && loader) loader.style.display = 'none';
@@ -577,6 +577,9 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
     
     // Set dynamic orientation layout based on MediaManager calculation
     polaroidWrapper.classList.add(mediaObj.orientation || 'landscape');
+    if (mediaObj.rotate) {
+        polaroidWrapper.classList.add('rotated');
+    }
     
     // Pause background animations for GPU headroom
     document.body.classList.add('is-paused-background');
