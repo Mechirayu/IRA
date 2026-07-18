@@ -1,23 +1,23 @@
-const MEMORY_CONFIG = [
-    { video: "video-snaps/VN20260717_033554.mp4", type: "landscape", rotation: 90 }, // index 0 (Memory 1)
-    { video: "video-snaps/VN20260717_033929.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_034038.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_034318.mp4", type: "portrait", rotation: 0 },  // index 3 (Memory 4)
-    { video: "video-snaps/VN20260717_034652.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_035013.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_035258.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_042216.mp4", type: "portrait", rotation: 0 },  // index 7 (Memory 8)
-    { video: "video-snaps/VN20260717_042620.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_042713.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_042805.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_042933.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_043042.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_043156.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_043319.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_043613.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_043722.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_120339.mp4", type: "landscape", rotation: 90 }  // index 17 (Memory 18)
-];
+const MEMORY_CONFIG = {
+    1:{video: "video-snaps/VN20260717_033554.mp4", frame:"landscape"},
+    2:{video: "video-snaps/VN20260717_033929.mp4", frame:"landscape"},
+    3:{video: "video-snaps/VN20260717_034038.mp4", frame:"landscape"},
+    4:{video: "video-snaps/VN20260717_034318.mp4", frame:"portrait"},
+    5:{video: "video-snaps/VN20260717_034652.mp4", frame:"landscape"},
+    6:{video: "video-snaps/VN20260717_035013.mp4", frame:"landscape"},
+    7:{video: "video-snaps/VN20260717_035258.mp4", frame:"landscape"},
+    8:{video: "video-snaps/VN20260717_042216.mp4", frame:"portrait"},
+    9:{video: "video-snaps/VN20260717_042620.mp4", frame:"landscape"},
+    10:{video: "video-snaps/VN20260717_042713.mp4", frame:"landscape"},
+    11:{video: "video-snaps/VN20260717_042805.mp4", frame:"landscape"},
+    12:{video: "video-snaps/VN20260717_042933.mp4", frame:"landscape"},
+    13:{video: "video-snaps/VN20260717_043042.mp4", frame:"landscape"},
+    14:{video: "video-snaps/VN20260717_043156.mp4", frame:"landscape"},
+    15:{video: "video-snaps/VN20260717_043319.mp4", frame:"landscape"},
+    16:{video: "video-snaps/VN20260717_043613.mp4", frame:"landscape"},
+    17:{video: "video-snaps/VN20260717_043722.mp4", frame:"landscape"},
+    18:{video: "video-snaps/VN20260717_120339.mp4", frame:"landscape"}
+};
 
 // Global Asset Cache & Queue
 let openedCount = 0;
@@ -48,77 +48,39 @@ const MediaManager = {
     
     init: function() {
         console.log("MediaManager: Aggressive background preload started.");
-        // Instantly fire load requests for all memories
-        MEMORY_CONFIG.forEach((_, i) => this.preloadMedia(i));
+        const promises = [];
+        for (let i = 1; i <= Object.keys(MEMORY_CONFIG).length; i++) {
+            promises.push(this.preloadMedia(i));
+        }
+        Promise.all(promises).then(() => console.log("All media preloaded successfully."));
     },
     
-    preloadMedia: function(index) {
-        const memory = MEMORY_CONFIG[index];
+    preloadMedia: function(indexOrKey) {
+        const memoryKey = typeof indexOrKey === "number" ? indexOrKey : (indexOrKey + 1);
+        const memory = MEMORY_CONFIG[memoryKey];
         const id = memory.video || memory.image;
         
-        if (this.cache.has(id) || this.pending.has(id)) return;
+        if (this.cache.has(id) || this.pending.has(id)) return this.pending.get(id) || Promise.resolve(this.cache.get(id));
         
-        const loadPromise = new Promise((resolve, reject) => {
+        const loadPromise = new Promise(async (resolve, reject) => {
             const isVid = !!memory.video;
-            
-            if (isVid) {
-                const video = document.createElement("video");
-                video.preload = "auto";
-                video.playsInline = true;
-                video.muted = true;
-                video.src = memory.video;
+            try {
+                const response = await fetch(id);
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                const blob = await response.blob();
+                const cachedURL = URL.createObjectURL(blob);
                 
-                const checkReady = async () => {
-                    if (video.readyState >= 3) {
-                        video.removeEventListener('loadeddata', checkReady);
-                        
-                        // Safe decoder warming
-                        video.currentTime = 0.01;
-                        video.pause();
-                        try {
-                            await video.play();
-                            video.pause();
-                        } catch(e) {} // Ignore autoplay block during warming
-                        
-                        // Strict adherence to config, no fallback logic
-                        const result = { 
-                            element: video, 
-                            isVid: true,
-                            type: memory.type,
-                            rotation: memory.rotation
-                        };
-                        this.cache.set(id, result);
-                        this.pending.delete(id);
-                        resolve(result);
-                    }
+                const result = { 
+                    src: cachedURL, 
+                    isVid: isVid,
+                    frame: memory.frame
                 };
-                
-                video.addEventListener('loadeddata', checkReady);
-                video.load();
-                if (video.readyState >= 3) checkReady();
-                
-                video.onerror = (e) => {
-                    this.pending.delete(id);
-                    reject(e);
-                };
-            } else {
-                const img = new Image();
-                img.src = memory.image;
-                img.onload = () => {
-                    const result = { 
-                        element: img, 
-                        isVid: false,
-                        type: memory.type,
-                        rotation: memory.rotation
-                    };
-                    this.cache.set(id, result);
-                    this.pending.delete(id);
-                    resolve(result);
-                };
-                img.onerror = (e) => {
-                    this.pending.delete(id);
-                    reject(e);
-                };
+                this.cache.set(id, result);
+                this.pending.delete(id);
+                resolve(result);
+            } catch (e) {
+                this.pending.delete(id);
+                reject(e);
             }
         });
         
@@ -126,8 +88,9 @@ const MediaManager = {
         return loadPromise;
     },
     
-    getMedia: async function(index) {
-        const memory = MEMORY_CONFIG[index];
+    getMedia: async function(indexOrKey) {
+        const memoryKey = typeof indexOrKey === "number" && indexOrKey < 18 ? indexOrKey + 1 : indexOrKey;
+        const memory = MEMORY_CONFIG[memoryKey];
         const id = memory.video || memory.image;
         
         if (this.cache.has(id)) return this.cache.get(id);
@@ -135,32 +98,18 @@ const MediaManager = {
         const forceOpen = () => {
             console.warn(`MediaManager: Timeout/Error waiting for ${id}. Forcing open.`);
             const isVid = !!memory.video;
-            let element;
-            if (isVid) {
-                element = document.createElement("video");
-                element.src = memory.video;
-                element.preload = "auto";
-                element.playsInline = true;
-                element.muted = true;
-            } else {
-                element = new Image();
-                element.src = memory.image;
-            }
             const result = { 
-                element: element, 
+                src: id, 
                 isVid: isVid,
-                type: memory.type,
-                rotation: memory.rotation
+                frame: memory.frame
             };
             this.cache.set(id, result);
             return result;
         };
 
-        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(forceOpen()), 3000));
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(forceOpen()), 4000));
+        let loadPromise = this.pending.get(id) || this.preloadMedia(indexOrKey);
         
-        let loadPromise = this.pending.get(id) || this.preloadMedia(index);
-        
-        // Catch any error and just force open
         loadPromise = loadPromise.catch(e => {
             console.error("MediaManager: preload failed", e);
             return forceOpen();
@@ -248,7 +197,7 @@ async function triggerScatterExplosion() {
     
     console.log("Creating grid");
     // 1. Populate immutable grid IMMEDIATELY (Do not block on preload)
-    MEMORY_CONFIG.forEach((memory, index) => {
+    Object.values(MEMORY_CONFIG).forEach((memory, index) => {
         const env = document.createElement('div');
         env.className = 'mini-envelope';
         
@@ -440,7 +389,7 @@ function createBurstingHearts(container, deskRect) {
 }
 
 function checkAllOpened() {
-    if (openedCount === MEMORY_CONFIG.length) {
+    if (openedCount === Object.keys(MEMORY_CONFIG).length) {
         const collectorHeart = document.getElementById('collectorHeart');
         collectorHeart.style.pointerEvents = 'auto';
         
@@ -559,66 +508,60 @@ function checkAllOpened() {
 }
 
 function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalRot) {
-    const modalRoot = document.getElementById('modal-root') || document.body;
-    const backdrop = document.getElementById('polaroidBackdrop');
+    const modalRoot = document.getElementById("modal-root") || document.body;
+    const backdrop = document.getElementById("polaroidBackdrop");
     
-    // Create polaroid wrapper
-    const polaroidWrapper = document.createElement('div');
-    
-    const displayNode = mediaObj.element;
+    const polaroidWrapper = document.createElement("div");
     const isVid = mediaObj.isVid;
+    const orientationClass = mediaObj.frame;
     
-    // STRICT Layout mapping (from MEMORY_CONFIG as single source of truth)
-    const orientationClass = mediaObj.type;
-    
-    if (mediaObj.rotation === 90) {
-        displayNode.classList.add('rotated-90');
-    } else {
-        displayNode.classList.remove('rotated-90');
-    }
-    
-    polaroidWrapper.className = 'desk-polaroid-wrapper is-open';
+    polaroidWrapper.className = "desk-polaroid-wrapper is-open";
     polaroidWrapper.innerHTML = `
         <div class="video-frame ${orientationClass}">
         </div>
     `;
     
-    const frame = polaroidWrapper.querySelector('.video-frame');
+    const frame = polaroidWrapper.querySelector(".video-frame");
+    let displayNode;
+    
+    if (isVid) {
+        displayNode = document.createElement("video");
+        displayNode.preload = "auto";
+        displayNode.playsInline = true;
+        displayNode.muted = true;
+        displayNode.src = mediaObj.src;
+    } else {
+        displayNode = new Image();
+        displayNode.src = mediaObj.src;
+    }
+    
     frame.appendChild(displayNode);
     
-    // Pause background animations for GPU headroom
-    document.body.classList.add('is-paused-background');
+    document.body.classList.add("is-paused-background");
     
     if (isVid) {
         const playPromise = displayNode.play();
         if (playPromise !== undefined) {
             playPromise.catch(e => {
-                console.log('Autoplay prevented, fallback to controls:', e);
-                displayNode.controls = true; // allow manual play if blocked by Low Power Mode
+                console.log("Autoplay prevented, fallback to controls:", e);
+                displayNode.controls = true;
             });
         }
     }
     
-    // Start modal hidden
     gsap.set(polaroidWrapper, { opacity: 0, scale: 0.8 });
     modalRoot.appendChild(polaroidWrapper);
     
-    // Fade out clone, Fade in Modal (scaled to 0.9 to be 10% smaller)
     gsap.to(cloneElement, { opacity: 0, duration: 0.2 });
     gsap.to(polaroidWrapper, { opacity: 1, scale: 0.9, duration: 0.3, ease: "back.out(1.2)" });
     
-    // Play snap sound (if it's a photo)
     if (!isVid) playSnapSound();
     
-    // Close function
     const closeIt = () => {
-        // Resume background animations instantly
-        document.body.classList.remove('is-paused-background');
+        document.body.classList.remove("is-paused-background");
+        backdrop.style.opacity = "0";
+        backdrop.style.pointerEvents = "none";
         
-        backdrop.style.opacity = '0';
-        backdrop.style.pointerEvents = 'none';
-        
-        // Hide modal
         gsap.to(polaroidWrapper, { 
             opacity: 0, 
             scale: 0.8, 
@@ -626,31 +569,25 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
             onComplete: () => {
                 if (isVid) {
                     displayNode.pause();
-                    // Detach safely AFTER animation ends to prevent flickering
+                    displayNode.src = ""; // Clean up
+                    displayNode.load();
                     displayNode.remove();
                 }
-                
                 polaroidWrapper.remove();
                 
-                // Show clone and fly it back
                 gsap.set(cloneElement, { opacity: 1 });
                 gsap.to(cloneElement, {
-                    x: 0, // Reset delta to 0 (which returns it to its original rect position)
+                    x: 0, 
                     y: 0,
                     scale: 1,
                     rotation: originalRot,
                     duration: 0.4,
                     ease: "power2.out",
                     onComplete: () => {
-                        // Return to pool
                         EnvelopeClonePool.release(cloneElement);
-                        
-                        // Show original by removing class
-                        envElement.classList.remove('is-opening');
-                        
+                        envElement.classList.remove("is-opening");
                         envElement.isAnimating = false;
                         window.activePolaroid = false;
-                        
                         checkAllOpened();
                     }
                 });
