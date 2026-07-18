@@ -42,64 +42,25 @@ const EnvelopeClonePool = {
     }
 };
 
-// Media Manager (Singleton)
+// Media Manager (Singleton) - Aggressive Parallel Preload
 const MediaManager = {
-    queue: [],
     cache: new Map(),
     pending: new Map(),
-    isProcessing: false,
     
     init: function() {
-        this.queue = memoriesData.map((_, i) => i);
-        this.processQueue();
+        console.log("MediaManager: Aggressive background preload started.");
+        // Instantly fire load requests for all memories
+        memoriesData.forEach((_, i) => this.preloadMedia(i));
     },
     
-    reprioritize: function(targetIndex) {
-        // Sort queue by absolute distance from the tapped envelope
-        this.queue.sort((a, b) => Math.abs(a - targetIndex) - Math.abs(b - targetIndex));
-    },
-    
-    processQueue: async function() {
-        if (this.isProcessing) return;
-        this.isProcessing = true;
-        
-        while (this.queue.length > 0) {
-            const nextIndex = this.queue.shift();
-            try {
-                await this.getMedia(nextIndex, false); // silent background load
-            } catch(e) {
-                console.warn("Background preload failed for index", nextIndex, e);
-            }
-        }
-        this.isProcessing = false;
-    },
-    
-    getMedia: function(index, showLoader = false) {
+    preloadMedia: function(index) {
         const memory = memoriesData[index];
         const id = memory.video || memory.image;
         
-        if (this.cache.has(id)) return Promise.resolve(this.cache.get(id));
-        
-        const loader = document.getElementById('memory-loading-overlay');
-        
-        if (this.pending.has(id)) {
-            if (showLoader && loader) loader.style.display = 'flex';
-            return this.pending.get(id);
-        }
-        
-        if (showLoader && loader) loader.style.display = 'flex';
-        
-        // Remove from pending queue if we are manually requesting it
-        this.queue = this.queue.filter(i => i !== index);
+        if (this.cache.has(id) || this.pending.has(id)) return;
         
         const loadPromise = new Promise((resolve, reject) => {
             const isVid = !!memory.video;
-            
-            // 10 second timeout fallback
-            const timeoutId = setTimeout(() => {
-                this.pending.delete(id);
-                reject(new Error("Media load timeout"));
-            }, 10000);
             
             if (isVid) {
                 const video = document.createElement("video");
@@ -111,10 +72,6 @@ const MediaManager = {
                 const checkReady = async () => {
                     if (video.readyState >= 3) {
                         video.removeEventListener('loadeddata', checkReady);
-                        clearTimeout(timeoutId);
-                        
-                        // Fallback orientation detection removed as per mentor request
-                        let orientation = memory.orientation;
                         
                         // Safe decoder warming
                         video.currentTime = 0.01;
@@ -124,10 +81,9 @@ const MediaManager = {
                             video.pause();
                         } catch(e) {} // Ignore autoplay block during warming
                         
-                        const result = { element: video, orientation, isVid: true, rotate: memory.rotate };
+                        const result = { element: video, isVid: true, rotate: memory.rotate };
                         this.cache.set(id, result);
                         this.pending.delete(id);
-                        if (showLoader && loader) loader.style.display = 'none';
                         resolve(result);
                     }
                 };
@@ -137,7 +93,6 @@ const MediaManager = {
                 if (video.readyState >= 3) checkReady();
                 
                 video.onerror = (e) => {
-                    clearTimeout(timeoutId);
                     this.pending.delete(id);
                     reject(e);
                 };
@@ -145,15 +100,12 @@ const MediaManager = {
                 const img = new Image();
                 img.src = memory.image;
                 img.onload = () => {
-                    clearTimeout(timeoutId);
-                    const result = { element: img, orientation: memory.orientation || 'landscape', isVid: false };
+                    const result = { element: img, isVid: false };
                     this.cache.set(id, result);
                     this.pending.delete(id);
-                    if (showLoader && loader) loader.style.display = 'none';
                     resolve(result);
                 };
                 img.onerror = (e) => {
-                    clearTimeout(timeoutId);
                     this.pending.delete(id);
                     reject(e);
                 };
@@ -162,6 +114,17 @@ const MediaManager = {
         
         this.pending.set(id, loadPromise);
         return loadPromise;
+    },
+    
+    getMedia: async function(index) {
+        const memory = memoriesData[index];
+        const id = memory.video || memory.image;
+        
+        if (this.cache.has(id)) return this.cache.get(id);
+        if (this.pending.has(id)) return await this.pending.get(id);
+        
+        // Fallback if not preloaded yet
+        return await this.preloadMedia(index);
     }
 };
 
@@ -314,13 +277,10 @@ async function triggerScatterExplosion() {
                     ease: "power2.out"
                 });
                 
-                // Reprioritize the background queue
-                MediaManager.reprioritize(index);
-                
-                // Fetch safely (displays loader if not ready)
+                // Fetch safely
                 let mediaObj;
                 try {
-                    mediaObj = await MediaManager.getMedia(index, true);
+                    mediaObj = await MediaManager.getMedia(index);
                 } catch(e) {
                     console.error("Failed to load memory media", e);
                     env.classList.remove('is-opening');
