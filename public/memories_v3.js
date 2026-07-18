@@ -23,6 +23,25 @@ const memoriesData = [
 // Global Asset Cache & Queue
 let openedCount = 0;
 
+// Envelope Clone Pool to prevent GC spikes
+const EnvelopeClonePool = {
+    pool: [],
+    acquire: function(originalNode) {
+        if (this.pool.length > 0) {
+            const clone = this.pool.pop();
+            clone.innerHTML = originalNode.innerHTML;
+            return clone;
+        }
+        return originalNode.cloneNode(true);
+    },
+    release: function(cloneNode) {
+        if (cloneNode.parentNode) cloneNode.parentNode.removeChild(cloneNode);
+        cloneNode.style.cssText = '';
+        cloneNode.className = 'mini-envelope';
+        this.pool.push(cloneNode);
+    }
+};
+
 // // Synchronous Media Cache
 const mediaCache = new Map();
 
