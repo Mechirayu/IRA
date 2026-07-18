@@ -72,6 +72,12 @@ body{
 
 .page{position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;min-height:100dvh;z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:20px;overflow-y:auto;overflow-x:hidden;}
+@media (max-width: 768px) {
+    .page {
+        justify-content: flex-start !important;
+        padding: 60px 20px 40px 20px !important;
+    }
+}
 .page.active{display:flex !important;animation:slideIn .6s cubic-bezier(.2,.9,.3,1);}
 @keyframes slideIn{from{opacity:0;transform:translateY(22px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
 .inner{max-width:800px;width:90vw;margin:0 auto;display:flex;flex-direction:column;align-items:center;text-align:center;}
@@ -178,6 +184,19 @@ body{
 @keyframes floatSide {
     0%, 100% { transform: translate(100%, -50%); }
     50% { transform: translate(calc(100% + 10px), -50%); }
+}
+
+@media (max-width: 768px) {
+    .prompt-right {
+        top: 110%;
+        right: 50%;
+        transform: translateX(50%);
+        animation: floatDown 2s infinite ease-in-out;
+    }
+    @keyframes floatDown {
+        0%, 100% { transform: translateX(50%); }
+        50% { transform: translate(50%, 10px); }
+    }
 }
 
 .c-message {
@@ -675,7 +694,7 @@ body{
 /* Responsive: stack on small screens */
 @media (max-width: 768px) {
     .scratch-row,
-    .row-right { flex-direction: column; }
+    .row-right { flex-direction: column; margin-bottom: 80px; gap: 20px; }
     .scratch-card-side,
     .scratch-note-side { flex: unset; width: 100%; }
     .scratch-card-shell { width: min(95vw, 550px); }
@@ -1210,12 +1229,16 @@ body{
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     perspective: 1000px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 @media (max-width: 768px) {
     .memory-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
+        gap: 12px;
+        max-width: 380px;
     }
 }
 
@@ -2166,10 +2189,13 @@ body{
     #vinylRoomPage {
         flex-direction: column !important;
         align-items: center !important;
-        justify-content: center !important;
+        justify-content: flex-start !important;
+        padding-top: 80px !important;
         gap: 20px !important;
-        height: 100vh !important;
-        overflow: hidden !important;
+        min-height: 100vh !important;
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
     }
     .vinyl-room-layout {
         flex-direction: column !important;

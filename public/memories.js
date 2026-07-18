@@ -112,10 +112,17 @@ function triggerScatterExplosion() {
         // Mobile Layout: 3 cols x 6 rows (18 items)
         const cols = 3;
         const rows = 6;
-        const spacingX = W * 0.28; 
-        const spacingY = H * 0.12; 
-        const startX = -spacingX * 1; 
-        const startY = -spacingY * 2.5; 
+        const envelopeWidth = Math.min(100, W * 0.25);
+        const envelopeHeight = envelopeWidth / 1.6;
+        const spacingX = envelopeWidth + 15; 
+        const spacingY = envelopeHeight + 15; 
+        
+        const gridTotalWidth = (cols - 1) * spacingX;
+        const gridTotalHeight = (rows - 1) * spacingY;
+        
+        const startX = -gridTotalWidth / 2;
+        const startY = -gridTotalHeight / 2 + (H * 0.05); // shift down slightly
+        
         for(let r=0; r<rows; r++) {
             for(let c=0; c<cols; c++) {
                 slotPositions.push({ x: startX + c*spacingX, y: startY + r*spacingY });
