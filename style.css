@@ -560,13 +560,39 @@ body{
     filter: grayscale(0.5) opacity(0.6);
     pointer-events: none;
 }
-.modal-layer {
+.is-opening {
+    opacity: 0;
+    pointer-events: none;
+}
+#overlay-root {
     position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99999;
+}
+#polaroidBackdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 9000;
+    pointer-events: none;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+#animation-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 9100;
+    pointer-events: none;
+}
+#modal-root {
+    position: absolute;
     inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 99999;
+    z-index: 9200;
     pointer-events: none;
 }
 .desk-polaroid-wrapper {
@@ -575,8 +601,8 @@ body{
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 500;
-    pointer-events: none; /* Let backdrop handle clicks */
+    z-index: 9200;
+    pointer-events: none;
 }
 .desk-polaroid-inner {
     width: min(90vw, 500px);
