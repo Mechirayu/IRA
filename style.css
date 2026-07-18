@@ -152,7 +152,7 @@ body{
 .hint{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 
 /* 1 CONSTELLATION */
-#constellationPage { overflow: hidden; padding: 0; align-items: center; justify-content: center; background: transparent; }
+#constellationPage { overflow: hidden; padding: 0; display: flex; align-items: center; justify-content: center; background: transparent; }
 .constellation-bg { position: absolute; inset: 0; background: radial-gradient(circle at center, #1b1c3a 0%, #080914 100%); z-index: -2; opacity: 0; animation: fadeInConstBg 2s forwards; }
 @keyframes fadeInConstBg { to { opacity: 1; } }
 
@@ -170,7 +170,11 @@ body{
 @keyframes starIdle { from { opacity: 0.15; transform: scale(0.9); } to { opacity: 0.5; transform: scale(1.1); } }
 
 .c-prompt { position: absolute; top: 50%; left: 8%; transform: translateY(-50%); width: 28%; text-align: left; font-family: 'Quicksand', sans-serif; font-style: normal; font-size: clamp(32px, 4vw, 48px); font-weight: 800; color: var(--cream); letter-spacing: 1px; animation: pulseText 3s infinite ease-in-out; text-shadow: 0 0 15px rgba(255, 126, 157, 0.6); line-height: 1.4; z-index: 50; transition: opacity 1s ease; }
-@media (max-width: 768px) { .c-prompt { top: 80px; left: 5%; width: 90%; text-align: center; transform: none; font-size: 26px; } }
+@media (max-width: 768px) { 
+    #constellationPage { flex-direction: column; padding-top: 40px; justify-content: flex-start; }
+    .constellation-wrapper { margin-top: 20px; max-width: 90%; }
+    .c-prompt { position: relative; top: auto; left: auto; transform: none; width: 90%; text-align: center; font-size: clamp(24px, 6vw, 32px); margin: 0 auto; margin-bottom: 20px; } 
+}
 @keyframes pulseText { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
 #constellationFlash { position: absolute; inset: 0; background: #000; z-index: 100; opacity: 0; pointer-events: none; }
@@ -383,10 +387,56 @@ body{
     display: none;
 }
 #memoriesDesk {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    height: 100%;
+    margin: 0 auto;
     z-index: 2;
     pointer-events: none; /* Let clicks pass through if needed, except on envelopes */
+    display: grid;
+    /* Fluid responsive grid for mobile/tablet */
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 15px;
+    justify-content: center;
+    align-content: center;
+    padding: 20px;
+}
+/* Ensure envelopes receive clicks */
+#memoriesDesk > .mini-envelope {
+    pointer-events: auto;
+    position: relative;
+    z-index: 10; /* Keep unopened envelopes above closed polaroids */
+    width: 100%;
+    aspect-ratio: 1.6; /* approximate envelope ratio */
+}
+
+/* Desktop exact layout: 6 top, 3 left, 3 right, 6 bottom (18 items total) */
+@media (min-width: 1024px) {
+    #memoriesDesk {
+        grid-template-columns: repeat(6, 1fr);
+        grid-auto-rows: min-content;
+        gap: 20px;
+        padding: 40px;
+    }
+    
+    /* Create the hollow center: 
+       Items 1-6 fill Row 1 natively.
+       Items 7, 8 go to Row 2. We force 8 to Col 6.
+       Items 9, 10 go to Row 3. We force 10 to Col 6.
+       Items 11, 12 go to Row 4. We force 12 to Col 6.
+       Items 13-18 fill Row 5 natively. */
+    #memoriesDesk > .mini-envelope:nth-child(8),
+    #memoriesDesk > .mini-envelope:nth-child(10),
+    #memoriesDesk > .mini-envelope:nth-child(12) {
+        grid-column: 6;
+    }
+    
+    /* Restrict envelope max width on desktop so they aren't huge */
+    #memoriesDesk > .mini-envelope {
+        max-width: 100px;
+        margin: 0 auto;
+    }
 }
 
 #bigEnvelopeContainer {
@@ -438,6 +488,14 @@ body{
     cursor: pointer;
     transition: transform 0.2s;
     filter: drop-shadow(0 8px 15px rgba(0,0,0,0.4));
+}
+.mini-envelope {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+    min-width: 44px; /* Touch target accessibility */
+    min-height: 44px;
 }
 .be-seal svg {
     width: 100%;
@@ -737,15 +795,27 @@ body{
     display: flex !important;
     flex-direction: column;
     align-items: center;
+    justify-content: space-between;
+    padding: 30px 20px;
+    box-sizing: border-box;
+}
+#vinylRoomPage .global-header {
+    position: static;
+    transform: none;
+    margin-bottom: 20px;
 }
 .vinyl-room-layout {
-    width: 100vw;
+    width: 100%;
+    max-width: 1200px;
     flex: 1;
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    gap: 4vw;
 }
 @media (max-width: 800px) {
-    .vinyl-room-layout { flex-direction: column; }
+    .vinyl-room-layout { flex-direction: column; gap: 20px; }
 }
 
 /* LEFT COL - PLAYER */
@@ -759,7 +829,7 @@ body{
 }
 .vinyl-container {
     position: relative;
-    width: min(45vw, 420px);
+    width: clamp(200px, 45vw, 420px);
     aspect-ratio: 1;
     display: flex;
     align-items: center;
@@ -992,15 +1062,13 @@ body{
 
 /* Centered Play + Next Game wrapper */
 .vinyl-center-controls {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 30px;
+    gap: 20px;
     z-index: 50;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .vinyl-next-game-btn {
@@ -1025,7 +1093,8 @@ body{
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px 40px;
+    padding: 10px 20px;
+    width: 100%;
 }
 /* Global Header for the Room */
 .global-header {
@@ -1053,6 +1122,18 @@ body{
     display: block;
     margin-bottom: 14px;
     text-shadow: 0 0 10px rgba(232,192,125,0.3);
+}
+.scratch-note-inner h2 {
+    font-size: clamp(24px, 5vw, 42px);
+    color: var(--gold);
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+.scratch-note-inner p {
+    font-size: clamp(16px, 3.5vw, 22px);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-weight: 500;
 }
 .italic-script {
     font-family: 'Playfair Display', serif;
@@ -2229,134 +2310,17 @@ body{
         text-shadow: 1px 1px 4px rgba(0,0,0,0.8) !important;
     }
 
-    /* ---- 5. VINYL ROOM (MUSIC PLAYER) SCREEN ---- */
-    #vinylRoomPage {
-        padding: 0 !important;
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-    }
-
-    /* FORCE the header out of absolute positioning */
-    .global-header,
-    .lyrics-header.global-header,
-    #vinylRoomPage .lyrics-header.global-header,
-    #vinylRoomPage .global-header {
-        position: relative !important;
-        top: auto !important;
-        left: auto !important;
-        right: auto !important;
-        bottom: auto !important;
-        transform: none !important;
-        width: 100% !important;
-        max-width: 100vw !important;
-        padding: 25px 20px 10px !important;
-        text-align: center !important;
-        word-wrap: break-word !important;
-        overflow-wrap: break-word !important;
-        box-sizing: border-box !important;
-    }
-    #vinylRoomPage .gold-serif {
-        font-size: 0.7rem !important;
-        letter-spacing: 2px !important;
-        margin-bottom: 6px !important;
-        max-width: 100% !important;
-    }
-    #vinylRoomPage .italic-script {
-        font-size: clamp(1.1rem, 4.5vw, 1.5rem) !important;
-        line-height: 1.3 !important;
-        max-width: 100% !important;
-        white-space: normal !important;
-    }
-
-    /* Layout: force vertical column */
-    .vinyl-room-layout {
-        flex-direction: column !important;
-        align-items: center !important;
-        width: 100% !important;
-        max-width: 100vw !important;
-        padding: 0 16px !important;
-        gap: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Vinyl column */
-    .vinyl-col {
-        width: 100% !important;
-        flex: none !important;
-        align-items: center !important;
-        padding: 0 !important;
-    }
-
-    /* The vinyl record - compact for mobile */
-    .vinyl-container {
-        width: 160px !important;
-        height: 160px !important;
-        margin: 10px auto !important;
-        position: relative !important;
-    }
-
-    /* Controls: remove absolute, stack naturally */
-    .vinyl-center-controls {
-        position: relative !important;
-        bottom: auto !important;
-        left: auto !important;
-        transform: none !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        width: 100% !important;
-        gap: 12px !important;
-        padding: 8px 0 !important;
-    }
-
-    /* Play button */
-    .play-record-btn {
-        padding: 10px 24px !important;
-        font-size: 14px !important;
-        letter-spacing: 2px !important;
-    }
-
-    /* Next game button */
-    .vinyl-next-game-btn {
-        font-size: 1rem !important;
-        padding: 12px 32px !important;
-        max-width: 80vw !important;
-    }
-
-    /* Lyrics column */
-    .lyrics-col {
-        width: 100% !important;
-        flex: none !important;
-        padding: 0 10px !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Track switcher tabs - horizontal centered row */
-    .track-switcher {
-        padding: 0 0 10px 0 !important;
-        gap: 8px !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-    }
-    .track-btn {
-        padding: 6px 12px !important;
-    }
-    .track-title {
-        font-size: clamp(14px, 4vw, 22px) !important;
-        letter-spacing: 1px !important;
-    }
-
-    /* Lyrics container */
+    /* Mobile specific tweaks for lyrics if needed */
     .lyrics-container {
-        height: 150px !important;
-        max-width: 100% !important;
+        height: 180px !important;
     }
     .lyrics-inner {
-        padding: 60px 10px !important;
-        gap: 14px !important;
+        padding: 80px 10px !important;
     }
-    .lyric-line {
-        font-size: clamp(14px, 3.5vw, 20px) !important;
+    .play-record-btn.playing-state,
+    .play-record-btn.paused-state {
+        padding: 10px 24px;
+        font-size: 16px;
     }
 
     /* ---- 6. MEMORY MATCH GAME SCREEN ---- */

@@ -246,7 +246,10 @@ function startMemoryMatchTransition() {
     const ambientParticles = document.querySelectorAll('.star, .heart');
     
     // Prepare Memory Game elements
+    memoryPage.style.display = 'block';
     memoryPage.style.opacity = '1';
+    memoryPage.style.pointerEvents = 'auto';
+    memoryPage.style.zIndex = '10';
     memoryPage.classList.add('active'); 
     
     // Update global nav state manually to avoid go() instantly hiding the previous page
