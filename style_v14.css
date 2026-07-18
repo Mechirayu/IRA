@@ -2666,6 +2666,7 @@ body{
     display: block;
     border-radius: 12px;
     background: #000;
+    transform: scale(1.15); /* Zoom in by 15% to crop out baked-in black borders */
 }
 
 /* Spinning heart loader */
