@@ -195,13 +195,31 @@ function triggerScatterExplosion() {
             if(!window.activePolaroid && !env.isAnimating) {
                 env.isAnimating = true;
                 
-                // Immediate Tap Feedback
-                gsap.to(env, { scale: 0.9, duration: 0.1, yoyo: true, repeat: 1 });
+                // Create a pure visual clone for the tap feedback
+                const rect = env.getBoundingClientRect();
+                const clone = env.cloneNode(true);
+                clone.style.position = 'fixed';
+                clone.style.left = rect.left + 'px';
+                clone.style.top = rect.top + 'px';
+                clone.style.width = rect.width + 'px';
+                clone.style.height = rect.height + 'px';
+                clone.style.margin = '0';
+                clone.style.zIndex = '9999';
+                
+                // Copy computed rotation manually
+                const rot = gsap.getProperty(env, "rotation") || 0;
+                gsap.set(clone, { rotation: rot, transformOrigin: "center center" });
+                
+                document.body.appendChild(clone);
+                env.style.opacity = '0'; // Hide original, but NEVER transform it
+                
+                // Immediate Tap Feedback on Clone
+                gsap.to(clone, { scale: 0.9, duration: 0.1, yoyo: true, repeat: 1 });
                 
                 // Add Loading State immediately if not already cached
                 const isReady = window.AssetCache.videos.has(memory.video) && window.AssetCache.videos.get(memory.video).readyState >= 3;
                 if (!isReady) {
-                    env.classList.add('envelope-loading');
+                    clone.classList.add('envelope-loading');
                 }
                 
                 // Prioritize next asset in background queue
@@ -218,13 +236,12 @@ function triggerScatterExplosion() {
                 window.activePolaroid = true;
                 env.isAnimating = false;
                 
-                // Asset is fully ready! Trigger the flyout.
-                env.classList.remove('envelope-loading');
+                clone.classList.remove('envelope-loading');
                 if (!env.classList.contains('opened')) {
                     env.classList.add('opened');
                     openedCount++;
                 }
-                openPolaroid(memory, env, index, videoNode);
+                openPolaroid(memory, env, index, videoNode, clone);
             }
         });
         
@@ -414,7 +431,7 @@ function checkAllOpened() {
     }
 }
 
-function openPolaroid(memoryData, envElement, index, videoNode) {
+function openPolaroid(memoryData, envElement, index, videoNode, cloneElement) {
     const desk = document.getElementById('memoriesDesk');
     const backdrop = document.getElementById('polaroidBackdrop');
     
@@ -423,12 +440,11 @@ function openPolaroid(memoryData, envElement, index, videoNode) {
     
     const rot = gsap.getProperty(envElement, "rotation") || 0;
     
-    // Hide envelope entirely while its polaroid is active
-    gsap.to(envElement, {
-        scale: 0.5,
-        opacity: 0,
-        duration: 0.2
-    });
+    // Original envelope is ALREADY opacity 0. DO NOT scale it!
+    // Fade out the clone
+    if (cloneElement) {
+        gsap.to(cloneElement, { opacity: 0, duration: 0.2, onComplete: () => cloneElement.remove() });
+    }
     
     // Create polaroid wrapper
     const polaroidWrapper = document.createElement('div');
@@ -549,12 +565,18 @@ function openPolaroid(memoryData, envElement, index, videoNode) {
                 // Fully destroy the floating polaroid so it doesn't block the grid!
                 polaroidWrapper.remove();
                 
-                // Restore the real envelope visually
+                // Restore the original untransformed envelope visually
                 gsap.to(envElement, {
-                    scale: 1,
                     opacity: 1,
                     duration: 0.3,
-                    ease: "back.out(1.2)"
+                    ease: "power2.out",
+                    onComplete: () => {
+                        // Guarantee absolute removal of ANY inline transform properties from GSAP
+                        gsap.set(envElement, { clearProps: "all" });
+                        
+                        // Re-apply the resting rotation natively so it stays tilted
+                        gsap.set(envElement, { rotation: rot });
+                    }
                 });
                 
                 checkAllOpened();
