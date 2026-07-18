@@ -23,37 +23,28 @@ const memoriesData = [
 // Global Asset Cache & Queue
 let openedCount = 0;
 
-// Async Priority Media Cache
+// // Synchronous Media Cache
 const mediaCache = new Map();
 
-async function preloadMediaPriority(url, currentIndex) {
-    if (mediaCache.has(url)) return mediaCache.get(url);
+async function preloadAllMedia(onProgress) {
+    let loadedCount = 0;
+    const total = memoriesData.length;
     
-    const video = document.createElement("video");
-    video.preload = "auto";
-    video.playsInline = true;
-    video.muted = true; // Required for background auto-loading in some browsers
-    video.src = url;
-    
-    // Trigger priority queue for next 2 items
-    if (currentIndex !== undefined) {
-        for(let i=1; i<=2; i++) {
-            if (currentIndex + i < memoriesData.length) {
-                const nextUrl = memoriesData[currentIndex + i].video;
-                if (!mediaCache.has(nextUrl)) {
-                    preloadMediaPriority(nextUrl); // Fire and forget
+    const promises = memoriesData.map((memory) => {
+        return new Promise((resolve) => {
+            const video = document.createElement("video");
+            video.preload = "auto";
+            video.playsInline = true;
+            video.muted = true; // Required for background auto-loading in some browsers
+            video.src = memory.video;
+            
+            const markLoaded = () => {
+                if (!mediaCache.has(memory.video)) {
+                    mediaCache.set(memory.video, video);
+                    loadedCount++;
+                    if (onProgress) onProgress(loadedCount, total);
+                    resolve(video);
                 }
-            }
-        }
-    }
-    
-    return new Promise((resolve) => {
-                cachedVideo.oncanplay = () => resolve(cachedVideo);
-                return;
-            }
-        }
-        
-        const video = document.createElement('video');
         video.preload = 'auto';
         video.muted = true;
         video.loop = true;
@@ -158,34 +149,33 @@ function initMemories() {
     };
 }
 
-function triggerScatterExplosion() {
+async function triggerScatterExplosion() {
     const desk = document.getElementById('memoriesDesk');
-    const btnContinue = document.getElementById('btnContinue');
-    const deskRect = desk.getBoundingClientRect();
     
-    // Pre-calculated positions as percentage offsets from center (0,0).
-    // Arranged in a clean perimeter: 6 top, 3 left-middle, 3 right-middle, 6 bottom.
-    // The entire center is left completely empty for the collector heart.
-    let W = window.innerWidth;
-    let H = window.innerHeight;
-
-    // Progressive Lazy Loading
-    if (!window.memoriesPreloaded) {
-        window.memoriesPreloaded = true;
-        // Preload first 2 immediately
-        const initial = memoriesData.slice(0, 2).map(m => m.video);
-        initial.forEach(url => preloadAsset(url));
-        
-        // Queue the rest
-        const rest = memoriesData.slice(2).map(m => m.video);
-        preloadQueue.push(...rest);
-        if (!isPreloading) processPreloadQueue();
-    }
-
-    // Envelope layout is now natively handled by CSS Grid!
-    // No hardcoded coordinate math is necessary.
+    // 1. Show Loading Overlay
+    const loader = document.createElement('div');
+    loader.id = 'memoriesLoader';
+    loader.style.cssText = 'position:fixed; inset:0; z-index:99990; display:flex; justify-content:center; align-items:center; flex-direction:column; background:rgba(25,10,15,0.95); transition:opacity 0.5s;';
+    loader.innerHTML = `
+        <h2 style="font-family:'Quicksand', sans-serif; color:#ff6699; font-size:1.5rem; margin-bottom: 20px;">Developing Polaroids... <span id="memProgressText">0%</span></h2>
+        <div style="width:250px; height:6px; background:rgba(255,255,255,0.2); border-radius:3px; overflow:hidden;">
+            <div id="memProgressBar" style="width:0%; height:100%; background:#ff3377; transition: width 0.3s;"></div>
+        </div>
+    `;
+    document.body.appendChild(loader);
     
+    // 2. Synchronous Preload Barrier
+    await preloadAllMedia((loaded, total) => {
+        const pct = Math.round((loaded / total) * 100);
+        document.getElementById('memProgressText').innerText = pct + '%';
+        document.getElementById('memProgressBar').style.width = pct + '%';
+    });
+    
+    // 3. Fade out loader
+    loader.style.opacity = '0';
+    setTimeout(() => loader.remove(), 500);
 
+    // 4. Populate immutable grid
     memoriesData.forEach((memory, index) => {
         const env = document.createElement('div');
         env.className = 'mini-envelope';
@@ -206,6 +196,11 @@ function triggerScatterExplosion() {
         num.innerText = index + 1;
         env.appendChild(num);
         
+        // Random resting rotation
+        const randomRot = (Math.random() * 14) - 7;
+        gsap.set(env, { rotation: randomRot, opacity: 0 }); // start hidden for the clone animation
+        desk.appendChild(env);
+        
         env.addEventListener('click', async () => {
             if(!window.activePolaroid && !env.isAnimating) {
                 env.isAnimating = true;
@@ -222,6 +217,7 @@ function triggerScatterExplosion() {
                 clone.style.width = rect.width + 'px';
                 clone.style.height = rect.height + 'px';
                 clone.style.margin = '0';
+                clone.style.opacity = '1';
                 
                 // Copy computed rotation manually
                 const rot = gsap.getProperty(env, "rotation") || 0;
@@ -251,12 +247,9 @@ function triggerScatterExplosion() {
                     ease: "power2.out"
                 });
                 
-                clone.classList.add('envelope-loading');
+                // Await instantly from cache
+                const videoNode = mediaCache.get(memory.video);
                 
-                // Await current asset
-                const videoNode = await preloadMediaPriority(memory.video, index);
-                
-                clone.classList.remove('envelope-loading');
                 if (!env.classList.contains('opened')) {
                     env.classList.add('opened');
                     openedCount++;
@@ -270,34 +263,57 @@ function triggerScatterExplosion() {
                 openPolaroidStrict(memory, env, index, videoNode, clone, rot);
             }
         });
+    });
         
         desk.appendChild(env);
         
-        const randomRot = (Math.random() * 14) - 7;
+    // 5. Clone Intro Scatter Animation
+    // This allows us to animate an explosion WITHOUT mutating the real grid DOM
+    requestAnimationFrame(() => {
+        const animLayer = document.getElementById('animation-layer') || document.body;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
         
-        // Let CSS Grid place it naturally, but apply the resting rotation immediately
-        gsap.set(env, { scale: 1, opacity: 1, rotation: randomRot, x: 0, y: 0, xPercent: 0, yPercent: 0 });
+        const realEnvs = desk.querySelectorAll('.mini-envelope');
         
-        // Animate from the center of the screen to its natural grid slot
-        requestAnimationFrame(() => {
+        realEnvs.forEach((env, index) => {
             const rect = env.getBoundingClientRect();
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
+            
+            const clone = EnvelopeClonePool.acquire(env);
+            clone.style.position = 'absolute'; 
+            clone.style.left = rect.left + 'px';
+            clone.style.top = rect.top + 'px';
+            clone.style.width = rect.width + 'px';
+            clone.style.height = rect.height + 'px';
+            clone.style.margin = '0';
+            clone.style.opacity = '1';
+            
+            const rot = gsap.getProperty(env, "rotation") || 0;
             
             // Distance from screen center to the envelope's natural grid center
             const dx = centerX - (rect.left + rect.width / 2);
             const dy = centerY - (rect.top + rect.height / 2);
             
-            gsap.from(env, {
+            animLayer.appendChild(clone);
+            
+            gsap.fromTo(clone, {
                 x: dx,
                 y: dy,
                 scale: 0,
-                opacity: 0,
-                rotation: (Math.random() * 360), // spin out
+                rotation: (Math.random() * 360)
+            }, {
+                x: 0,
+                y: 0,
+                scale: 1,
+                rotation: rot,
                 duration: 0.7 + Math.random() * 0.3, 
                 delay: index * 0.06,
                 ease: "back.out(1.2)",
-                clearProps: "x,y" // Clean up transform when done so grid resizing is fluid
+                onComplete: () => {
+                    // Destroy clone and reveal the actual grid item
+                    EnvelopeClonePool.release(clone);
+                    gsap.set(env, { opacity: 1 }); 
+                }
             });
         });
     });
@@ -582,114 +598,7 @@ function playSnapSound() {
     } catch(e) {}
 }
 
-// Dev tool to open all un-opened envelopes instantly
-function devOpenAll() {
-    const envs = document.querySelectorAll('.mini-envelope:not(.opened)');
-    const page = document.getElementById('memoriesPage');
-    
-    envs.forEach((env) => {
-        env.classList.add('opened');
-        
-        // Find index
-        const indexStr = env.querySelector('.me-num').innerText;
-        const index = parseInt(indexStr) - 1;
-        const memoryData = memoriesData[index];
-        
-        const startX = gsap.getProperty(env, "x");
-        const startY = gsap.getProperty(env, "y");
-        const rot = gsap.getProperty(env, "rotation");
-        
-        gsap.killTweensOf(env);
-        env.remove();
-        
-        const polaroidWrapper = document.createElement('div');
-        polaroidWrapper.className = 'desk-polaroid-wrapper';
-        
-        polaroidWrapper.innerHTML = `
-            <div class="desk-polaroid-inner" style="pointer-events: auto;">
-                <div class="dp-photo" style="background-image: url('${memoryData.image}')"></div>
-            </div>
-        `;
-        
-        page.appendChild(polaroidWrapper);
-        
-        const endRot = rot + (Math.random() * 10 - 5);
-        
-        gsap.set(polaroidWrapper, {
-            x: startX,
-            y: startY,
-            xPercent: -50,
-            yPercent: -50,
-            rotation: endRot,
-            scale: 1,
-            zIndex: 50,
-            opacity: 1
-        });
-        
-        gsap.to(polaroidWrapper, {
-            y: "+=10",
-            rotation: endRot + (Math.random() * 4 - 2),
-            duration: 2 + Math.random(),
-            yoyo: true,
-            repeat: -1,
-            ease: "sine.inOut"
-        });
-        
-        // Allow reopening the polaroid from the desk!
-        polaroidWrapper.onclick = () => {
-            if (polaroidWrapper.classList.contains('is-open')) return;
-            polaroidWrapper.classList.add('is-open');
-            
-            gsap.killTweensOf(polaroidWrapper);
-            
-            const currentX = gsap.getProperty(polaroidWrapper, "x");
-            const currentY = gsap.getProperty(polaroidWrapper, "y");
-            const currentRot = gsap.getProperty(polaroidWrapper, "rotation");
-            
-            // Show Backdrop
-            const backdrop = document.getElementById('polaroidBackdrop');
-            backdrop.style.opacity = '1';
-            backdrop.style.pointerEvents = 'auto';
-            
-            // Re-add close button
-            const btn = document.createElement('button');
-            btn.className = 'pm-close';
-            btn.style.cssText = "position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 10px 20px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: #fff; border-radius: 20px; font-family: 'Quicksand', sans-serif; cursor: pointer; opacity: 0; pointer-events: auto;";
-            btn.innerText = 'Close';
-            polaroidWrapper.appendChild(btn);
-            
-            gsap.to(polaroidWrapper, {
-                x: 0, y: 0, xPercent: -50, yPercent: -50, scale: 2.2, zIndex: 500, rotation: (Math.random()*6-3),
-                duration: 0.6, ease: "back.out(1.2)"
-            });
-            
-            gsap.to(btn, { opacity: 1, duration: 0.3, delay: 0.6 });
-            
-            btn.onclick = (e) => {
-                e.stopPropagation(); // prevent reopening click
-                polaroidWrapper.classList.remove('is-open');
-                backdrop.style.opacity = '0';
-                backdrop.style.pointerEvents = 'none';
-                
-                gsap.to(btn, { opacity: 0, duration: 0.2, onComplete: () => btn.remove() });
-                
-                const newEndRot = currentRot + (Math.random() * 10 - 5);
-                gsap.to(polaroidWrapper, {
-                    x: currentX, y: currentY, rotation: newEndRot, scale: 1, xPercent: -50, yPercent: -50, zIndex: 50, duration: 0.6, ease: "back.out(1.2)",
-                    onComplete: () => {
-                        gsap.to(polaroidWrapper, {
-                            y: "+=10", rotation: newEndRot + (Math.random() * 4 - 2), duration: 2 + Math.random(), yoyo: true, repeat: -1, ease: "sine.inOut"
-                        });
-                    }
-                });
-            };
-        };
-        
-        openedCount++;
-    });
-    
-    checkAllOpened();
-}
+// Removed devOpenAll to strictly enforce grid immutability.
 
 // Ensure closed polaroids reflow correctly if the device is rotated or window is resized
 window.addEventListener('resize', () => {
