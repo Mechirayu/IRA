@@ -192,11 +192,17 @@ function triggerScatterExplosion() {
         env.appendChild(num);
         
         env.addEventListener('click', async () => {
-            if(!window.activePolaroid) {
-                window.activePolaroid = true;
+            if(!window.activePolaroid && !env.isAnimating) {
+                env.isAnimating = true;
                 
-                // Add Loading State immediately
-                env.classList.add('envelope-loading');
+                // Immediate Tap Feedback
+                gsap.to(env, { scale: 0.9, duration: 0.1, yoyo: true, repeat: 1 });
+                
+                // Add Loading State immediately if not already cached
+                const isReady = window.AssetCache.videos.has(memory.video) && window.AssetCache.videos.get(memory.video).readyState >= 3;
+                if (!isReady) {
+                    env.classList.add('envelope-loading');
+                }
                 
                 // Prioritize next asset in background queue
                 if (index + 1 < memoriesData.length) {
@@ -208,6 +214,9 @@ function triggerScatterExplosion() {
                 
                 // Await current asset
                 const videoNode = await preloadAsset(memory.video);
+                
+                window.activePolaroid = true;
+                env.isAnimating = false;
                 
                 // Asset is fully ready! Trigger the flyout.
                 env.classList.remove('envelope-loading');
@@ -412,20 +421,13 @@ function openPolaroid(memoryData, envElement, index, videoNode) {
     // Stop envelope animations
     gsap.killTweensOf(envElement);
     
-    // Get envelope's visual center relative to the viewport center
-    const envRect = envElement.getBoundingClientRect();
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    const startX = (envRect.left + envRect.width / 2) - centerX;
-    const startY = (envRect.top + envRect.height / 2) - centerY;
-    const rot = gsap.getProperty(envElement, "rotation");
+    const rot = gsap.getProperty(envElement, "rotation") || 0;
     
     // Hide envelope entirely while its polaroid is active
     gsap.to(envElement, {
-        scale: 0,
+        scale: 0.5,
         opacity: 0,
-        duration: 0.3,
-        ease: "back.in(1.2)"
+        duration: 0.2
     });
     
     // Create polaroid wrapper
@@ -456,14 +458,6 @@ function openPolaroid(memoryData, envElement, index, videoNode) {
     // Pause video immediately to prevent lag during the GSAP zoom animation
     video.pause();
     
-    const isMobile = window.innerWidth <= 1024;
-    const deskScale = isMobile ? 0.6 : 1; // Scale down so it fits perfectly in the grid slot without overlapping
-
-    // Show Backdrop - darker on mobile to hide closed envelopes completely
-    backdrop.style.background = isMobile ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
-    backdrop.style.opacity = '1';
-    backdrop.style.pointerEvents = 'auto';
-    
     // Allow clicking the photo itself to close it, preventing click bleed
     polaroidWrapper.onclick = (e) => {
         if (e) e.stopPropagation();
@@ -472,73 +466,84 @@ function openPolaroid(memoryData, envElement, index, videoNode) {
         }
     };
     polaroidWrapper.style.cursor = 'pointer';
+
+    // Pre-calculate target bounds (since the wrapper is flex, inner is already naturally centered)
+    const polaroidRect = inner.getBoundingClientRect();
+    const envRect = envElement.getBoundingClientRect();
     
-    // Set polaroid starting position and z-index to be strictly over the backdrop
-    gsap.set(polaroidWrapper, { x: startX, y: startY, rotation: rot, scale: 0, opacity: 0, zIndex: 500 });
+    const deltaX = (envRect.left + envRect.width / 2) - (polaroidRect.left + polaroidRect.width / 2);
+    const deltaY = (envRect.top + envRect.height / 2) - (polaroidRect.top + polaroidRect.height / 2);
+    const scaleDelta = envRect.width / polaroidRect.width;
     
     // The user requested videos 4 and 8 to be vertical. (Index 3 and 7)
     const isVertical = (index === 3 || index === 7);
     const targetRotation = isVertical ? 0 : -90;
-    
-    const startHeight = polaroidWrapper.offsetHeight || ((polaroidWrapper.offsetWidth || 100) * 1.77);
-    
-    let targetScale;
-    if (isVertical) {
-        // Fit 75% of screen height for vertical videos (85% on mobile)
-        const targetHeight = window.innerHeight * (isMobile ? 0.85 : 0.75);
-        targetScale = targetHeight / startHeight;
-    } else {
-        // Fit 60% of screen width for horizontal videos (90% on mobile)
-        const targetWidth = window.innerWidth * (isMobile ? 0.90 : 0.60);
-        targetScale = targetWidth / startHeight;
+    if (!isVertical) {
+        gsap.set(inner, { rotation: -90 }); // apply immediately so layout doesn't break during measurement
     }
     
-    // Animate polaroid TO CENTER
-    gsap.to(polaroidWrapper, { 
-        x: 0, 
-        y: 0, 
-        rotation: targetRotation, 
-        scale: targetScale, 
-        opacity: 1, 
-        duration: 0.6, 
-        delay: 0.1, 
+    // Animate polaroid FROM the envelope TO the center
+    gsap.fromTo(inner, { 
+        x: deltaX, 
+        y: deltaY, 
+        scale: scaleDelta, 
+        rotation: rot 
+    }, {
+        x: 0,
+        y: 0,
+        scale: 1,
+        rotation: targetRotation,
+        duration: 0.6,
         ease: "back.out(1.2)",
         onComplete: () => {
-            video.play();
+            if(videoNode) videoNode.play();
         }
     });
+    
+    // Show Backdrop - darker on mobile
+    const isMobile = window.innerWidth <= 1024;
+    backdrop.style.background = isMobile ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
+    backdrop.style.opacity = '1';
+    backdrop.style.pointerEvents = 'auto';
     
     // Handle close function
     const closeIt = (e) => {
         if (e) e.stopPropagation();
         window.activePolaroid = false;
-        polaroidWrapper.classList.remove('is-open'); // Re-enable CSS hover
-        video.pause(); // Pause video when returning to desk to prevent lag
+        if(videoNode) videoNode.pause();
         
         // Hide Backdrop
         backdrop.style.opacity = '0';
         backdrop.style.pointerEvents = 'none';
         
-        inner.style.pointerEvents = 'auto'; // allow hover
+        // Recalculate deltas in case the window resized
+        const currentEnvRect = envElement.getBoundingClientRect();
+        const currentPolaroidRect = inner.getBoundingClientRect();
         
-        const endRot = rot + (Math.random() * 10 - 5);
-             // Recalculate envRect dynamically to handle any layout shifts or rotations while open
-        const newEnvRect = envElement.getBoundingClientRect();
-        const newCenterX = window.innerWidth / 2;
-        const newCenterY = window.innerHeight / 2;
-        const targetX = (newEnvRect.left + newEnvRect.width / 2) - newCenterX;
-        const targetY = (newEnvRect.top + newEnvRect.height / 2) - newCenterY;
+        // Remove GSAP transforms temporarily to measure pure bounds
+        gsap.set(inner, { clearProps: "all" });
+        const purePolaroidRect = inner.getBoundingClientRect();
+        
+        const returnDeltaX = (currentEnvRect.left + currentEnvRect.width / 2) - (purePolaroidRect.left + purePolaroidRect.width / 2);
+        const returnDeltaY = (currentEnvRect.top + currentEnvRect.height / 2) - (purePolaroidRect.top + purePolaroidRect.height / 2);
+        const returnScaleDelta = currentEnvRect.width / purePolaroidRect.width;
+        
+        // Restore transforms to where it was
+        gsap.set(inner, { 
+            x: 0, 
+            y: 0, 
+            scale: 1, 
+            rotation: targetRotation 
+        });
         
         // Animate BACK TO ORIGINAL ENVELOPE LOCATION
-        gsap.to(polaroidWrapper, {
-            x: targetX,
-            y: targetY,
+        gsap.to(inner, {
+            x: returnDeltaX,
+            y: returnDeltaY,
             rotation: rot,
-            scale: 0.3,
-            xPercent: -50,
-            yPercent: -50,
+            scale: returnScaleDelta,
             opacity: 0,
-            duration: 0.6,
+            duration: 0.5,
             ease: "back.in(1.2)",
             onComplete: () => {
                 // Fully destroy the floating polaroid so it doesn't block the grid!
@@ -548,7 +553,7 @@ function openPolaroid(memoryData, envElement, index, videoNode) {
                 gsap.to(envElement, {
                     scale: 1,
                     opacity: 1,
-                    duration: 0.4,
+                    duration: 0.3,
                     ease: "back.out(1.2)"
                 });
                 

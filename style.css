@@ -561,20 +561,30 @@ body{
     pointer-events: none;
 }
 .desk-polaroid-wrapper {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: clamp(80px, 10vw, 120px);
-    z-index: 50;
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 500;
+    pointer-events: none; /* Let backdrop handle clicks */
 }
 .desk-polaroid-inner {
-    width: 100%;
+    width: min(90vw, 500px);
+    max-height: 85vh;
+    aspect-ratio: auto;
     background: #fff;
     padding: 8px 8px 32px 8px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-    border-radius: 3px;
-    cursor: pointer;
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    border-radius: 8px;
+    pointer-events: auto; /* Re-enable clicks on the modal itself */
+}
+.vid-container video {
+    width: 100%;
+    height: auto;
+    max-height: 75vh;
+    object-fit: contain;
+    border-radius: 4px;
 }
 .dp-photo {
     width: 100%;
