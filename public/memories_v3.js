@@ -47,25 +47,40 @@ const EnvelopeClonePool = {
 };
 
 // ─────────────────────────────────────────────────────────
-// MEDIA MANAGER — Avoid Blob preloading for videos to prevent Out Of Memory black screens on mobile
+// MEDIA MANAGER — DOM-based preloading for instant playback
 // ─────────────────────────────────────────────────────────
 const MediaManager = {
+    cache: new Map(), // id -> { el: DOMElement, isVid: boolean, frame: string }
+
     init() {
-        console.log('[MediaManager] Preloading images, letting browser stream videos natively.');
+        console.log('[MediaManager] Creating hidden media elements for instant playback...');
         for (let i = 1; i <= Object.keys(MEMORY_CONFIG).length; i++) {
             const mem = MEMORY_CONFIG[i];
-            if (mem.image) {
+            const id = mem.video || mem.image;
+            
+            if (mem.video) {
+                const vid = document.createElement('video');
+                vid.src = id;
+                vid.preload = 'metadata'; // Fetches headers, avoiding OOM on mobile
+                vid.playsInline = true;
+                vid.muted = true;
+                vid.loop = true;
+                this.cache.set(id, { el: vid, isVid: true, frame: mem.frame });
+            } else if (mem.image) {
                 const img = new Image();
-                img.src = mem.image;
+                img.src = id;
+                this.cache.set(id, { el: img, isVid: false, frame: mem.frame });
             }
         }
     },
 
-    // Returns direct URL so the browser can use byte-range requests and avoid RAM explosion
+    // Returns the pre-initialized DOM element for instant appending
     get(memKey) {
         const k   = typeof memKey === 'number' ? memKey : Number(memKey);
         const mem = MEMORY_CONFIG[k];
         const id  = mem.video || mem.image;
+        if (this.cache.has(id)) return this.cache.get(id);
+        
         return { src: id, isVid: !!mem.video, frame: mem.frame };
     },
 };
@@ -264,11 +279,15 @@ function openPolaroidStrict(mediaObj, envElement, memKey, cloneElement, original
     let spinner = null;
 
     if (isVid) {
-        mediaEl = document.createElement('video');
-        mediaEl.muted       = true;
-        mediaEl.loop        = true;
-        mediaEl.playsInline = true;
-        mediaEl.preload     = 'metadata';
+        // Use pre-cached DOM element if available
+        mediaEl = mediaObj.el || document.createElement('video');
+        if (!mediaObj.el) {
+            mediaEl.src = mediaObj.src;
+            mediaEl.muted       = true;
+            mediaEl.loop        = true;
+            mediaEl.playsInline = true;
+            mediaEl.preload     = 'metadata';
+        }
         mediaEl.className   = 'mem-media';
 
         // Spinner shown while loading
@@ -277,42 +296,35 @@ function openPolaroidStrict(mediaObj, envElement, memKey, cloneElement, original
         spinner.innerHTML = '❤️';
         frameEl.appendChild(spinner);
 
-        // Append video to DOM FIRST — Android Chrome won't load if src set before DOM insertion
+        // Append video to DOM FIRST
         frameEl.appendChild(mediaEl);
 
-        // Bind all events BEFORE assigning src
-        mediaEl.addEventListener('loadedmetadata', async () => {
-            console.log(`[Memory ${memKey}] ${mediaEl.videoWidth}×${mediaEl.videoHeight} readyState=${mediaEl.readyState}`);
-            try {
-                await mediaEl.play();
-            } catch (e) {
-                console.warn('[Memory] play() rejected:', e.message);
-                mediaEl.controls = true;
-            }
-        }, { once: true });
-
-        mediaEl.addEventListener('canplay', () => {
-            if (spinner) spinner.style.display = 'none';
-        });
-
-        mediaEl.addEventListener('waiting', () => {
-            if (spinner) spinner.style.display = 'flex';
-        });
-
+        // Bind all events
+        mediaEl.onloadedmetadata = async () => {
+            try { await mediaEl.play(); } catch (e) { mediaEl.controls = true; }
+        };
+        mediaEl.oncanplay = () => { if (spinner) spinner.style.display = 'none'; };
+        mediaEl.onwaiting = () => { if (spinner) spinner.style.display = 'flex'; };
         mediaEl.onerror = () => {
             console.error('[Memory] Video error code:', mediaEl.error?.code, 'src:', mediaEl.currentSrc);
             if (spinner) spinner.innerHTML = '⚠️';
         };
 
-        // NOW assign src — element is already in DOM
-        mediaEl.src = mediaObj.src;
-        // Explicitly call load() so Android Chrome doesn't stall on blob URLs
-        mediaEl.load();
+        // Try playing immediately if metadata is already preloaded!
+        if (mediaEl.readyState >= 1) {
+            try { mediaEl.play(); } catch(e) {}
+        }
+        if (mediaEl.readyState >= 3) {
+            if (spinner) spinner.style.display = 'none';
+        }
+        if (mediaEl.readyState === 0) {
+            mediaEl.load();
+        }
 
     } else {
-        mediaEl = new Image();
+        mediaEl = mediaObj.el || new Image();
         mediaEl.className = 'mem-media';
-        mediaEl.src = mediaObj.src;
+        if (!mediaObj.el) mediaEl.src = mediaObj.src;
         frameEl.appendChild(mediaEl);
     }
 
@@ -341,8 +353,9 @@ function openPolaroidStrict(mediaObj, envElement, memKey, cloneElement, original
             onComplete: () => {
                 if (isVid) {
                     mediaEl.pause();
-                    mediaEl.removeAttribute('src');
-                    // Do NOT call .load() — that crashes the decoder
+                    // IMPORTANT: Do NOT reset src or destroy the element! 
+                    // Simply remove it from the DOM. 
+                    // MediaManager holds the reference, so it will instantly play next time!
                     mediaEl.remove();
                 }
                 wrapper.remove();
