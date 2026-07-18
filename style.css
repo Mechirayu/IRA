@@ -507,7 +507,7 @@ body{
 
 /* Scattered Mini Envelopes */
 .mini-envelope {
-    position: absolute;
+    position: relative;
     width: clamp(80px, 12vw, 130px);
     aspect-ratio: 1.6/1; /* matching SVG 400/250 aspect ratio */
     border-radius: 6px;
@@ -517,13 +517,8 @@ body{
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: auto; /* Re-enable pointer events */
-    
-    /* They will start positioned exactly in the center */
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(0); 
-    opacity: 0;
+    pointer-events: auto;
+    margin: 0 auto; /* center in grid cells */
     z-index: 50;
 }
 .mini-envelope:hover {

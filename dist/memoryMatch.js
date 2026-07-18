@@ -231,7 +231,14 @@ function startMemoryMatchTransition() {
     const rightCol = document.querySelector('.memory-col-right');
 
     // Fade out Vinyl Room
-    gsap.to(vinylPage, { opacity: 0, duration: 1 });
+    gsap.to(vinylPage, { 
+        opacity: 0, 
+        duration: 1,
+        onComplete: () => {
+            vinylPage.style.display = 'none';
+            vinylPage.classList.remove('active');
+        }
+    });
 
     // Stop all playing audio gracefully
     document.querySelectorAll('audio').forEach(audioEl => {
