@@ -2093,3 +2093,102 @@ body{
     border: 1.5px solid rgba(232,192,125,.28);
     box-shadow: none;
 }
+
+/* --- COMPREHENSIVE MOBILE RESPONSIVENESS FIXES --- */
+@media (max-width: 768px) {
+    /* 1. Fix "18 Times You Melted My Heart" (Envelopes Screen) */
+    #memoriesDesk {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 15px !important;
+    }
+    .mini-envelope {
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        transform: none !important;
+        width: 28% !important;
+        height: auto !important;
+        aspect-ratio: 1.6;
+    }
+    
+    .desk-polaroid-wrapper.is-open {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 9999 !important;
+        width: 85vw !important;
+        max-width: 85vw !important;
+        height: auto !important;
+        box-shadow: 0 0 20px rgba(0,0,0,0.8) !important;
+    }
+    .desk-polaroid-wrapper.is-open video, 
+    .desk-polaroid-wrapper.is-open .dp-photo {
+        max-height: 70vh !important;
+        object-fit: contain !important;
+    }
+    .desk-polaroid-inner {
+        max-width: 100% !important;
+        max-height: 70vh !important;
+    }
+
+    /* 2. Fix The Music Player Screen */
+    .vinyl-container {
+        margin-top: 50px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 30px !important;
+    }
+    .song-tabs {
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+        overflow-x: auto !important;
+    }
+    .song-tabs .tab {
+        white-space: nowrap !important;
+        font-size: 1rem !important;
+    }
+    #nextGameBtn {
+        width: auto !important;
+        padding: 12px 30px !important;
+        border-radius: 50px !important;
+        font-size: 1.2rem !important;
+    }
+
+    /* 3. Fix "Everything About You" Grid */
+    .letter-grid {
+        grid-template-columns: 1fr !important;
+        max-width: 80vw !important;
+    }
+    .card-back {
+        font-size: 1.2rem !important;
+        word-wrap: break-word !important;
+        text-align: center !important;
+    }
+
+    /* 4. Fix The Scratch Card Screen */
+    .scratch-note-inner {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+        margin-top: 20px !important;
+    }
+    .scratch-quote {
+        margin-bottom: 0 !important;
+    }
+    .scratch-sub {
+        margin-top: 0 !important;
+    }
+
+    /* 5. Fix The "One Last Promise..." Text Screen */
+    .promise-text {
+        font-size: 1.4rem !important;
+        line-height: 1.6 !important;
+        padding: 0 20px !important;
+        text-align: center !important;
+        max-width: 90vw !important;
+        margin: 0 auto !important;
+    }
+}
