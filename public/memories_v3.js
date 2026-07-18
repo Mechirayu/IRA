@@ -520,10 +520,12 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
     
     if (isVid) {
         displayNode = document.createElement("video");
-        displayNode.preload = "auto";
-        displayNode.playsInline = true;
-        displayNode.muted = true;
         displayNode.src = mediaObj.src;
+        displayNode.loop = true;
+        displayNode.muted = true;
+        displayNode.playsInline = true;
+        displayNode.preload = "metadata";
+        displayNode.crossOrigin = "anonymous";
     } else {
         displayNode = new Image();
         displayNode.src = mediaObj.src;
@@ -531,17 +533,37 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
     
     frame.appendChild(displayNode);
     
-    document.body.classList.add("is-paused-background");
-    
+    // Add loading indicator for videos
+    let loader = null;
     if (isVid) {
-        const playPromise = displayNode.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(e => {
-                console.log("Autoplay prevented, fallback to controls:", e);
+        loader = document.createElement("div");
+        loader.className = "video-loader";
+        loader.style.cssText = "position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:#ff4d4d; font-size:32px; z-index:10; pointer-events:none;";
+        loader.innerHTML = '<i class="fas fa-heart fa-beat"></i>';
+        frame.appendChild(loader);
+        
+        displayNode.addEventListener("loadedmetadata", async () => {
+            try {
+                await displayNode.play();
+            } catch(e) {
+                console.log("Autoplay prevented:", e);
                 displayNode.controls = true;
-            });
-        }
+            }
+        }, { once: true });
+        
+        displayNode.addEventListener("canplay", () => {
+            if (loader) loader.style.display = 'none';
+        });
+        displayNode.addEventListener("waiting", () => {
+            if (loader) loader.style.display = 'block';
+        });
+        
+        displayNode.onerror = () => {
+            console.error("Video failed", displayNode.currentSrc, displayNode.error);
+        };
     }
+    
+    document.body.classList.add("is-paused-background");
     
     gsap.set(polaroidWrapper, { opacity: 0, scale: 0.8 });
     modalRoot.appendChild(polaroidWrapper);
@@ -563,8 +585,7 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
             onComplete: () => {
                 if (isVid) {
                     displayNode.pause();
-                    displayNode.src = ""; // Clean up
-                    displayNode.load();
+                    displayNode.removeAttribute("src");
                     displayNode.remove();
                 }
                 polaroidWrapper.remove();
