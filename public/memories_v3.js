@@ -336,6 +336,8 @@ function openPolaroidStrict(mediaObj, envElement, memKey, cloneElement, original
 
         // NOW assign src — element is already in DOM
         mediaEl.src = mediaObj.src;
+        // Explicitly call load() so Android Chrome doesn't stall on blob URLs
+        mediaEl.load();
 
     } else {
         mediaEl = new Image();
@@ -347,7 +349,7 @@ function openPolaroidStrict(mediaObj, envElement, memKey, cloneElement, original
     // ── Add to DOM and animate in ──────────────────────────
     document.body.classList.add('is-paused-background');
     gsap.set(wrapper, { opacity: 0, scale: 0.85 });
-    overlayRoot.appendChild(wrapper);  // fixed-position overlay → always full viewport
+    document.body.appendChild(wrapper);  // Use document.body to avoid nested fixed positioning issues
 
     gsap.to(cloneElement, { opacity: 0, duration: 0.15 });
     gsap.to(wrapper, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(1.2)' });
