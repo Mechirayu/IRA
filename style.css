@@ -98,6 +98,12 @@ body{
 @keyframes shim{to{background-position:250% center;}}
 .script{font-family:'Pacifico',cursive;color:var(--blush);font-size:clamp(22px,7vw,42px);
   text-shadow:2px 2px 4px rgba(0,0,0,.3);letter-spacing:1px;}
+
+@media (max-width: 768px) {
+    .display { font-size: clamp(20px, 6vw, 32px); }
+    .script { font-size: clamp(18px, 5vw, 26px); }
+    .hbd { font-size: clamp(28px, 10vw, 42px); }
+}
 .lede{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(16px,4vw,24px);
   color:var(--muted);max-width:480px;margin:0 auto;line-height:1.5;}
 .sub{font-size:15px;color:var(--muted);font-weight:600;letter-spacing:.5px;}
@@ -2138,51 +2144,20 @@ body{
 
 /* --- COMPREHENSIVE MOBILE RESPONSIVENESS FIXES --- */
 @media (max-width: 768px) {
-    /* 1. Fix "18 Times You Melted My Heart" (Envelopes Screen) */
-    #memoriesDesk {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 15px !important;
-    }
-    .mini-envelope {
-        position: relative !important;
-        left: auto !important;
-        top: auto !important;
-        transform: none !important;
-        width: 28% !important;
-        height: auto !important;
-        aspect-ratio: 1.6;
-    }
-    
-    .desk-polaroid-wrapper.is-open {
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        z-index: 1000 !important;
-        width: 90vw !important;
-        max-width: 90vw !important;
-        max-height: 85vh !important;
-        height: auto !important;
-        box-shadow: 0 0 20px rgba(0,0,0,0.8) !important;
-    }
-    .desk-polaroid-wrapper.is-open video, 
-    .desk-polaroid-wrapper.is-open .dp-photo {
-        max-height: 85vh !important;
-        object-fit: contain !important;
-    }
-    .desk-polaroid-inner {
-        max-width: 100% !important;
-        max-height: 85vh !important;
-    }
+    /* The 18 Envelopes mobile fix is handled dynamically in JS (memories.js) now, 
+       so we don't need CSS overrides that break GSAP. */
 
     #chText {
         background-color: rgba(0, 0, 0, 0.7) !important;
-        padding: 10px 24px !important;
+        padding: 8px 20px !important;
         border-radius: 30px !important;
         color: #fff !important;
         z-index: 1001 !important;
+    }
+    
+    .display {
+        white-space: normal !important;
+        word-wrap: break-word !important;
     }
 
     /* 2. Fix The Music Player Screen */
