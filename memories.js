@@ -107,30 +107,28 @@ function triggerScatterExplosion() {
     
     // We position relative to the center of the desk (which is at 50%, 50%).
     // Values are pixel offsets from center.
-    const slotPositions = [
-        // Row 1 (top) — 6 items, pushed below the heading
-        { x: -W * 0.40, y: -H * 0.15 },
-        { x: -W * 0.24, y: -H * 0.15 },
-        { x: -W * 0.08, y: -H * 0.15 },
-        { x:  W * 0.08, y: -H * 0.15 },
-        { x:  W * 0.24, y: -H * 0.15 },
-        { x:  W * 0.40, y: -H * 0.15 },
-        // Row 2 (middle) — 3 left side only
-        { x: -W * 0.40, y:  H * 0.08 },
-        { x: -W * 0.24, y:  H * 0.08 },
-        { x: -W * 0.08, y:  H * 0.08 },
-        // Row 2 (middle) — 3 right side only
-        { x:  W * 0.08, y:  H * 0.08 },
-        { x:  W * 0.24, y:  H * 0.08 },
-        { x:  W * 0.40, y:  H * 0.08 },
-        // Row 3 (bottom) — 6 items evenly spread
-        { x: -W * 0.40, y:  H * 0.30 },
-        { x: -W * 0.24, y:  H * 0.30 },
-        { x: -W * 0.08, y:  H * 0.30 },
-        { x:  W * 0.08, y:  H * 0.30 },
-        { x:  W * 0.24, y:  H * 0.30 },
-        { x:  W * 0.40, y:  H * 0.30 },
-    ];
+    let slotPositions = [];
+    if (W <= 768) {
+        // Mobile Layout: 3 cols x 6 rows (18 items)
+        const cols = 3;
+        const rows = 6;
+        const spacingX = W * 0.28; 
+        const spacingY = H * 0.12; 
+        const startX = -spacingX * 1; 
+        const startY = -spacingY * 2.5; 
+        for(let r=0; r<rows; r++) {
+            for(let c=0; c<cols; c++) {
+                slotPositions.push({ x: startX + c*spacingX, y: startY + r*spacingY });
+            }
+        }
+    } else {
+        // Desktop Layout: 6 top, 3 left, 3 right, 6 bottom
+        slotPositions = [
+            { x: -W * 0.40, y: -H * 0.15 }, { x: -W * 0.24, y: -H * 0.15 }, { x: -W * 0.08, y: -H * 0.15 }, { x:  W * 0.08, y: -H * 0.15 }, { x:  W * 0.24, y: -H * 0.15 }, { x:  W * 0.40, y: -H * 0.15 },
+            { x: -W * 0.40, y:  H * 0.08 }, { x: -W * 0.24, y:  H * 0.08 }, { x: -W * 0.08, y:  H * 0.08 }, { x:  W * 0.08, y:  H * 0.08 }, { x:  W * 0.24, y:  H * 0.08 }, { x:  W * 0.40, y:  H * 0.08 },
+            { x: -W * 0.40, y:  H * 0.30 }, { x: -W * 0.24, y:  H * 0.30 }, { x: -W * 0.08, y:  H * 0.30 }, { x:  W * 0.08, y:  H * 0.30 }, { x:  W * 0.24, y:  H * 0.30 }, { x:  W * 0.40, y:  H * 0.30 }
+        ];
+    }
     
     memoriesData.forEach((memory, index) => {
         const env = document.createElement('div');
@@ -364,7 +362,7 @@ function openPolaroid(memoryData, envElement, index) {
     
     polaroidWrapper.innerHTML = `
         <div class="desk-polaroid-inner" style="pointer-events: none; padding: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); background: #fff; border-radius: 8px; aspect-ratio: 9/16; overflow: hidden;">
-            <video src="${memoryData.video}" autoplay loop muted playsinline style="width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: cover; pointer-events: none;"></video>
+            <div class="video-loader"></div><video src="${memoryData.video}" autoplay loop muted playsinline style="width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: cover; pointer-events: auto;" onplaying="this.previousElementSibling.style.display='none'"></video>
         </div>
     `;
     
