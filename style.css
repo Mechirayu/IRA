@@ -2620,6 +2620,11 @@ body.is-paused-background .heart {
     animation-play-state: paused !important;
 }
 
+.desk-polaroid-wrapper.rotated video {
+    transform: rotate(90deg);
+    transform-origin: center;
+}
+
 #memory-loading-overlay {
     position: fixed;
     inset: 0;
