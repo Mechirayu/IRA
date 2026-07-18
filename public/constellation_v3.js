@@ -251,8 +251,8 @@ function climaxConstellation() {
             duration: 2.0,
             ease: "power2.inOut",
             onComplete: () => {
-                // Cleanup and reset
-                gsap.set('#constellationPage', { display: '', zIndex: '', opacity: 1 });
+                // Cleanup and reset - MUST be none/0 so it doesn't overlap the next page
+                gsap.set('#constellationPage', { display: 'none', zIndex: '-1', opacity: 0 });
             }
         });
     });
