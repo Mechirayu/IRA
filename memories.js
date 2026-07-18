@@ -108,12 +108,16 @@ function triggerScatterExplosion() {
     // Preload videos in the background to prevent the 3-4s buffering lag on mobile
     if (!window.memoriesPreloaded) {
         window.memoriesPreloaded = true;
+        const preloadContainer = document.createElement('div');
+        preloadContainer.style.display = 'none';
+        document.body.appendChild(preloadContainer);
         memoriesData.forEach(mem => {
-            const link = document.createElement('link');
-            link.rel = 'preload';
-            link.as = 'video';
-            link.href = mem.video;
-            document.head.appendChild(link);
+            const vid = document.createElement('video');
+            vid.preload = 'auto';
+            vid.muted = true;
+            vid.playsInline = true;
+            vid.src = mem.video;
+            preloadContainer.appendChild(vid);
         });
     }
 
@@ -170,7 +174,8 @@ function triggerScatterExplosion() {
         env.appendChild(num);
         
         env.addEventListener('click', () => {
-            if(!env.classList.contains('opened')) {
+            if(!env.classList.contains('opened') && !window.activePolaroid) {
+                window.activePolaroid = true;
                 env.classList.add('opened');
                 openedCount++;
                 openPolaroid(memory, env, index);
@@ -381,7 +386,7 @@ function openPolaroid(memoryData, envElement, index) {
     
     polaroidWrapper.innerHTML = `
         <div class="desk-polaroid-inner" style="pointer-events: none; padding: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); background: #fff; border-radius: 8px; aspect-ratio: 9/16; overflow: hidden;">
-            <div class="video-loader"></div><video src="${memoryData.video}" autoplay loop muted playsinline style="width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: cover; pointer-events: auto;" onplaying="this.previousElementSibling.style.display='none'"></video>
+            <video src="${memoryData.video}" autoplay loop muted playsinline style="width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: cover; pointer-events: auto;"></video>
         </div>
     `;
     
@@ -435,6 +440,7 @@ function openPolaroid(memoryData, envElement, index) {
     
     // Handle close function
     const closeIt = () => {
+        window.activePolaroid = false;
         polaroidWrapper.classList.remove('is-open'); // Re-enable CSS hover
         video.pause(); // Pause video when returning to desk to prevent lag
         
@@ -476,6 +482,8 @@ function openPolaroid(memoryData, envElement, index) {
                         closeIt();
                         return;
                     }
+                    if (window.activePolaroid) return;
+                    window.activePolaroid = true;
                     polaroidWrapper.classList.add('is-open');
 
                     
