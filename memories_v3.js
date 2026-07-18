@@ -1,23 +1,23 @@
 // 18 Snaps and Notes
 const memoriesData = [
-    { video: "video-snaps/VN20260717_033554.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_033929.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_034038.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_034318.mp4", orientation: "portrait", rotate: true }, // index 3
-    { video: "video-snaps/VN20260717_034652.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_035013.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_035258.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_042216.mp4", orientation: "portrait", rotate: true }, // index 7
-    { video: "video-snaps/VN20260717_042620.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_042713.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_042805.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_042933.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_043042.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_043156.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_043319.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_043613.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_043722.mp4", orientation: "landscape" },
-    { video: "video-snaps/VN20260717_120339.mp4", orientation: "landscape" }
+    { video: "video-snaps/VN20260717_033554.mp4" },
+    { video: "video-snaps/VN20260717_033929.mp4" },
+    { video: "video-snaps/VN20260717_034038.mp4" },
+    { video: "video-snaps/VN20260717_034318.mp4" }, // index 3
+    { video: "video-snaps/VN20260717_034652.mp4" },
+    { video: "video-snaps/VN20260717_035013.mp4" },
+    { video: "video-snaps/VN20260717_035258.mp4" },
+    { video: "video-snaps/VN20260717_042216.mp4" }, // index 7
+    { video: "video-snaps/VN20260717_042620.mp4" },
+    { video: "video-snaps/VN20260717_042713.mp4" },
+    { video: "video-snaps/VN20260717_042805.mp4" },
+    { video: "video-snaps/VN20260717_042933.mp4" },
+    { video: "video-snaps/VN20260717_043042.mp4" },
+    { video: "video-snaps/VN20260717_043156.mp4" },
+    { video: "video-snaps/VN20260717_043319.mp4" },
+    { video: "video-snaps/VN20260717_043613.mp4" },
+    { video: "video-snaps/VN20260717_043722.mp4" },
+    { video: "video-snaps/VN20260717_120339.mp4" }
 ];
 
 // Global Asset Cache & Queue
@@ -81,7 +81,7 @@ const MediaManager = {
                             video.pause();
                         } catch(e) {} // Ignore autoplay block during warming
                         
-                        const result = { element: video, isVid: true, rotate: memory.rotate };
+                        const result = { element: video, isVid: true };
                         this.cache.set(id, result);
                         this.pending.delete(id);
                         resolve(result);
@@ -522,29 +522,25 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
     
     // Create polaroid wrapper
     const polaroidWrapper = document.createElement('div');
-    polaroidWrapper.className = 'desk-polaroid-wrapper is-open';
-    polaroidWrapper.innerHTML = `
-        <div class="desk-polaroid-inner">
-            <div class="vid-container" style="width: 100%; height: 100%;"></div>
-        </div>
-    `;
     
     const displayNode = mediaObj.element;
     const isVid = mediaObj.isVid;
     
     // STRICT Layout overrides
     const isPortrait = (index === 3 || index === 7);
-    polaroidWrapper.classList.add(isPortrait ? 'portrait' : 'landscape');
+    const orientationClass = isPortrait ? 'portrait' : 'landscape';
     
-    if (mediaObj.rotate) {
-        polaroidWrapper.classList.add('rotated');
-    }
+    polaroidWrapper.className = 'desk-polaroid-wrapper is-open';
+    polaroidWrapper.innerHTML = `
+        <div class="video-frame ${orientationClass}">
+        </div>
+    `;
+    
+    const frame = polaroidWrapper.querySelector('.video-frame');
+    frame.appendChild(displayNode);
     
     // Pause background animations for GPU headroom
     document.body.classList.add('is-paused-background');
-    
-    displayNode.style.cssText = "width: 100%; height: auto; max-height: 85vh; display: block; border-radius: 4px; object-fit: contain; pointer-events: auto;";
-    polaroidWrapper.querySelector('.vid-container').replaceChildren(displayNode);
     
     if (isVid) {
         const playPromise = displayNode.play();
