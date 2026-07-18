@@ -2631,7 +2631,7 @@ body{
 .video-frame.landscape img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 /* Portrait Videos (Only 4 & 8) */
@@ -2643,7 +2643,7 @@ body{
 .video-frame.portrait img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 /* Pause Heavy Background Animations during Video Playback */
@@ -2674,7 +2674,7 @@ body.is-paused-background .heart {
 .video-frame video, .video-frame img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 4px;
     background: #000;
 }

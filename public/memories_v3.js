@@ -543,6 +543,13 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
         frame.appendChild(loader);
         
         displayNode.addEventListener("loadedmetadata", async () => {
+            console.log(
+                "Memory " + index,
+                displayNode.videoWidth,
+                displayNode.videoHeight,
+                displayNode.readyState,
+                displayNode.error
+            );
             try {
                 await displayNode.play();
             } catch(e) {
