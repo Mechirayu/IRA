@@ -113,11 +113,8 @@ const MediaManager = {
                         video.removeEventListener('loadeddata', checkReady);
                         clearTimeout(timeoutId);
                         
-                        // Fallback orientation detection
+                        // Fallback orientation detection removed as per mentor request
                         let orientation = memory.orientation;
-                        if (!orientation) {
-                            orientation = video.videoWidth > video.videoHeight ? 'landscape' : 'portrait';
-                        }
                         
                         // Safe decoder warming
                         video.currentTime = 0.01;
@@ -575,8 +572,10 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
     const displayNode = mediaObj.element;
     const isVid = mediaObj.isVid;
     
-    // Set dynamic orientation layout based on MediaManager calculation
-    polaroidWrapper.classList.add(mediaObj.orientation || 'landscape');
+    // STRICT Layout overrides
+    const isPortrait = (index === 3 || index === 7);
+    polaroidWrapper.classList.add(isPortrait ? 'portrait' : 'landscape');
+    
     if (mediaObj.rotate) {
         polaroidWrapper.classList.add('rotated');
     }
