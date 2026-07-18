@@ -1,23 +1,23 @@
 // 18 Snaps and Notes
 const memoriesData = [
-    { video: "video-snaps/VN20260717_033554.mp4" },
-    { video: "video-snaps/VN20260717_033929.mp4" },
-    { video: "video-snaps/VN20260717_034038.mp4" },
-    { video: "video-snaps/VN20260717_034318.mp4" },
-    { video: "video-snaps/VN20260717_034652.mp4" },
-    { video: "video-snaps/VN20260717_035013.mp4" },
-    { video: "video-snaps/VN20260717_035258.mp4" },
-    { video: "video-snaps/VN20260717_042216.mp4" },
-    { video: "video-snaps/VN20260717_042620.mp4" },
-    { video: "video-snaps/VN20260717_042713.mp4" },
-    { video: "video-snaps/VN20260717_042805.mp4" },
-    { video: "video-snaps/VN20260717_042933.mp4" },
-    { video: "video-snaps/VN20260717_043042.mp4" },
-    { video: "video-snaps/VN20260717_043156.mp4" },
-    { video: "video-snaps/VN20260717_043319.mp4" },
-    { video: "video-snaps/VN20260717_043613.mp4" },
-    { video: "video-snaps/VN20260717_043722.mp4" },
-    { video: "video-snaps/VN20260717_120339.mp4" }
+    { video: "video-snaps/VN20260717_033554.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_033929.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_034038.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_034318.mp4", orientation: "portrait" }, // index 3
+    { video: "video-snaps/VN20260717_034652.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_035013.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_035258.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_042216.mp4", orientation: "portrait" }, // index 7
+    { video: "video-snaps/VN20260717_042620.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_042713.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_042805.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_042933.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_043042.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_043156.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_043319.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_043613.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_043722.mp4", orientation: "landscape" },
+    { video: "video-snaps/VN20260717_120339.mp4", orientation: "landscape" }
 ];
 
 // Global Asset Cache & Queue
@@ -57,14 +57,22 @@ async function preloadAllMedia(onProgress) {
             video.muted = true; // Required for background auto-loading in some browsers
             video.src = memory.video;
             
-            const markLoaded = () => {
+            const markLoaded = async () => {
                 if (!mediaCache.has(memory.video)) {
+                    // Decoder warming to prevent stutter on first play
+                    try {
+                        await video.play();
+                        video.pause();
+                        video.currentTime = 0;
+                    } catch (e) {
+                        // Ignore autoplay errors during warming phase
+                    }
+                    
                     mediaCache.set(memory.video, video);
                     loadedCount++;
                     if (onProgress) onProgress(loadedCount, total);
                     resolve(video);
                 }
-        video.preload = 'auto';
             };
             video.oncanplay = markLoaded;
             video.onerror = (e) => {
@@ -499,24 +507,38 @@ function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneEleme
     let displayNode;
     
     if (isVid) {
-        // Always create a fresh video node to avoid iOS Safari DOM reparenting bugs
-        displayNode = document.createElement('video');
-        displayNode.src = memoryData.video;
-        displayNode.setAttribute('playsinline', '');
-        displayNode.setAttribute('webkit-playsinline', '');
-        displayNode.setAttribute('muted', '');
-        displayNode.setAttribute('autoplay', '');
-        displayNode.setAttribute('loop', '');
-        displayNode.muted = true;
-        displayNode.loop = true;
-        displayNode.playsInline = true;
+        // Reuse warmed video node directly from cache for 0ms delay
+        displayNode = mediaCache.get(memoryData.video);
+        if (!displayNode) {
+            console.warn("Video not in cache, fallback creating new element");
+            displayNode = document.createElement('video');
+            displayNode.src = memoryData.video;
+            displayNode.setAttribute('playsinline', '');
+            displayNode.setAttribute('webkit-playsinline', '');
+            displayNode.setAttribute('muted', '');
+            displayNode.setAttribute('autoplay', '');
+            displayNode.setAttribute('loop', '');
+            displayNode.muted = true;
+            displayNode.loop = true;
+            displayNode.playsInline = true;
+        }
     } else {
         displayNode = document.createElement('img');
         displayNode.src = memoryData.image;
     }
     
+    // Set dynamic orientation layout
+    if (memoryData.orientation) {
+        polaroidWrapper.classList.add(memoryData.orientation);
+    } else {
+        polaroidWrapper.classList.add('landscape'); // default
+    }
+    
+    // Pause background animations for GPU headroom
+    document.body.classList.add('is-paused-background');
+    
     displayNode.style.cssText = "width: 100%; height: auto; max-height: 85vh; display: block; border-radius: 4px; object-fit: contain; pointer-events: auto;";
-    polaroidWrapper.querySelector('.vid-container').appendChild(displayNode);
+    polaroidWrapper.querySelector('.vid-container').replaceChildren(displayNode);
     
     if (isVid) {
         const playPromise = displayNode.play();
@@ -542,7 +564,14 @@ function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneEleme
     // Close function
     const closeIt = () => {
         const vid = polaroidWrapper.querySelector('video');
-        if (vid) vid.pause();
+        if (vid) {
+            vid.pause();
+            // Detach safely without destroying so it can be reused
+            vid.remove();
+        }
+        
+        // Resume background animations
+        document.body.classList.remove('is-paused-background');
         
         backdrop.style.opacity = '0';
         backdrop.style.pointerEvents = 'none';

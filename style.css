@@ -2597,3 +2597,25 @@ body{
         padding: 10px 20px;
     }
 }
+
+/* Dynamic Orientation Aspect Ratios */
+.desk-polaroid-wrapper.landscape .vid-container video {
+    width: min(92vw, 900px);
+    max-height: 82vh;
+    aspect-ratio: 16/9;
+    object-fit: contain;
+}
+
+.desk-polaroid-wrapper.portrait .vid-container video {
+    height: 82vh;
+    width: auto;
+    max-width: 92vw;
+    aspect-ratio: 9/16;
+    object-fit: contain;
+}
+
+/* Pause Heavy Background Animations during Video Playback */
+body.is-paused-background .star,
+body.is-paused-background .heart {
+    animation-play-state: paused !important;
+}
