@@ -20,6 +20,55 @@ const memoriesData = [
     { video: "video-snaps/VN20260717_120339.mp4" }
 ];
 
+// Global Asset Cache & Queue
+window.AssetCache = window.AssetCache || { videos: new Map() };
+let preloadQueue = [];
+let isPreloading = false;
+
+function preloadAsset(url) {
+    return new Promise((resolve) => {
+        if (window.AssetCache.videos.has(url)) {
+            const cachedVideo = window.AssetCache.videos.get(url);
+            if (cachedVideo.readyState >= 3) { // HAVE_FUTURE_DATA
+                resolve(cachedVideo);
+                return;
+            } else {
+                cachedVideo.oncanplay = () => resolve(cachedVideo);
+                return;
+            }
+        }
+        
+        const video = document.createElement('video');
+        video.preload = 'auto';
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.src = url;
+        
+        window.AssetCache.videos.set(url, video);
+        
+        video.oncanplay = () => resolve(video);
+        video.onerror = () => resolve(video); // Fallback if error
+        video.load();
+    });
+}
+
+function processPreloadQueue() {
+    if (preloadQueue.length === 0) {
+        isPreloading = false;
+        return;
+    }
+    isPreloading = true;
+    const nextUrl = preloadQueue.shift();
+    
+    const scheduleNext = window.requestIdleCallback || ((cb) => setTimeout(cb, 50));
+    scheduleNext(() => {
+        preloadAsset(nextUrl).then(() => {
+            processPreloadQueue();
+        });
+    });
+}
+
 let openedCount = 0;
 
 function initMemories() {
@@ -105,23 +154,17 @@ function triggerScatterExplosion() {
     let W = window.innerWidth;
     let H = window.innerHeight;
 
-    // Preload videos in the background to prevent the 3-4s buffering lag on mobile
+    // Progressive Lazy Loading
     if (!window.memoriesPreloaded) {
         window.memoriesPreloaded = true;
-        window.preloadedVideos = [];
-        const preloadContainer = document.createElement('div');
-        preloadContainer.style.display = 'none';
-        document.body.appendChild(preloadContainer);
-        memoriesData.forEach((mem, i) => {
-            const vid = document.createElement('video');
-            vid.preload = 'auto';
-            vid.muted = true;
-            vid.loop = true;
-            vid.playsInline = true;
-            vid.src = mem.video;
-            preloadContainer.appendChild(vid);
-            window.preloadedVideos[i] = vid;
-        });
+        // Preload first 2 immediately
+        const initial = memoriesData.slice(0, 2).map(m => m.video);
+        initial.forEach(url => preloadAsset(url));
+        
+        // Queue the rest
+        const rest = memoriesData.slice(2).map(m => m.video);
+        preloadQueue.push(...rest);
+        if (!isPreloading) processPreloadQueue();
     }
 
     // Envelope layout is now natively handled by CSS Grid!
@@ -148,12 +191,29 @@ function triggerScatterExplosion() {
         num.innerText = index + 1;
         env.appendChild(num);
         
-        env.addEventListener('click', () => {
+        env.addEventListener('click', async () => {
             if(!env.classList.contains('opened') && !window.activePolaroid) {
                 window.activePolaroid = true;
+                
+                // Add Loading State immediately
+                env.classList.add('envelope-loading');
+                
+                // Prioritize next asset in background queue
+                if (index + 1 < memoriesData.length) {
+                    const nextUrl = memoriesData[index+1].video;
+                    preloadQueue = preloadQueue.filter(u => u !== nextUrl);
+                    preloadQueue.unshift(nextUrl);
+                    if (!isPreloading) processPreloadQueue();
+                }
+                
+                // Await current asset
+                const videoNode = await preloadAsset(memory.video);
+                
+                // Asset is fully ready! Trigger the flyout.
+                env.classList.remove('envelope-loading');
                 env.classList.add('opened');
                 openedCount++;
-                openPolaroid(memory, env, index);
+                openPolaroid(memory, env, index, videoNode);
             }
         });
         
@@ -343,7 +403,7 @@ function checkAllOpened() {
     }
 }
 
-function openPolaroid(memoryData, envElement, index) {
+function openPolaroid(memoryData, envElement, index, videoNode) {
     const desk = document.getElementById('memoriesDesk');
     const backdrop = document.getElementById('polaroidBackdrop');
     
@@ -378,7 +438,6 @@ function openPolaroid(memoryData, envElement, index) {
     `;
     
     // Reuse preloaded video for ZERO lag
-    const videoNode = window.preloadedVideos[index];
     if (videoNode && videoNode.parentNode) videoNode.parentNode.removeChild(videoNode);
     if (videoNode) {
         videoNode.style.cssText = "width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: cover; pointer-events: auto;";

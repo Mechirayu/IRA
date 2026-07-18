@@ -326,21 +326,26 @@ body{
     overflow: hidden;
     perspective: 1000px;
 }
-.memories-heading-block {
+.memories-layout {
     position: absolute;
-    top: 6%;
-    left: 50%;
-    transform: translateX(-50%);
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+    z-index: 10;
+}
+.memories-layout > * {
+    pointer-events: auto;
+}
+.memories-heading-block {
+    position: relative;
+    flex: 0 0 auto;
+    width: 100%;
+    text-align: center;
+    padding: env(safe-area-inset-top, 20px) 15px 15px 15px;
+    margin-top: 50px; /* Clear the global skip button natively */
     z-index: 200;
     opacity: 0;
-    text-align: center;
-    width: 95%;
-    pointer-events: none;
-}
-@media (max-width: 768px) {
-    .memories-heading-block {
-        top: 2%; /* Move higher on mobile */
-    }
 }
 .memories-heading {
     font-family: 'Cormorant Garamond', serif;
@@ -393,19 +398,19 @@ body{
 }
 #memoriesDesk {
     position: relative;
+    flex: 1 1 auto;
     width: 100%;
     max-width: 1000px;
-    height: 100%;
     margin: 0 auto;
     z-index: 2;
     pointer-events: none; /* Let clicks pass through if needed, except on envelopes */
     display: grid;
     /* Fluid responsive grid for mobile/tablet */
-    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
     gap: 10px;
     justify-content: center;
-    align-content: start;
-    padding: 15vh 10px 20px 10px;
+    align-content: center;
+    padding: 10px 10px 40px 10px;
 }
 /* Ensure envelopes receive clicks */
 #memoriesDesk > .mini-envelope {

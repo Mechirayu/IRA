@@ -192,7 +192,7 @@ function triggerScatterExplosion() {
         env.appendChild(num);
         
         env.addEventListener('click', async () => {
-            if(!env.classList.contains('opened') && !window.activePolaroid) {
+            if(!window.activePolaroid) {
                 window.activePolaroid = true;
                 
                 // Add Loading State immediately
@@ -211,8 +211,10 @@ function triggerScatterExplosion() {
                 
                 // Asset is fully ready! Trigger the flyout.
                 env.classList.remove('envelope-loading');
-                env.classList.add('opened');
-                openedCount++;
+                if (!env.classList.contains('opened')) {
+                    env.classList.add('opened');
+                    openedCount++;
+                }
                 openPolaroid(memory, env, index, videoNode);
             }
         });
@@ -520,85 +522,37 @@ function openPolaroid(memoryData, envElement, index, videoNode) {
         inner.style.pointerEvents = 'auto'; // allow hover
         
         const endRot = rot + (Math.random() * 10 - 5);
-        
-        // Recalculate envRect just in case window was resized while polaroid was open
+             // Recalculate envRect dynamically to handle any layout shifts or rotations while open
         const newEnvRect = envElement.getBoundingClientRect();
         const newCenterX = window.innerWidth / 2;
         const newCenterY = window.innerHeight / 2;
-        const newStartX = (newEnvRect.left + newEnvRect.width / 2) - newCenterX;
-        const newStartY = (newEnvRect.top + newEnvRect.height / 2) - newCenterY;
+        const targetX = (newEnvRect.left + newEnvRect.width / 2) - newCenterX;
+        const targetY = (newEnvRect.top + newEnvRect.height / 2) - newCenterY;
         
-        // Use deskScale for both mobile and desktop so it shrinks nicely into the grid
-        const finalDeskScale = deskScale;
-        
-        // DESKTOP & MOBILE: Animate BACK TO DESK
+        // Animate BACK TO ORIGINAL ENVELOPE LOCATION
         gsap.to(polaroidWrapper, {
-            x: newStartX, 
-            y: newStartY, 
-            rotation: endRot, 
-            scale: finalDeskScale, 
+            x: targetX,
+            y: targetY,
+            rotation: rot,
+            scale: 0.3,
             xPercent: -50,
             yPercent: -50,
-            zIndex: 1, // Fix z-index stacking context! Unopened envelopes are z-index: 10
-            duration: 0.5, 
+            opacity: 0,
+            duration: 0.6,
             ease: "back.in(1.2)",
             onComplete: () => {
-                // Restore the envelope visually beneath it
+                // Fully destroy the floating polaroid so it doesn't block the grid!
+                polaroidWrapper.remove();
+                
+                // Restore the real envelope visually
                 gsap.to(envElement, {
                     scale: 1,
                     opacity: 1,
-                    duration: 0.3,
+                    duration: 0.4,
                     ease: "back.out(1.2)"
                 });
                 
-                // CRITICAL: Ensure z-index prevents it from blocking unopened envelopes (handled above with zIndex: 1)
-                polaroidWrapper.style.pointerEvents = 'auto';
-                
-                // Add subtle floating effect for polaroid on desk
-                gsap.to(polaroidWrapper, {
-                    y: "+=10",
-                    rotation: endRot + (Math.random() * 4 - 2),
-                    duration: 2 + Math.random(),
-                    yoyo: true,
-                    repeat: -1,
-                    ease: "sine.inOut"
-                });
                 checkAllOpened();
-                
-                // Allow reopening the polaroid from the desk!
-                polaroidWrapper.onclick = (e) => {
-                    e.stopPropagation();
-                    if (polaroidWrapper.classList.contains('is-open')) {
-                        closeIt(e);
-                        return;
-                    }
-                    if (window.activePolaroid) return;
-                    window.activePolaroid = true;
-                    polaroidWrapper.classList.add('is-open');
-
-                    
-                    gsap.killTweensOf(polaroidWrapper);
-                    
-                    const currentX = gsap.getProperty(polaroidWrapper, "x");
-                    const currentY = gsap.getProperty(polaroidWrapper, "y");
-                    const currentRot = gsap.getProperty(polaroidWrapper, "rotation");
-                    
-                    // Show Backdrop - darker on mobile
-                    backdrop.style.background = isMobile ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
-                    backdrop.style.opacity = '1';
-                    backdrop.style.pointerEvents = 'auto';
-                    
-                    // Reassign backdrop click
-                    backdrop.onclick = closeIt;
-                    
-                    gsap.to(polaroidWrapper, {
-                        x: 0, y: 0, xPercent: -50, yPercent: -50, scale: targetScale, zIndex: 500, rotation: targetRotation,
-                        duration: 0.6, ease: "back.out(1.2)",
-                        onComplete: () => {
-                            video.play();
-                        }
-                    });
-                };
             }
         });
     };
