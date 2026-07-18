@@ -42,65 +42,131 @@ const EnvelopeClonePool = {
     }
 };
 
-// // Synchronous Media Cache
-const mediaCache = new Map();
-
-async function preloadAllMedia(onProgress) {
-    let loadedCount = 0;
-    const total = memoriesData.length;
+// Media Manager (Singleton)
+const MediaManager = {
+    queue: [],
+    cache: new Map(),
+    pending: new Map(),
+    isProcessing: false,
     
-    const promises = memoriesData.map((memory) => {
-        return new Promise((resolve) => {
-            const video = document.createElement("video");
-            video.preload = "auto";
-            video.playsInline = true;
-            video.muted = true; // Required for background auto-loading in some browsers
-            video.src = memory.video;
+    init: function() {
+        this.queue = memoriesData.map((_, i) => i);
+        this.processQueue();
+    },
+    
+    reprioritize: function(targetIndex) {
+        // Sort queue by absolute distance from the tapped envelope
+        this.queue.sort((a, b) => Math.abs(a - targetIndex) - Math.abs(b - targetIndex));
+    },
+    
+    processQueue: async function() {
+        if (this.isProcessing) return;
+        this.isProcessing = true;
+        
+        while (this.queue.length > 0) {
+            const nextIndex = this.queue.shift();
+            try {
+                await this.getMedia(nextIndex, false); // silent background load
+            } catch(e) {
+                console.warn("Background preload failed for index", nextIndex, e);
+            }
+        }
+        this.isProcessing = false;
+    },
+    
+    getMedia: function(index, showLoader = false) {
+        const memory = memoriesData[index];
+        const id = memory.video || memory.image;
+        
+        if (this.cache.has(id)) return Promise.resolve(this.cache.get(id));
+        
+        const loader = document.getElementById('memory-loading-overlay');
+        
+        if (this.pending.has(id)) {
+            if (showLoader && loader) loader.style.display = 'flex';
+            return this.pending.get(id);
+        }
+        
+        if (showLoader && loader) loader.style.display = 'flex';
+        
+        // Remove from pending queue if we are manually requesting it
+        this.queue = this.queue.filter(i => i !== index);
+        
+        const loadPromise = new Promise((resolve, reject) => {
+            const isVid = !!memory.video;
             
-            const markLoaded = async () => {
-                if (!mediaCache.has(memory.video)) {
-                    // Decoder warming to prevent stutter on first play
-                    try {
-                        await video.play();
+            // 10 second timeout fallback
+            const timeoutId = setTimeout(() => {
+                this.pending.delete(id);
+                reject(new Error("Media load timeout"));
+            }, 10000);
+            
+            if (isVid) {
+                const video = document.createElement("video");
+                video.preload = "auto";
+                video.playsInline = true;
+                video.muted = true;
+                video.src = memory.video;
+                
+                const checkReady = async () => {
+                    if (video.readyState >= 3) {
+                        video.removeEventListener('loadeddata', checkReady);
+                        clearTimeout(timeoutId);
+                        
+                        // Fallback orientation detection
+                        let orientation = memory.orientation;
+                        if (!orientation) {
+                            orientation = video.videoWidth > video.videoHeight ? 'landscape' : 'portrait';
+                        }
+                        
+                        // Safe decoder warming
+                        video.currentTime = 0.01;
                         video.pause();
-                        video.currentTime = 0;
-                    } catch (e) {
-                        // Ignore autoplay errors during warming phase
+                        try {
+                            await video.play();
+                            video.pause();
+                        } catch(e) {} // Ignore autoplay block during warming
+                        
+                        const result = { element: video, orientation, isVid: true };
+                        this.cache.set(id, result);
+                        this.pending.delete(id);
+                        if (showLoader && loader) loader.style.display = 'none';
+                        resolve(result);
                     }
-                    
-                    mediaCache.set(memory.video, video);
-                    loadedCount++;
-                    if (onProgress) onProgress(loadedCount, total);
-                    resolve(video);
-                }
-            };
-            video.oncanplay = markLoaded;
-            video.onerror = (e) => {
-                console.error("Preload failed for:", memory.video, e);
-                markLoaded(); // Resolve anyway to avoid infinite hang
-            };
-            video.load();
+                };
+                
+                video.addEventListener('loadeddata', checkReady);
+                video.load();
+                if (video.readyState >= 3) checkReady();
+                
+                video.onerror = (e) => {
+                    clearTimeout(timeoutId);
+                    this.pending.delete(id);
+                    reject(e);
+                };
+            } else {
+                const img = new Image();
+                img.src = memory.image;
+                img.onload = () => {
+                    clearTimeout(timeoutId);
+                    const result = { element: img, orientation: memory.orientation || 'landscape', isVid: false };
+                    this.cache.set(id, result);
+                    this.pending.delete(id);
+                    if (showLoader && loader) loader.style.display = 'none';
+                    resolve(result);
+                };
+                img.onerror = (e) => {
+                    clearTimeout(timeoutId);
+                    this.pending.delete(id);
+                    reject(e);
+                };
+            }
         });
-    });
-    
-    await Promise.allSettled(promises);
-}
-
-function processPreloadQueue() {
-    if (preloadQueue.length === 0) {
-        isPreloading = false;
-        return;
+        
+        this.pending.set(id, loadPromise);
+        return loadPromise;
     }
-    isPreloading = true;
-    const nextUrl = preloadQueue.shift();
-    
-    const scheduleNext = window.requestIdleCallback || ((cb) => setTimeout(cb, 50));
-    scheduleNext(() => {
-        preloadAsset(nextUrl).then(() => {
-            processPreloadQueue();
-        });
-    });
-}
+};
 
 function initMemories() {
     const bigEnvelope = document.getElementById('bigEnvelopeContainer');
@@ -251,14 +317,19 @@ async function triggerScatterExplosion() {
                     ease: "power2.out"
                 });
                 
-                // Await instantly from cache, or fallback if preload hasn't finished
-                let videoNode = mediaCache.get(memory.video);
-                if (!videoNode) {
-                    console.log("Media not fully preloaded yet, buffering natively:", memory.video);
-                    videoNode = document.createElement("video");
-                    videoNode.src = memory.video;
-                    videoNode.playsInline = true;
-                    videoNode.preload = "auto";
+                // Reprioritize the background queue
+                MediaManager.reprioritize(index);
+                
+                // Fetch safely (displays loader if not ready)
+                let mediaObj;
+                try {
+                    mediaObj = await MediaManager.getMedia(index, true);
+                } catch(e) {
+                    console.error("Failed to load memory media", e);
+                    env.classList.remove('is-opening');
+                    env.isAnimating = false;
+                    window.activePolaroid = false;
+                    return;
                 }
                 
                 if (!env.classList.contains('opened')) {
@@ -271,18 +342,16 @@ async function triggerScatterExplosion() {
                 backdrop.style.opacity = '1';
                 backdrop.style.pointerEvents = 'auto';
                 
-                openPolaroidStrict(memory, env, index, videoNode, clone, rot);
+                openPolaroidStrict(mediaObj, env, index, clone, rot);
             }
         });
     });
     
     console.log("Grid created");
     
-    // Run preload in the background silently
-    console.log("Starting preload");
-    preloadAllMedia().then(() => {
-        console.log("Preload complete");
-    });
+    // Initialize Smart Preloading
+    console.log("Starting Smart Preload");
+    MediaManager.init();
         
     // 5. Clone Intro Scatter Animation
     // This allows us to animate an explosion WITHOUT mutating the real grid DOM
@@ -490,7 +559,7 @@ function checkAllOpened() {
     }
 }
 
-function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneElement, originalRot) {
+function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalRot) {
     const modalRoot = document.getElementById('modal-root') || document.body;
     const backdrop = document.getElementById('polaroidBackdrop');
     
@@ -503,36 +572,11 @@ function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneEleme
         </div>
     `;
     
-    const isVid = !!memoryData.video;
-    let displayNode;
+    const displayNode = mediaObj.element;
+    const isVid = mediaObj.isVid;
     
-    if (isVid) {
-        // Reuse warmed video node directly from cache for 0ms delay
-        displayNode = mediaCache.get(memoryData.video);
-        if (!displayNode) {
-            console.warn("Video not in cache, fallback creating new element");
-            displayNode = document.createElement('video');
-            displayNode.src = memoryData.video;
-            displayNode.setAttribute('playsinline', '');
-            displayNode.setAttribute('webkit-playsinline', '');
-            displayNode.setAttribute('muted', '');
-            displayNode.setAttribute('autoplay', '');
-            displayNode.setAttribute('loop', '');
-            displayNode.muted = true;
-            displayNode.loop = true;
-            displayNode.playsInline = true;
-        }
-    } else {
-        displayNode = document.createElement('img');
-        displayNode.src = memoryData.image;
-    }
-    
-    // Set dynamic orientation layout
-    if (memoryData.orientation) {
-        polaroidWrapper.classList.add(memoryData.orientation);
-    } else {
-        polaroidWrapper.classList.add('landscape'); // default
-    }
+    // Set dynamic orientation layout based on MediaManager calculation
+    polaroidWrapper.classList.add(mediaObj.orientation || 'landscape');
     
     // Pause background animations for GPU headroom
     document.body.classList.add('is-paused-background');
@@ -559,18 +603,11 @@ function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneEleme
     gsap.to(polaroidWrapper, { opacity: 1, scale: 0.9, duration: 0.3, ease: "back.out(1.2)" });
     
     // Play snap sound (if it's a photo)
-    if (memoryData.type === 'image') playSnapSound();
+    if (!isVid) playSnapSound();
     
     // Close function
     const closeIt = () => {
-        const vid = polaroidWrapper.querySelector('video');
-        if (vid) {
-            vid.pause();
-            // Detach safely without destroying so it can be reused
-            vid.remove();
-        }
-        
-        // Resume background animations
+        // Resume background animations instantly
         document.body.classList.remove('is-paused-background');
         
         backdrop.style.opacity = '0';
@@ -582,6 +619,12 @@ function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneEleme
             scale: 0.8, 
             duration: 0.2, 
             onComplete: () => {
+                if (isVid) {
+                    displayNode.pause();
+                    // Detach safely AFTER animation ends to prevent flickering
+                    displayNode.remove();
+                }
+                
                 polaroidWrapper.remove();
                 
                 // Show clone and fly it back
