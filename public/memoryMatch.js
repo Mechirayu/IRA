@@ -253,8 +253,9 @@ function startMemoryMatchTransition() {
     if (typeof current !== 'undefined') current = 5;
     if (typeof dots !== 'undefined') dots.forEach((d,i)=>d.classList.toggle('active',i===5));
     
-    // Make sure it sits on top of vinyl
+    // Make sure it sits on top of vinyl and vinyl doesn't block clicks
     vinylPage.style.position = 'absolute';
+    vinylPage.style.pointerEvents = 'none';
     
     gsap.set(gridContainer, { opacity: 0, scale: 0.8 });
     gsap.set(rightCol, { opacity: 0, x: 30 });
