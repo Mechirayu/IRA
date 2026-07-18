@@ -26,11 +26,26 @@ const backBtn=document.getElementById('backBtn');
 const BQ=6; // Bouquet page is index 6
 
 function go(n){
-    pages[current].classList.remove('active');
+    // STRICT SCENE ISOLATION
+    pages.forEach((p, i) => {
+        if (i === n) {
+            p.classList.add('active');
+            p.style.display = 'flex';
+            p.style.opacity = '1';
+            p.style.pointerEvents = 'auto';
+            p.style.zIndex = '10';
+        } else {
+            p.classList.remove('active');
+            p.style.display = 'none';
+            p.style.opacity = '0';
+            p.style.pointerEvents = 'none';
+            p.style.zIndex = '-1';
+        }
+    });
+    
     current=n;
     const pg=pages[current];
     void pg.offsetWidth; // trigger reflow
-    pg.classList.add('active');
     
     dots.forEach((d,i)=>d.classList.toggle('active',i===current));
     backBtn.classList.toggle('hidden',current===0);

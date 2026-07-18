@@ -66,7 +66,17 @@ function triggerBurst() {
     }
 
     // Hide UI
-    gsap.to('#welcomePage', { opacity: 0, duration: 0.5 });
+    gsap.to('#welcomePage', { 
+        opacity: 0, 
+        duration: 0.5,
+        onComplete: () => {
+            const wp = document.getElementById('welcomePage');
+            if(wp) {
+                wp.style.display = 'none';
+                wp.style.pointerEvents = 'none';
+            }
+        }
+    });
 
     // Start Canvas Physics
     startFloralPhysics();
