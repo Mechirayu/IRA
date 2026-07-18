@@ -140,7 +140,7 @@ function triggerScatterExplosion() {
         const gridTotalHeight = (rows - 1) * spacingY;
         
         const startX = -gridTotalWidth / 2;
-        const startY = -gridTotalHeight / 2 + (H * 0.08); // shift down to clear heading
+        const startY = -gridTotalHeight / 2 + (H * 0.15); // shift down more to clear heading
         
         for(let r=0; r<rows; r++) {
             for(let c=0; c<cols; c++) {
@@ -412,7 +412,7 @@ function openPolaroid(memoryData, envElement, index) {
     video.pause();
     
     const isMobile = window.innerWidth <= 1024;
-    const deskScale = isMobile ? 0.45 : 1;
+    const deskScale = isMobile ? 0.6 : 1; // Scale down so it fits perfectly in the grid slot without overlapping
 
     // Show Backdrop - darker on mobile to hide closed envelopes completely
     backdrop.style.background = isMobile ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
@@ -478,26 +478,10 @@ function openPolaroid(memoryData, envElement, index) {
         
         const endRot = rot + (Math.random() * 10 - 5);
         
-        // On mobile, shrink to 0 so it disappears completely and clears the screen!
-        const finalDeskScale = isMobile ? 0 : deskScale;
+        // Use deskScale for both mobile and desktop so it shrinks nicely into the grid
+        const finalDeskScale = deskScale;
         
-        if (finalDeskScale === 0) {
-            // MOBILE: Just hide it immediately and remove from DOM
-            polaroidWrapper.style.pointerEvents = 'none';
-            gsap.to(polaroidWrapper, {
-                scale: 0,
-                opacity: 0,
-                duration: 0.3,
-                ease: "power2.in",
-                onComplete: () => {
-                    polaroidWrapper.remove(); // Fully remove from DOM
-                    checkAllOpened();
-                }
-            });
-            return;
-        }
-        
-        // DESKTOP: Animate BACK TO DESK
+        // DESKTOP & MOBILE: Animate BACK TO DESK
         gsap.to(polaroidWrapper, {
             x: startX, 
             y: startY, 
@@ -527,7 +511,6 @@ function openPolaroid(memoryData, envElement, index) {
                         closeIt(e);
                         return;
                     }
-                    if (finalDeskScale === 0) return; // Cannot reopen if hidden on mobile
                     if (window.activePolaroid) return;
                     window.activePolaroid = true;
                     polaroidWrapper.classList.add('is-open');
