@@ -405,8 +405,8 @@ body{
     z-index: 2;
     pointer-events: none; /* Let clicks pass through if needed, except on envelopes */
     display: grid;
-    /* Fluid responsive grid for mobile/tablet */
-    grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+    /* 3x6 grid for mobile (3 columns, 6 rows for 18 envelopes) */
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     justify-content: center;
     align-content: center;
