@@ -2310,12 +2310,59 @@ body{
         text-shadow: 1px 1px 4px rgba(0,0,0,0.8) !important;
     }
 
+    /* ---- 5. THE VINYL ROOM ---- */
+    #vinylRoomPage.active {
+        justify-content: flex-start !important;
+        padding: 50px 10px 10px 10px !important;
+        gap: 10px !important;
+    }
+    #vinylRoomPage .global-header {
+        margin-bottom: 0 !important;
+    }
+    #vinylRoomPage .global-header h2 {
+        margin-top: 5px !important;
+    }
+    .vinyl-room-layout {
+        flex: 0 0 auto !important;
+        gap: 10px !important;
+        margin-bottom: 5px !important;
+    }
+    .vinyl-container {
+        width: clamp(160px, 45vw, 240px) !important;
+    }
+    .lyrics-col {
+        padding: 0 !important;
+        flex: 0 0 auto !important;
+        justify-content: flex-start !important;
+    }
+    .track-switcher {
+        padding: 0 !important;
+        gap: 15px !important;
+        margin-bottom: 0 !important;
+    }
+    .track-btn {
+        padding: 8px 16px 10px !important;
+        font-size: 14px !important;
+    }
+    .vinyl-center-controls {
+        margin-top: 5px !important;
+        margin-bottom: 5px !important;
+        gap: 15px !important;
+    }
+    .play-record-btn {
+        padding: 10px 24px !important;
+        font-size: 1.1rem !important;
+    }
+    .vinyl-next-game-btn {
+        padding: 12px 30px !important;
+        font-size: 1.2rem !important;
+    }
     /* Mobile specific tweaks for lyrics if needed */
     .lyrics-container {
-        height: 180px !important;
+        height: 120px !important;
     }
     .lyrics-inner {
-        padding: 80px 10px !important;
+        padding: 60px 10px !important;
     }
     .play-record-btn.playing-state,
     .play-record-btn.paused-state {
