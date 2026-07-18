@@ -108,16 +108,19 @@ function triggerScatterExplosion() {
     // Preload videos in the background to prevent the 3-4s buffering lag on mobile
     if (!window.memoriesPreloaded) {
         window.memoriesPreloaded = true;
+        window.preloadedVideos = [];
         const preloadContainer = document.createElement('div');
         preloadContainer.style.display = 'none';
         document.body.appendChild(preloadContainer);
-        memoriesData.forEach(mem => {
+        memoriesData.forEach((mem, i) => {
             const vid = document.createElement('video');
             vid.preload = 'auto';
             vid.muted = true;
+            vid.loop = true;
             vid.playsInline = true;
             vid.src = mem.video;
             preloadContainer.appendChild(vid);
+            window.preloadedVideos[i] = vid;
         });
     }
 
@@ -385,10 +388,19 @@ function openPolaroid(memoryData, envElement, index) {
     polaroidWrapper.className = 'desk-polaroid-wrapper is-open';
     
     polaroidWrapper.innerHTML = `
-        <div class="desk-polaroid-inner" style="pointer-events: none; padding: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); background: #fff; border-radius: 8px; aspect-ratio: 9/16; overflow: hidden;">
-            <video src="${memoryData.video}" autoplay loop muted playsinline style="width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: cover; pointer-events: auto;"></video>
+        <div class="desk-polaroid-inner" style="pointer-events: none; padding: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); background: #fff; border-radius: 8px; aspect-ratio: 9/16; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <div class="vid-container" style="width: 100%; height: 100%;"></div>
         </div>
     `;
+    
+    // Reuse preloaded video for ZERO lag
+    const videoNode = window.preloadedVideos[index];
+    if (videoNode && videoNode.parentNode) videoNode.parentNode.removeChild(videoNode);
+    if (videoNode) {
+        videoNode.style.cssText = "width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: cover; pointer-events: auto;";
+        videoNode.autoplay = true;
+        polaroidWrapper.querySelector('.vid-container').appendChild(videoNode);
+    }
     
     const page = document.getElementById('memoriesPage');
     page.appendChild(polaroidWrapper);
@@ -399,9 +411,22 @@ function openPolaroid(memoryData, envElement, index) {
     // Pause video immediately to prevent lag during the GSAP zoom animation
     video.pause();
     
-    // Show Backdrop
+    const isMobile = window.innerWidth <= 768;
+    const deskScale = isMobile ? 0.45 : 1;
+
+    // Show Backdrop - darker on mobile to hide closed envelopes completely
+    backdrop.style.background = isMobile ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
     backdrop.style.opacity = '1';
     backdrop.style.pointerEvents = 'auto';
+    
+    // Allow clicking the photo itself to close it, preventing click bleed
+    polaroidWrapper.onclick = (e) => {
+        if (e) e.stopPropagation();
+        if (polaroidWrapper.classList.contains('is-open')) {
+            closeIt(e);
+        }
+    };
+    polaroidWrapper.style.cursor = 'pointer';
     
     // Set polaroid starting position and z-index to be strictly over the backdrop
     gsap.set(polaroidWrapper, { x: startX, y: startY, rotation: rot, scale: 0, opacity: 0, zIndex: 500 });
@@ -414,12 +439,12 @@ function openPolaroid(memoryData, envElement, index) {
     
     let targetScale;
     if (isVertical) {
-        // Fit 75% of screen height for vertical videos
-        const targetHeight = window.innerHeight * 0.75;
+        // Fit 75% of screen height for vertical videos (85% on mobile)
+        const targetHeight = window.innerHeight * (isMobile ? 0.85 : 0.75);
         targetScale = targetHeight / startHeight;
     } else {
-        // Fit 60% of screen width for horizontal videos
-        const targetWidth = window.innerWidth * 0.60;
+        // Fit 60% of screen width for horizontal videos (90% on mobile)
+        const targetWidth = window.innerWidth * (isMobile ? 0.90 : 0.60);
         targetScale = targetWidth / startHeight;
     }
     
@@ -439,7 +464,8 @@ function openPolaroid(memoryData, envElement, index) {
     });
     
     // Handle close function
-    const closeIt = () => {
+    const closeIt = (e) => {
+        if (e) e.stopPropagation();
         window.activePolaroid = false;
         polaroidWrapper.classList.remove('is-open'); // Re-enable CSS hover
         video.pause(); // Pause video when returning to desk to prevent lag
@@ -452,12 +478,15 @@ function openPolaroid(memoryData, envElement, index) {
         
         const endRot = rot + (Math.random() * 10 - 5);
         
+        // On mobile, shrink to 0 so it disappears completely and clears the screen!
+        const finalDeskScale = window.innerWidth <= 768 ? 0 : deskScale;
+        
         // Animate BACK TO DESK
         gsap.to(polaroidWrapper, {
             x: startX, 
             y: startY, 
             rotation: endRot, 
-            scale: 1, 
+            scale: finalDeskScale, 
             xPercent: -50,
             yPercent: -50,
             zIndex: 50,
@@ -465,23 +494,26 @@ function openPolaroid(memoryData, envElement, index) {
             ease: "back.out(1.2)",
             onComplete: () => {
                 // Add subtle floating effect for polaroid on desk
-                gsap.to(polaroidWrapper, {
-                    y: "+=10",
-                    rotation: endRot + (Math.random() * 4 - 2),
-                    duration: 2 + Math.random(),
-                    yoyo: true,
-                    repeat: -1,
-                    ease: "sine.inOut"
-                });
+                if (finalDeskScale > 0) {
+                    gsap.to(polaroidWrapper, {
+                        y: "+=10",
+                        rotation: endRot + (Math.random() * 4 - 2),
+                        duration: 2 + Math.random(),
+                        yoyo: true,
+                        repeat: -1,
+                        ease: "sine.inOut"
+                    });
+                }
                      checkAllOpened(); // Trigger heart check here!
                 
                 // Allow reopening the polaroid from the desk!
                 polaroidWrapper.onclick = (e) => {
                     e.stopPropagation();
                     if (polaroidWrapper.classList.contains('is-open')) {
-                        closeIt();
+                        closeIt(e);
                         return;
                     }
+                    if (finalDeskScale === 0) return; // Cannot reopen if hidden on mobile
                     if (window.activePolaroid) return;
                     window.activePolaroid = true;
                     polaroidWrapper.classList.add('is-open');
@@ -493,7 +525,8 @@ function openPolaroid(memoryData, envElement, index) {
                     const currentY = gsap.getProperty(polaroidWrapper, "y");
                     const currentRot = gsap.getProperty(polaroidWrapper, "rotation");
                     
-                    // Show Backdrop
+                    // Show Backdrop - darker on mobile
+                    backdrop.style.background = window.innerWidth <= 768 ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
                     backdrop.style.opacity = '1';
                     backdrop.style.pointerEvents = 'auto';
                     
