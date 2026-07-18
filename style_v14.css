@@ -2646,6 +2646,8 @@ body{
     max-height: 55vh;
     /* When max-height constrains height, shrink width proportionally */
     max-width: min(92vw, calc(55vh * 1920 / 860));
+    /* Force Android to rotate the whole frame to fix upside-down videos */
+    transform: rotate(180deg);
 }
 
 /* Portrait: 860×1920 ≈ 9:16
@@ -2664,11 +2666,6 @@ body{
     display: block;
     border-radius: 12px;
     background: #000;
-}
-
-/* Fix Android upside-down metadata issue for horizontal videos */
-.mem-video-frame.landscape .mem-media {
-    transform: rotate(180deg);
 }
 
 /* Spinning heart loader */
