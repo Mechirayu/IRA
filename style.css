@@ -2148,11 +2148,57 @@ body{
     box-shadow: none;
 }
 
-/* --- COMPREHENSIVE MOBILE RESPONSIVENESS FIXES --- */
+/* =====================================================
+   COMPREHENSIVE MOBILE RESPONSIVENESS FIXES
+   ===================================================== */
 @media (max-width: 768px) {
-    /* The 18 Envelopes mobile fix is handled dynamically in JS (memories.js) now, 
-       so we don't need CSS overrides that break GSAP. */
 
+    /* ---- 0. GLOBAL MOBILE FOUNDATION ---- */
+    html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+    }
+
+    .page {
+        padding: 20px 16px !important;
+        overflow-x: hidden !important;
+    }
+
+    .display {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+
+    /* ---- 1. WELCOME SCREEN ---- */
+    #welcomePage .inner {
+        width: 90vw !important;
+        max-width: 100% !important;
+        padding: 0 10px !important;
+    }
+
+    /* ---- 2. CONSTELLATION SCREEN ---- */
+    .constellation-wrapper {
+        max-width: 90vw !important;
+    }
+    .c-star { 
+        width: 40px !important; 
+        height: 40px !important; 
+        margin-left: -20px !important;
+        margin-top: -20px !important;
+    }
+    .star-icon {
+        width: 22px !important;
+        height: 22px !important;
+    }
+    .c-star.ignited .star-icon {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    /* ---- 3. MEMORIES (18 ENVELOPES) SCREEN ---- */
+    /* Handled in JS — just fix the text overlay */
     #chText {
         background-color: rgba(0, 0, 0, 0.7) !important;
         padding: 8px 20px !important;
@@ -2160,197 +2206,238 @@ body{
         color: #fff !important;
         z-index: 1001 !important;
     }
-    
-    .display {
-        white-space: normal !important;
-        word-wrap: break-word !important;
-    }
 
-    /* 2. Fix The Music Player Screen */
-    #vinylRoomPage {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100dvh !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-        padding: 40px 20px !important;
-        box-sizing: border-box !important;
-        background: var(--bg1) !important;
-        z-index: 10 !important;
-    }
-    
-    .vinyl-room-layout {
-        position: relative !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        width: 100% !important;
-    }
-
-    #vinylRoomPage *:not(.vinyl-container):not(.vinyl-container *) {
-        position: relative !important;
-        inset: auto !important;
-        transform: none !important;
-        margin: 0;
-    }
-
-    /* Stack Order & Styling */
-    .lyrics-header {
-        width: 100% !important; 
-        text-align: center !important; 
-        margin-bottom: 20px !important; 
-        word-wrap: break-word !important;
-    }
-    .lyrics-header .gold-serif {
-        font-size: 0.9rem !important; 
-        letter-spacing: 2px !important;
-        display: block !important;
-        margin-bottom: 5px !important;
-    }
-    .lyrics-header .italic-script {
-        font-size: 1.8rem !important; 
-        line-height: 1.2 !important;
-        display: block !important;
-    }
-    
-    .vinyl-col {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        width: 100% !important;
-    }
-    .vinyl-container {
-        width: 200px !important; 
-        height: 200px !important; 
-        margin: 20px auto !important; 
-        display: flex !important; 
-        align-items: center !important; 
-        justify-content: center !important;
-    }
-    .vinyl-center-controls {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        width: 100% !important;
-    }
-    
-    #vinylControlBtn, .play-record-btn {
-        width: auto !important; 
-        padding: 10px 24px !important; 
-        border: 1px solid var(--gold) !important; 
-        border-radius: 30px !important; 
-        font-size: 1rem !important; 
-        margin-bottom: 20px !important; 
-        background: transparent !important;
-        color: var(--gold) !important;
-    }
-    
-    .lyrics-col {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        width: 100% !important;
-    }
-
-    .track-switcher {
-        display: flex !important; 
-        flex-direction: row !important; 
-        justify-content: center !important; 
-        gap: 20px !important; 
-        width: 100% !important; 
-        margin-bottom: 20px !important;
-    }
-    .track-switcher .tab, .track-switcher button, .track-btn {
-        font-size: 1rem !important; 
-        white-space: nowrap !important;
-        padding: 8px 16px !important;
-    }
-    .lyrics-container {
-        width: 100% !important; 
-        min-height: 80px !important; 
-        text-align: center !important; 
-        margin-bottom: 20px !important; 
-        display: flex !important; 
-        align-items: center !important; 
-        justify-content: center !important; 
-        font-size: 1.2rem !important;
-    }
-    
-    #vinylNextGameBtn {
-        margin-top: auto !important; 
-        padding: 15px 40px !important; 
-        border-radius: 50px !important; 
-        font-size: 1.2rem !important; 
-        max-width: 80vw !important; 
-        background: var(--blush) !important; 
-        color: var(--bg1) !important;
-    }
-    
-    .c-star { 
-        width: 16px !important; 
-        height: 16px !important; 
-        margin-left: -8px !important;
-        margin-top: -8px !important;
-    }
-    .track-switcher {
-        display: flex !important;
-        gap: 20px !important;
-        justify-content: center !important;
-        width: 100% !important;
-        flex-wrap: wrap !important;
-    }
-    #nextGameBtn {
-        width: max-content !important;
-        padding: 12px 32px !important;
-        border-radius: 50px !important;
-        margin: 0 auto !important;
-        font-size: 1.2rem !important;
-    }
-
-    /* 3. Fix "Everything About You" Grid */
-    .letter-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
-        width: 90vw !important;
-        max-height: 80vh !important;
-        margin: 0 auto !important;
-    }
-    .card-back {
-        padding: 15px !important;
-        font-size: 0.95rem !important;
-        word-wrap: break-word !important;
-        text-align: center !important;
-    }
-
-    /* 4. Fix The Scratch Card Screen */
+    /* ---- 4. SCRATCH CARD (GOLDEN MEMORIES) SCREEN ---- */
     .scratch-note-inner {
         display: flex !important;
         flex-direction: column !important;
-        gap: 15px !important;
-        margin-top: 20px !important;
-        background: rgba(0, 0, 0, 0.6) !important;
+        gap: 12px !important;
+        margin-top: 15px !important;
+        background: rgba(0, 0, 0, 0.5) !important;
         padding: 15px !important;
         border-radius: 12px !important;
-        font-size: 1.2rem !important;
     }
     .scratch-quote {
         margin-bottom: 0 !important;
+        font-size: clamp(16px, 4vw, 22px) !important;
         text-shadow: 1px 1px 4px rgba(0,0,0,0.8) !important;
     }
     .scratch-sub {
         margin-top: 0 !important;
+        font-size: clamp(13px, 3.5vw, 18px) !important;
         text-shadow: 1px 1px 4px rgba(0,0,0,0.8) !important;
     }
 
-    /* 5. Fix The Promise & Final Screen */
+    /* ---- 5. VINYL ROOM (MUSIC PLAYER) SCREEN ---- */
+    /* 
+     * KEY FIX: We target each element individually instead of using 
+     * wildcard selectors. The wildcard `transform: none !important` 
+     * was destroying GSAP animations, play button visibility, 
+     * vinyl disc scale, and tonearm rotation.
+     */
+    #vinylRoomPage {
+        padding: 0 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
+    /* The header: remove absolute positioning, make it flow naturally */
+    #vinylRoomPage .lyrics-header.global-header {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        padding: 20px 16px 10px !important;
+        text-align: center !important;
+        word-wrap: break-word !important;
+        order: -1;
+    }
+    #vinylRoomPage .lyrics-header .gold-serif {
+        font-size: 0.75rem !important;
+        letter-spacing: 2px !important;
+        margin-bottom: 6px !important;
+    }
+    #vinylRoomPage .lyrics-header .italic-script {
+        font-size: clamp(1.2rem, 5vw, 1.6rem) !important;
+        line-height: 1.3 !important;
+    }
+
+    /* Layout: vertical column */
+    .vinyl-room-layout {
+        flex-direction: column !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 0 16px !important;
+        gap: 0 !important;
+    }
+
+    /* Vinyl column */
+    .vinyl-col {
+        width: 100% !important;
+        flex: none !important;
+        align-items: center !important;
+        padding: 0 !important;
+    }
+
+    /* The vinyl record - compact for mobile */
+    .vinyl-container {
+        width: 180px !important;
+        height: 180px !important;
+        margin: 10px auto !important;
+        position: relative !important; /* Keep relative for inner absolute children */
+    }
+
+    /* Controls: remove absolute, stack naturally */
+    .vinyl-center-controls {
+        position: relative !important;
+        bottom: auto !important;
+        left: auto !important;
+        transform: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        width: 100% !important;
+        gap: 15px !important;
+        padding: 10px 0 !important;
+    }
+
+    /* Play button — DON'T override transform (GSAP uses translateY for visibility) */
+    .play-record-btn {
+        padding: 12px 30px !important;
+        font-size: 16px !important;
+        letter-spacing: 2px !important;
+    }
+
+    /* Next game button */
+    .vinyl-next-game-btn {
+        font-size: 1.1rem !important;
+        padding: 14px 36px !important;
+    }
+
+    /* Lyrics column */
+    .lyrics-col {
+        width: 100% !important;
+        flex: none !important;
+        padding: 0 !important;
+    }
+
+    /* Track switcher tabs - horizontal centered row */
+    .track-switcher {
+        padding: 0 0 15px 0 !important;
+        gap: 10px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+    }
+    .track-btn {
+        padding: 8px 16px !important;
+    }
+    .track-title {
+        font-size: clamp(18px, 4.5vw, 28px) !important;
+        letter-spacing: 1px !important;
+    }
+
+    /* Lyrics container */
+    .lyrics-container {
+        height: 200px !important;
+        max-width: 100% !important;
+    }
+    .lyrics-inner {
+        padding: 80px 10px !important;
+        gap: 18px !important;
+    }
+    .lyric-line {
+        font-size: clamp(16px, 4vw, 24px) !important;
+    }
+
+    /* ---- 6. MEMORY MATCH GAME SCREEN ---- */
+    #memoryMatchPage {
+        padding: 10px !important;
+    }
+    .memory-layout {
+        flex-direction: column-reverse !important;
+        padding: 10px !important;
+        gap: 15px !important;
+    }
+    .memory-col-left {
+        flex: none !important;
+        width: 100% !important;
+    }
+    .memory-col-right {
+        flex: none !important;
+        width: 100% !important;
+        padding-left: 0 !important;
+        text-align: center !important;
+        margin-bottom: 10px !important;
+    }
+    .memory-col-right .gold-serif {
+        font-size: clamp(20px, 5vw, 32px) !important;
+    }
+    .memory-col-right .italic-script {
+        font-size: clamp(14px, 3.5vw, 20px) !important;
+    }
+    .memory-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+    }
+    #win-heart {
+        font-size: clamp(150px, 40vw, 250px) !important;
+    }
+
+    /* ---- 7. BOUQUET SCREEN ---- */
+    #bqPage .inner {
+        width: 95vw !important;
+        max-width: 100% !important;
+    }
+    #bqHeader {
+        font-size: clamp(18px, 4.5vw, 28px) !important;
+        width: 90% !important;
+    }
+    #bqWrap {
+        max-width: 85vw !important;
+    }
+
+    /* ---- 8. LETTER GRID ("Everything About You") ---- */
+    .letter-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        width: 90vw !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+    }
+    .letter-card {
+        min-height: 120px !important;
+    }
+    .card-back {
+        padding: 12px !important;
+        font-size: 0.9rem !important;
+        word-wrap: break-word !important;
+        text-align: center !important;
+    }
+    .letter-modal {
+        width: 95vw !important;
+        max-width: 100% !important;
+        padding: 20px 10px !important;
+    }
+
+    /* ---- 9. VINTAGE ENVELOPE & LETTER ---- */
+    .envelope-wrapper {
+        max-width: 90vw !important;
+    }
+    .paper-letter-scroll {
+        max-width: 95vw !important;
+        max-height: 85dvh !important;
+    }
+    .letter-text-container {
+        padding: 50px 16px 16px 16px !important;
+    }
+    .letter-para {
+        font-size: clamp(13px, 3.5vw, 17px) !important;
+        line-height: 1.7 !important;
+    }
+
+    /* ---- 10. PROMISE & FINALE SCREENS ---- */
     #promise-scene, #end-scene {
-        height: 100vh !important;
         height: 100dvh !important;
         width: 100vw !important;
         overflow: hidden !important;
@@ -2361,18 +2448,29 @@ body{
         padding: 20px !important;
         box-sizing: border-box !important;
     }
-    
-    .promise-text {
-        font-size: 1.1rem !important;
-        line-height: 1.5 !important;
+    .promise-card {
         max-width: 90vw !important;
-        margin: 0 auto !important;
+        padding: 25px 20px !important;
     }
-    
+    .promise-text {
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+        max-width: 90vw !important;
+    }
+    .promise-buttons {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 10px !important;
+    }
     .end-title {
-        font-size: 2.5rem !important;
+        font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
     }
     .end-subtitle {
-        font-size: 1.2rem !important;
+        font-size: clamp(0.9rem, 3.5vw, 1.2rem) !important;
+    }
+    .end-btn {
+        padding: 12px 30px !important;
+        font-size: 1rem !important;
+        max-width: 80vw !important;
     }
 }
