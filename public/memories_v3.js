@@ -267,10 +267,11 @@ async function triggerScatterExplosion() {
 // OPEN POLAROID — rock-solid mobile video lifecycle
 // ─────────────────────────────────────────────────────────
 function openPolaroidStrict(mediaObj, envElement, memKey, cloneElement, originalRot) {
-    const modalRoot = document.getElementById('modal-root') || document.body;
-    const backdrop  = document.getElementById('polaroidBackdrop');
-    const isVid     = mediaObj.isVid;
-    const frame     = mediaObj.frame; // 'landscape' or 'portrait'
+    // Use overlay-root (position:fixed) for reliable full-viewport centering
+    const overlayRoot = document.getElementById('overlay-root') || document.body;
+    const backdrop    = document.getElementById('polaroidBackdrop');
+    const isVid       = mediaObj.isVid;
+    const frame       = mediaObj.frame; // 'landscape' or 'portrait'
 
     // ── Build wrapper ──────────────────────────────────────
     const wrapper = document.createElement('div');
@@ -284,28 +285,34 @@ function openPolaroidStrict(mediaObj, envElement, memKey, cloneElement, original
     // ── Build close button ─────────────────────────────────
     const closeBtn = document.createElement('button');
     closeBtn.className = 'mem-close-btn';
+    closeBtn.setAttribute('aria-label', 'Close memory');
     closeBtn.innerHTML = '✕';
     wrapper.appendChild(closeBtn);
 
     // ── Build media element ────────────────────────────────
     let mediaEl;
+    let spinner = null;
+
     if (isVid) {
         mediaEl = document.createElement('video');
-        mediaEl.muted      = true;
-        mediaEl.loop       = true;
+        mediaEl.muted       = true;
+        mediaEl.loop        = true;
         mediaEl.playsInline = true;
-        mediaEl.preload    = 'metadata';
-        // Do NOT set autoplay attribute — we play manually on loadedmetadata
+        mediaEl.preload     = 'metadata';
+        mediaEl.className   = 'mem-media';
 
-        // Loading spinner (heart pulse)
-        const spinner = document.createElement('div');
+        // Spinner shown while loading
+        spinner = document.createElement('div');
         spinner.className = 'mem-spinner';
         spinner.innerHTML = '❤️';
         frameEl.appendChild(spinner);
 
-        // Log dimensions for debugging
+        // Append video to DOM FIRST — Android Chrome won't load if src set before DOM insertion
+        frameEl.appendChild(mediaEl);
+
+        // Bind all events BEFORE assigning src
         mediaEl.addEventListener('loadedmetadata', async () => {
-            console.log(`[Memory ${memKey}] ${mediaEl.videoWidth}×${mediaEl.videoHeight} readyState=${mediaEl.readyState} error=${mediaEl.error}`);
+            console.log(`[Memory ${memKey}] ${mediaEl.videoWidth}×${mediaEl.videoHeight} readyState=${mediaEl.readyState}`);
             try {
                 await mediaEl.play();
             } catch (e) {
@@ -315,33 +322,32 @@ function openPolaroidStrict(mediaObj, envElement, memKey, cloneElement, original
         }, { once: true });
 
         mediaEl.addEventListener('canplay', () => {
-            spinner.style.display = 'none';
-        }, { once: true });
+            if (spinner) spinner.style.display = 'none';
+        });
 
         mediaEl.addEventListener('waiting', () => {
-            spinner.style.display = 'block';
+            if (spinner) spinner.style.display = 'flex';
         });
 
         mediaEl.onerror = () => {
-            console.error('[Memory] Video error:', mediaEl.error, 'src:', mediaEl.currentSrc);
-            spinner.innerHTML = '⚠️';
+            console.error('[Memory] Video error code:', mediaEl.error?.code, 'src:', mediaEl.currentSrc);
+            if (spinner) spinner.innerHTML = '⚠️';
         };
 
-        // Assign src AFTER binding all listeners
+        // NOW assign src — element is already in DOM
         mediaEl.src = mediaObj.src;
 
     } else {
         mediaEl = new Image();
+        mediaEl.className = 'mem-media';
         mediaEl.src = mediaObj.src;
+        frameEl.appendChild(mediaEl);
     }
 
-    mediaEl.className = 'mem-media';
-    frameEl.appendChild(mediaEl);
-
-    // ── Animate in ─────────────────────────────────────────
+    // ── Add to DOM and animate in ──────────────────────────
     document.body.classList.add('is-paused-background');
     gsap.set(wrapper, { opacity: 0, scale: 0.85 });
-    modalRoot.appendChild(wrapper);
+    overlayRoot.appendChild(wrapper);  // fixed-position overlay → always full viewport
 
     gsap.to(cloneElement, { opacity: 0, duration: 0.15 });
     gsap.to(wrapper, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(1.2)' });

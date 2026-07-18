@@ -2605,18 +2605,19 @@ body{
    Portrait  videos:  860×1920 → aspect ≈ 9:16
    ══════════════════════════════════════════════════════ */
 
-/* Full-screen centering overlay */
+/* Full-screen centering overlay — position:fixed covers viewport regardless of parent */
 .mem-modal-wrapper {
-    position: absolute;
+    position: fixed;
     inset: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 9200;
-    pointer-events: none;   /* wrapper itself doesn't catch clicks */
+    z-index: 100000;         /* above overlay-root (99999) */
+    pointer-events: none;    /* wrapper itself doesn't catch clicks */
     gap: 14px;
     padding: 12px;
+    box-sizing: border-box;
 }
 
 /* The rounded video frame — pointer-events re-enabled */
