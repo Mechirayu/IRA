@@ -2637,15 +2637,15 @@ body{
     pointer-events: auto;
 }
 
-/* Landscape: 1920×860 ≈ 2.23:1
+/* Landscape: 16:9 standard video aspect ratio
    On mobile keep within 92vw AND 55vh so it doesn't overflow */
 .mem-video-frame.landscape {
     width: min(92vw, 860px);
-    /* height derived from true pixel ratio */
-    aspect-ratio: 1920 / 860;
+    /* Standard 16:9 fits mobile videos perfectly without cropping top/bottom */
+    aspect-ratio: 16 / 9;
     max-height: 55vh;
     /* When max-height constrains height, shrink width proportionally */
-    max-width: min(92vw, calc(55vh * 1920 / 860));
+    max-width: min(92vw, calc(55vh * 16 / 9));
     /* Force Android to rotate the whole frame to fix upside-down videos */
     transform: rotate(180deg);
 }
@@ -2666,7 +2666,6 @@ body{
     display: block;
     border-radius: 12px;
     background: #000;
-    transform: scale(1.15); /* Zoom in by 15% to crop out baked-in black borders */
 }
 
 /* Spinning heart loader */
