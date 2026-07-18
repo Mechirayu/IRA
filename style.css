@@ -2118,52 +2118,81 @@ body{
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        z-index: 9999 !important;
-        width: 85vw !important;
-        max-width: 85vw !important;
+        z-index: 1000 !important;
+        width: 90vw !important;
+        max-width: 90vw !important;
+        max-height: 85vh !important;
         height: auto !important;
         box-shadow: 0 0 20px rgba(0,0,0,0.8) !important;
     }
     .desk-polaroid-wrapper.is-open video, 
     .desk-polaroid-wrapper.is-open .dp-photo {
-        max-height: 70vh !important;
+        max-height: 85vh !important;
         object-fit: contain !important;
     }
     .desk-polaroid-inner {
         max-width: 100% !important;
-        max-height: 70vh !important;
+        max-height: 85vh !important;
+    }
+
+    #chText {
+        background-color: rgba(0, 0, 0, 0.7) !important;
+        padding: 10px 24px !important;
+        border-radius: 30px !important;
+        color: #fff !important;
+        z-index: 1001 !important;
     }
 
     /* 2. Fix The Music Player Screen */
-    .vinyl-container {
-        margin-top: 50px !important;
+    #vinylRoomPage {
         display: flex !important;
         flex-direction: column !important;
-        gap: 30px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 20px !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+    }
+    .lyrics-header {
+        order: -1 !important;
+    }
+    .vinyl-container {
+        margin-top: 0 !important;
+        width: 180px !important;
+        height: 180px !important;
+        display: block !important;
     }
     .song-tabs {
+        display: flex !important;
+        gap: 15px !important;
         flex-wrap: nowrap !important;
         white-space: nowrap !important;
         overflow-x: auto !important;
+        justify-content: center !important;
     }
     .song-tabs .tab {
         white-space: nowrap !important;
         font-size: 1rem !important;
     }
     #nextGameBtn {
-        width: auto !important;
-        padding: 12px 30px !important;
+        width: max-content !important;
+        padding: 12px 32px !important;
         border-radius: 50px !important;
+        margin: 0 auto !important;
         font-size: 1.2rem !important;
     }
 
     /* 3. Fix "Everything About You" Grid */
     .letter-grid {
-        grid-template-columns: 1fr !important;
-        max-width: 80vw !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        width: 90vw !important;
+        max-height: 80vh !important;
+        margin: 0 auto !important;
     }
     .card-back {
-        font-size: 1.2rem !important;
+        padding: 15px !important;
+        font-size: 0.95rem !important;
         word-wrap: break-word !important;
         text-align: center !important;
     }
@@ -2174,21 +2203,46 @@ body{
         flex-direction: column !important;
         gap: 15px !important;
         margin-top: 20px !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        padding: 15px !important;
+        border-radius: 12px !important;
+        font-size: 1.2rem !important;
     }
     .scratch-quote {
         margin-bottom: 0 !important;
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.8) !important;
     }
     .scratch-sub {
         margin-top: 0 !important;
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.8) !important;
     }
 
-    /* 5. Fix The "One Last Promise..." Text Screen */
-    .promise-text {
-        font-size: 1.4rem !important;
-        line-height: 1.6 !important;
-        padding: 0 20px !important;
+    /* 5. Fix The Promise & Final Screen */
+    #promise-scene, #end-scene {
+        height: 100vh !important;
+        height: 100dvh !important;
+        width: 100vw !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
         text-align: center !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
+    }
+    
+    .promise-text {
+        font-size: 1.1rem !important;
+        line-height: 1.5 !important;
         max-width: 90vw !important;
         margin: 0 auto !important;
+    }
+    
+    .end-title {
+        font-size: 2.5rem !important;
+    }
+    .end-subtitle {
+        font-size: 1.2rem !important;
     }
 }
