@@ -13,6 +13,7 @@ let isBoardLocked = false;
 
 function initMemoryMatch() {
     const grid = document.getElementById('memoryGrid');
+    grid.className = 'memory-grid';
     grid.innerHTML = '';
     flippedCards = [];
     matchedPairs = 0;
