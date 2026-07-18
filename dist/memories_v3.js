@@ -503,7 +503,8 @@ function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneEleme
         displayNode.style.cssText = "width: 100%; height: auto; max-height: 85vh; display: block; border-radius: 4px; object-fit: contain; pointer-events: auto;";
         if (isVid) {
             displayNode.autoplay = true;
-            displayNode.muted = false; // Ensure volume is on
+            displayNode.muted = true; // Mobile browsers require muted for autoplay
+            displayNode.loop = true;  // Keep it looping smoothly
             displayNode.play().catch(e => console.log('play prevented', e));
         }
         polaroidWrapper.querySelector('.vid-container').appendChild(displayNode);
@@ -513,9 +514,9 @@ function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneEleme
     gsap.set(polaroidWrapper, { opacity: 0, scale: 0.8 });
     modalRoot.appendChild(polaroidWrapper);
     
-    // Fade out clone, Fade in Modal
+    // Fade out clone, Fade in Modal (scaled to 0.9 to be 10% smaller)
     gsap.to(cloneElement, { opacity: 0, duration: 0.2 });
-    gsap.to(polaroidWrapper, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.2)" });
+    gsap.to(polaroidWrapper, { opacity: 1, scale: 0.9, duration: 0.3, ease: "back.out(1.2)" });
     
     // Play snap sound (if it's a photo)
     if (memoryData.type === 'image') playSnapSound();
