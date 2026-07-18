@@ -21,18 +21,33 @@ const memoriesData = [
 ];
 
 // Global Asset Cache & Queue
-window.AssetCache = window.AssetCache || { videos: new Map() };
-let preloadQueue = [];
-let isPreloading = false;
+let openedCount = 0;
 
-function preloadAsset(url) {
+// Async Priority Media Cache
+const mediaCache = new Map();
+
+async function preloadMediaPriority(url, currentIndex) {
+    if (mediaCache.has(url)) return mediaCache.get(url);
+    
+    const video = document.createElement("video");
+    video.preload = "auto";
+    video.playsInline = true;
+    video.muted = true; // Required for background auto-loading in some browsers
+    video.src = url;
+    
+    // Trigger priority queue for next 2 items
+    if (currentIndex !== undefined) {
+        for(let i=1; i<=2; i++) {
+            if (currentIndex + i < memoriesData.length) {
+                const nextUrl = memoriesData[currentIndex + i].video;
+                if (!mediaCache.has(nextUrl)) {
+                    preloadMediaPriority(nextUrl); // Fire and forget
+                }
+            }
+        }
+    }
+    
     return new Promise((resolve) => {
-        if (window.AssetCache.videos.has(url)) {
-            const cachedVideo = window.AssetCache.videos.get(url);
-            if (cachedVideo.readyState >= 3) { // HAVE_FUTURE_DATA
-                resolve(cachedVideo);
-                return;
-            } else {
                 cachedVideo.oncanplay = () => resolve(cachedVideo);
                 return;
             }
@@ -194,55 +209,65 @@ function triggerScatterExplosion() {
         env.addEventListener('click', async () => {
             if(!window.activePolaroid && !env.isAnimating) {
                 env.isAnimating = true;
+                window.activePolaroid = true;
                 
-                // Create a pure visual clone for the tap feedback
+                // Read and SAVE bounding rect once (do not recalculate)
                 const rect = env.getBoundingClientRect();
-                const clone = env.cloneNode(true);
-                clone.style.position = 'fixed';
+                
+                // Acquire clone from pool
+                const clone = EnvelopeClonePool.acquire(env);
+                clone.style.position = 'absolute'; 
                 clone.style.left = rect.left + 'px';
                 clone.style.top = rect.top + 'px';
                 clone.style.width = rect.width + 'px';
                 clone.style.height = rect.height + 'px';
                 clone.style.margin = '0';
-                clone.style.zIndex = '9999';
                 
                 // Copy computed rotation manually
                 const rot = gsap.getProperty(env, "rotation") || 0;
                 gsap.set(clone, { rotation: rot, transformOrigin: "center center" });
                 
-                const modalLayer = document.getElementById('modalLayer') || document.body;
-                modalLayer.appendChild(clone);
-                env.style.opacity = '0'; // Hide original, but NEVER transform it
+                const animLayer = document.getElementById('animation-layer') || document.body;
+                animLayer.appendChild(clone);
                 
-                // Immediate Tap Feedback on Clone
-                gsap.to(clone, { scale: 0.9, duration: 0.1, yoyo: true, repeat: 1 });
+                // Safely hide original using class (opacity 0, pointer-events none)
+                env.classList.add('is-opening');
                 
-                // Add Loading State immediately if not already cached
-                const isReady = window.AssetCache.videos.has(memory.video) && window.AssetCache.videos.get(memory.video).readyState >= 3;
-                if (!isReady) {
-                    clone.classList.add('envelope-loading');
-                }
+                // Immediate Tap Feedback on Clone (100ms)
+                await gsap.to(clone, { scale: 0.9, duration: 0.1, yoyo: true, repeat: 1 });
                 
-                // Prioritize next asset in background queue
-                if (index + 1 < memoriesData.length) {
-                    const nextUrl = memoriesData[index+1].video;
-                    preloadQueue = preloadQueue.filter(u => u !== nextUrl);
-                    preloadQueue.unshift(nextUrl);
-                    if (!isPreloading) processPreloadQueue();
-                }
+                // Clone flies to center
+                const cx = window.innerWidth / 2;
+                const cy = window.innerHeight / 2;
+                const dx = cx - (rect.left + rect.width / 2);
+                const dy = cy - (rect.top + rect.height / 2);
+                
+                await gsap.to(clone, {
+                    x: dx,
+                    y: dy,
+                    rotation: 0,
+                    scale: 2.5,
+                    duration: 0.4,
+                    ease: "power2.out"
+                });
+                
+                clone.classList.add('envelope-loading');
                 
                 // Await current asset
-                const videoNode = await preloadAsset(memory.video);
-                
-                window.activePolaroid = true;
-                env.isAnimating = false;
+                const videoNode = await preloadMediaPriority(memory.video, index);
                 
                 clone.classList.remove('envelope-loading');
                 if (!env.classList.contains('opened')) {
                     env.classList.add('opened');
                     openedCount++;
                 }
-                openPolaroid(memory, env, index, videoNode, clone);
+                
+                // Fade Backdrop
+                const backdrop = document.getElementById('polaroidBackdrop');
+                backdrop.style.opacity = '1';
+                backdrop.style.pointerEvents = 'auto';
+                
+                openPolaroidStrict(memory, env, index, videoNode, clone, rot);
             }
         });
         
@@ -432,170 +457,89 @@ function checkAllOpened() {
     }
 }
 
-function openPolaroid(memoryData, envElement, index, videoNode, cloneElement) {
-    const desk = document.getElementById('memoriesDesk');
+function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneElement, originalRot) {
+    const modalRoot = document.getElementById('modal-root') || document.body;
     const backdrop = document.getElementById('polaroidBackdrop');
-    
-    // Stop envelope animations
-    gsap.killTweensOf(envElement);
-    
-    const rot = gsap.getProperty(envElement, "rotation") || 0;
-    
-    // Original envelope is ALREADY opacity 0. DO NOT scale it!
-    // Fade out the clone
-    if (cloneElement) {
-        gsap.to(cloneElement, { opacity: 0, duration: 0.2, onComplete: () => cloneElement.remove() });
-    }
     
     // Create polaroid wrapper
     const polaroidWrapper = document.createElement('div');
     polaroidWrapper.className = 'desk-polaroid-wrapper is-open';
-    polaroidWrapper._envElement = envElement; // Save reference for resize reflow
-    
     polaroidWrapper.innerHTML = `
-        <div class="desk-polaroid-inner" style="pointer-events: none; padding: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); background: #fff; border-radius: 8px; aspect-ratio: 9/16; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <div class="desk-polaroid-inner">
             <div class="vid-container" style="width: 100%; height: 100%;"></div>
         </div>
     `;
     
-    // Reuse preloaded video for ZERO lag
     if (videoNode && videoNode.parentNode) videoNode.parentNode.removeChild(videoNode);
     if (videoNode) {
-        videoNode.style.cssText = "width: 100%; height: 100%; max-height: 85vh; display: block; border-radius: 4px; object-fit: contain; pointer-events: auto;";
-        videoNode.autoplay = true;
-        if (memoryData.type === 'video') {
-            videoNode.play().catch(e => console.log('play prevented', e));
+        const isVid = memoryData.type === 'video';
+        const displayNode = isVid ? videoNode : videoNode.cloneNode(true);
+        displayNode.style.cssText = "width: 100%; height: auto; max-height: 85vh; display: block; border-radius: 4px; object-fit: contain; pointer-events: auto;";
+        if (isVid) {
+            displayNode.autoplay = true;
+            displayNode.muted = false;
+            displayNode.play().catch(e => console.log('play prevented', e));
         }
-        polaroidWrapper.querySelector('.vid-container').appendChild(videoNode);
+        polaroidWrapper.querySelector('.vid-container').appendChild(displayNode);
     }
     
-    const modalLayer = document.getElementById('modalLayer') || document.body;
-    modalLayer.appendChild(polaroidWrapper);
+    // Start modal hidden
+    gsap.set(polaroidWrapper, { opacity: 0, scale: 0.8 });
+    modalRoot.appendChild(polaroidWrapper);
     
-    const inner = polaroidWrapper.querySelector('.desk-polaroid-inner');
-    const video = polaroidWrapper.querySelector('video');
+    // Fade out clone, Fade in Modal
+    gsap.to(cloneElement, { opacity: 0, duration: 0.2 });
+    gsap.to(polaroidWrapper, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.2)" });
     
-    // Pause video immediately to prevent lag during the GSAP zoom animation
-    video.pause();
+    // Play snap sound (if it's a photo)
+    if (memoryData.type === 'image') playSnapSound();
     
-    // Allow clicking the photo itself to close it, preventing click bleed
-    polaroidWrapper.onclick = (e) => {
-        if (e) e.stopPropagation();
-        if (polaroidWrapper.classList.contains('is-open')) {
-            closeIt(e);
-        }
-    };
-    polaroidWrapper.style.cursor = 'pointer';
-
-    // Pre-calculate target bounds (since the wrapper is flex, inner is already naturally centered)
-    const polaroidRect = inner.getBoundingClientRect();
-    const envRect = envElement.getBoundingClientRect();
-    
-    const deltaX = (envRect.left + envRect.width / 2) - (polaroidRect.left + polaroidRect.width / 2);
-    const deltaY = (envRect.top + envRect.height / 2) - (polaroidRect.top + polaroidRect.height / 2);
-    const scaleDelta = envRect.width / polaroidRect.width;
-    
-    // The user requested videos 4 and 8 to be vertical. (Index 3 and 7)
-    const isVertical = (index === 3 || index === 7);
-    const targetRotation = isVertical ? 0 : -90;
-    if (!isVertical) {
-        gsap.set(inner, { rotation: -90 }); // apply immediately so layout doesn't break during measurement
-    }
-    
-    // Animate polaroid FROM the envelope TO the center
-    gsap.fromTo(inner, { 
-        x: deltaX, 
-        y: deltaY, 
-        scale: scaleDelta, 
-        rotation: rot 
-    }, {
-        x: 0,
-        y: 0,
-        scale: 1,
-        rotation: targetRotation,
-        duration: 0.6,
-        ease: "back.out(1.2)",
-        onComplete: () => {
-            if(videoNode) videoNode.play();
-        }
-    });
-    
-    // Show Backdrop - darker on mobile
-    const isMobile = window.innerWidth <= 1024;
-    backdrop.style.background = isMobile ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
-    backdrop.style.opacity = '1';
-    backdrop.style.pointerEvents = 'auto';
-    
-    // Handle close function
-    const closeIt = (e) => {
-        if (e) e.stopPropagation();
-        window.activePolaroid = false;
-        if(videoNode) videoNode.pause();
+    // Close function
+    const closeIt = () => {
+        const vid = polaroidWrapper.querySelector('video');
+        if (vid) vid.pause();
         
-        // Hide Backdrop
         backdrop.style.opacity = '0';
         backdrop.style.pointerEvents = 'none';
         
-        // Recalculate deltas in case the window resized
-        const currentEnvRect = envElement.getBoundingClientRect();
-        const currentPolaroidRect = inner.getBoundingClientRect();
-        
-        // Remove GSAP transforms temporarily to measure pure bounds
-        gsap.set(inner, { clearProps: "all" });
-        const purePolaroidRect = inner.getBoundingClientRect();
-        
-        const returnDeltaX = (currentEnvRect.left + currentEnvRect.width / 2) - (purePolaroidRect.left + purePolaroidRect.width / 2);
-        const returnDeltaY = (currentEnvRect.top + currentEnvRect.height / 2) - (purePolaroidRect.top + purePolaroidRect.height / 2);
-        const returnScaleDelta = currentEnvRect.width / purePolaroidRect.width;
-        
-        // Restore transforms to where it was
-        gsap.set(inner, { 
-            x: 0, 
-            y: 0, 
-            scale: 1, 
-            rotation: targetRotation 
-        });
-        
-        // Animate BACK TO ORIGINAL ENVELOPE LOCATION
-        gsap.to(inner, {
-            x: returnDeltaX,
-            y: returnDeltaY,
-            rotation: rot,
-            scale: returnScaleDelta,
-            opacity: 0,
-            duration: 0.5,
-            ease: "back.in(1.2)",
+        // Hide modal
+        gsap.to(polaroidWrapper, { 
+            opacity: 0, 
+            scale: 0.8, 
+            duration: 0.2, 
             onComplete: () => {
-                // Fully destroy the floating polaroid so it doesn't block the grid!
                 polaroidWrapper.remove();
                 
-                // Restore the original untransformed envelope visually
-                gsap.to(envElement, {
-                    opacity: 1,
-                    duration: 0.3,
+                // Show clone and fly it back
+                gsap.set(cloneElement, { opacity: 1 });
+                gsap.to(cloneElement, {
+                    x: 0, // Reset delta to 0 (which returns it to its original rect position)
+                    y: 0,
+                    scale: 1,
+                    rotation: originalRot,
+                    duration: 0.4,
                     ease: "power2.out",
                     onComplete: () => {
-                        // Guarantee absolute removal of ANY inline transform properties from GSAP
-                        gsap.set(envElement, { clearProps: "all" });
+                        // Return to pool
+                        EnvelopeClonePool.release(cloneElement);
                         
-                        // Re-apply the resting rotation natively so it stays tilted
-                        gsap.set(envElement, { rotation: rot });
+                        // Show original by removing class
+                        envElement.classList.remove('is-opening');
+                        
+                        envElement.isAnimating = false;
+                        window.activePolaroid = false;
+                        
+                        checkAllOpened();
                     }
                 });
-                
-                checkAllOpened();
             }
         });
     };
     
-    // Bind click to close initially
     polaroidWrapper.onclick = (e) => {
         e.stopPropagation();
-        if (polaroidWrapper.classList.contains('is-open')) {
-            closeIt();
-        }
+        closeIt();
     };
-    
     backdrop.onclick = closeIt;
 }
 
