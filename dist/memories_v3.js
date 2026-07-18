@@ -131,10 +131,42 @@ const MediaManager = {
         const id = memory.video || memory.image;
         
         if (this.cache.has(id)) return this.cache.get(id);
-        if (this.pending.has(id)) return await this.pending.get(id);
         
-        // Fallback if not preloaded yet
-        return await this.preloadMedia(index);
+        const forceOpen = () => {
+            console.warn(`MediaManager: Timeout/Error waiting for ${id}. Forcing open.`);
+            const isVid = !!memory.video;
+            let element;
+            if (isVid) {
+                element = document.createElement("video");
+                element.src = memory.video;
+                element.preload = "auto";
+                element.playsInline = true;
+                element.muted = true;
+            } else {
+                element = new Image();
+                element.src = memory.image;
+            }
+            const result = { 
+                element: element, 
+                isVid: isVid,
+                type: memory.type,
+                rotation: memory.rotation
+            };
+            this.cache.set(id, result);
+            return result;
+        };
+
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(forceOpen()), 3000));
+        
+        let loadPromise = this.pending.get(id) || this.preloadMedia(index);
+        
+        // Catch any error and just force open
+        loadPromise = loadPromise.catch(e => {
+            console.error("MediaManager: preload failed", e);
+            return forceOpen();
+        });
+        
+        return Promise.race([loadPromise, timeoutPromise]);
     }
 };
 
@@ -216,7 +248,7 @@ async function triggerScatterExplosion() {
     
     console.log("Creating grid");
     // 1. Populate immutable grid IMMEDIATELY (Do not block on preload)
-    memoriesData.forEach((memory, index) => {
+    MEMORY_CONFIG.forEach((memory, index) => {
         const env = document.createElement('div');
         env.className = 'mini-envelope';
         
@@ -408,7 +440,7 @@ function createBurstingHearts(container, deskRect) {
 }
 
 function checkAllOpened() {
-    if (openedCount === memoriesData.length) {
+    if (openedCount === MEMORY_CONFIG.length) {
         const collectorHeart = document.getElementById('collectorHeart');
         collectorHeart.style.pointerEvents = 'auto';
         

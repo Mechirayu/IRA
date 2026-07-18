@@ -1,23 +1,23 @@
-const MEMORY_CONFIG = [
-    { video: "video-snaps/VN20260717_033554.mp4", type: "landscape", rotation: 90 }, // index 0 (Memory 1)
-    { video: "video-snaps/VN20260717_033929.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_034038.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_034318.mp4", type: "portrait", rotation: 0 },  // index 3 (Memory 4)
-    { video: "video-snaps/VN20260717_034652.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_035013.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_035258.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_042216.mp4", type: "portrait", rotation: 0 },  // index 7 (Memory 8)
-    { video: "video-snaps/VN20260717_042620.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_042713.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_042805.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_042933.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_043042.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_043156.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_043319.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_043613.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_043722.mp4", type: "landscape", rotation: 90 },
-    { video: "video-snaps/VN20260717_120339.mp4", type: "landscape", rotation: 90 }  // index 17 (Memory 18)
-];
+const MEMORY_CONFIG = {
+    1:{video: "video-snaps/VN20260717_033554.mp4", frame:"landscape",rotate:true},
+    2:{video: "video-snaps/VN20260717_033929.mp4", frame:"landscape",rotate:true},
+    3:{video: "video-snaps/VN20260717_034038.mp4", frame:"landscape",rotate:true},
+    4:{video: "video-snaps/VN20260717_034318.mp4", frame:"portrait",rotate:false},
+    5:{video: "video-snaps/VN20260717_034652.mp4", frame:"landscape",rotate:true},
+    6:{video: "video-snaps/VN20260717_035013.mp4", frame:"landscape",rotate:true},
+    7:{video: "video-snaps/VN20260717_035258.mp4", frame:"landscape",rotate:true},
+    8:{video: "video-snaps/VN20260717_042216.mp4", frame:"portrait",rotate:false},
+    9:{video: "video-snaps/VN20260717_042620.mp4", frame:"landscape",rotate:true},
+    10:{video: "video-snaps/VN20260717_042713.mp4", frame:"landscape",rotate:true},
+    11:{video: "video-snaps/VN20260717_042805.mp4", frame:"landscape",rotate:true},
+    12:{video: "video-snaps/VN20260717_042933.mp4", frame:"landscape",rotate:true},
+    13:{video: "video-snaps/VN20260717_043042.mp4", frame:"landscape",rotate:true},
+    14:{video: "video-snaps/VN20260717_043156.mp4", frame:"landscape",rotate:true},
+    15:{video: "video-snaps/VN20260717_043319.mp4", frame:"landscape",rotate:true},
+    16:{video: "video-snaps/VN20260717_043613.mp4", frame:"landscape",rotate:true},
+    17:{video: "video-snaps/VN20260717_043722.mp4", frame:"landscape",rotate:true},
+    18:{video: "video-snaps/VN20260717_120339.mp4", frame:"landscape",rotate:true}
+};
 
 // Global Asset Cache & Queue
 let openedCount = 0;
@@ -49,11 +49,15 @@ const MediaManager = {
     init: function() {
         console.log("MediaManager: Aggressive background preload started.");
         // Instantly fire load requests for all memories
-        MEMORY_CONFIG.forEach((_, i) => this.preloadMedia(i));
+        for (let i = 1; i <= Object.keys(MEMORY_CONFIG).length; i++) {
+            this.preloadMedia(i);
+        }
     },
     
-    preloadMedia: function(index) {
-        const memory = MEMORY_CONFIG[index];
+    preloadMedia: function(indexOrKey) {
+        // We use 1-based indexing for the config
+        const memoryKey = typeof indexOrKey === 'number' ? indexOrKey : (indexOrKey + 1);
+        const memory = MEMORY_CONFIG[memoryKey];
         const id = memory.video || memory.image;
         
         if (this.cache.has(id) || this.pending.has(id)) return;
@@ -84,8 +88,8 @@ const MediaManager = {
                         const result = { 
                             element: video, 
                             isVid: true,
-                            type: memory.type,
-                            rotation: memory.rotation
+                            frame: memory.frame,
+                            rotate: memory.rotate
                         };
                         this.cache.set(id, result);
                         this.pending.delete(id);
@@ -108,8 +112,8 @@ const MediaManager = {
                     const result = { 
                         element: img, 
                         isVid: false,
-                        type: memory.type,
-                        rotation: memory.rotation
+                        frame: memory.frame,
+                        rotate: memory.rotate
                     };
                     this.cache.set(id, result);
                     this.pending.delete(id);
@@ -126,8 +130,10 @@ const MediaManager = {
         return loadPromise;
     },
     
-    getMedia: async function(index) {
-        const memory = MEMORY_CONFIG[index];
+    getMedia: async function(indexOrKey) {
+        // Handle 0-indexed values safely
+        const memoryKey = typeof indexOrKey === 'number' && indexOrKey < 18 ? indexOrKey + 1 : indexOrKey;
+        const memory = MEMORY_CONFIG[memoryKey];
         const id = memory.video || memory.image;
         
         if (this.cache.has(id)) return this.cache.get(id);
@@ -149,8 +155,8 @@ const MediaManager = {
             const result = { 
                 element: element, 
                 isVid: isVid,
-                type: memory.type,
-                rotation: memory.rotation
+                frame: memory.frame,
+                rotate: memory.rotate
             };
             this.cache.set(id, result);
             return result;
@@ -248,7 +254,7 @@ async function triggerScatterExplosion() {
     
     console.log("Creating grid");
     // 1. Populate immutable grid IMMEDIATELY (Do not block on preload)
-    MEMORY_CONFIG.forEach((memory, index) => {
+    Object.values(MEMORY_CONFIG).forEach((memory, index) => {
         const env = document.createElement('div');
         env.className = 'mini-envelope';
         
@@ -440,7 +446,7 @@ function createBurstingHearts(container, deskRect) {
 }
 
 function checkAllOpened() {
-    if (openedCount === MEMORY_CONFIG.length) {
+    if (openedCount === Object.keys(MEMORY_CONFIG).length) {
         const collectorHeart = document.getElementById('collectorHeart');
         collectorHeart.style.pointerEvents = 'auto';
         
@@ -569,13 +575,7 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
     const isVid = mediaObj.isVid;
     
     // STRICT Layout mapping (from MEMORY_CONFIG as single source of truth)
-    const orientationClass = mediaObj.type;
-    
-    if (mediaObj.rotation === 90) {
-        displayNode.classList.add('rotated-90');
-    } else {
-        displayNode.classList.remove('rotated-90');
-    }
+    const orientationClass = mediaObj.frame;
     
     polaroidWrapper.className = 'desk-polaroid-wrapper is-open';
     polaroidWrapper.innerHTML = `
@@ -585,6 +585,33 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
     
     const frame = polaroidWrapper.querySelector('.video-frame');
     frame.appendChild(displayNode);
+    
+    // Explicit Javascript Layout Engine (Avoids CSS calc/var collapse bugs)
+    // We must apply dimensions explicitly after the element is in the DOM
+    if (mediaObj.rotate === true) {
+        // Read exact container pixel bounds
+        const frameRect = frame.getBoundingClientRect();
+        
+        // Swap width and height for rotation
+        displayNode.style.cssText = `
+            width: ${frameRect.height}px !important;
+            height: ${frameRect.width}px !important;
+            transform: rotate(90deg);
+            transform-origin: center center;
+            object-fit: cover;
+            border-radius: 10px;
+            pointer-events: auto;
+        `;
+    } else {
+        // Portrait (no rotation)
+        displayNode.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            pointer-events: auto;
+        `;
+    }
     
     // Pause background animations for GPU headroom
     document.body.classList.add('is-paused-background');
