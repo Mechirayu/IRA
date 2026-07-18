@@ -495,19 +495,37 @@ function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneEleme
         </div>
     `;
     
-    if (videoNode && videoNode.parentNode) videoNode.parentNode.removeChild(videoNode);
-    if (videoNode) {
-        // If there is a video property, it's a video.
-        const isVid = !!memoryData.video;
-        const displayNode = isVid ? videoNode : videoNode.cloneNode(true);
-        displayNode.style.cssText = "width: 100%; height: auto; max-height: 85vh; display: block; border-radius: 4px; object-fit: contain; pointer-events: auto;";
-        if (isVid) {
-            displayNode.autoplay = true;
-            displayNode.muted = true; // Mobile browsers require muted for autoplay
-            displayNode.loop = true;  // Keep it looping smoothly
-            displayNode.play().catch(e => console.log('play prevented', e));
+    const isVid = !!memoryData.video;
+    let displayNode;
+    
+    if (isVid) {
+        // Always create a fresh video node to avoid iOS Safari DOM reparenting bugs
+        displayNode = document.createElement('video');
+        displayNode.src = memoryData.video;
+        displayNode.setAttribute('playsinline', '');
+        displayNode.setAttribute('webkit-playsinline', '');
+        displayNode.setAttribute('muted', '');
+        displayNode.setAttribute('autoplay', '');
+        displayNode.setAttribute('loop', '');
+        displayNode.muted = true;
+        displayNode.loop = true;
+        displayNode.playsInline = true;
+    } else {
+        displayNode = document.createElement('img');
+        displayNode.src = memoryData.image;
+    }
+    
+    displayNode.style.cssText = "width: 100%; height: auto; max-height: 85vh; display: block; border-radius: 4px; object-fit: contain; pointer-events: auto;";
+    polaroidWrapper.querySelector('.vid-container').appendChild(displayNode);
+    
+    if (isVid) {
+        const playPromise = displayNode.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => {
+                console.log('Autoplay prevented, fallback to controls:', e);
+                displayNode.controls = true; // allow manual play if blocked by Low Power Mode
+            });
         }
-        polaroidWrapper.querySelector('.vid-container').appendChild(displayNode);
     }
     
     // Start modal hidden
