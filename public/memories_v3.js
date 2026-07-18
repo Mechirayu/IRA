@@ -131,16 +131,16 @@ function triggerScatterExplosion() {
         // Mobile Layout: 3 cols x 6 rows (18 items)
         const cols = 3;
         const rows = 6;
-        const envelopeWidth = Math.min(100, W * 0.25);
+        const envelopeWidth = Math.min(70, (W - 60) / 3.5); // Smaller to prevent overflow
         const envelopeHeight = envelopeWidth / 1.6;
-        const spacingX = envelopeWidth + 15; 
-        const spacingY = envelopeHeight + 15; 
+        const spacingX = envelopeWidth + 12; 
+        const spacingY = envelopeHeight + 12; 
         
         const gridTotalWidth = (cols - 1) * spacingX;
         const gridTotalHeight = (rows - 1) * spacingY;
         
         const startX = -gridTotalWidth / 2;
-        const startY = -gridTotalHeight / 2 + (H * 0.05); // shift down slightly
+        const startY = -gridTotalHeight / 2 + (H * 0.08); // shift down to clear heading
         
         for(let r=0; r<rows; r++) {
             for(let c=0; c<cols; c++) {
@@ -481,7 +481,23 @@ function openPolaroid(memoryData, envElement, index) {
         // On mobile, shrink to 0 so it disappears completely and clears the screen!
         const finalDeskScale = window.innerWidth <= 768 ? 0 : deskScale;
         
-        // Animate BACK TO DESK
+        if (finalDeskScale === 0) {
+            // MOBILE: Just hide it immediately and remove from DOM
+            polaroidWrapper.style.pointerEvents = 'none';
+            gsap.to(polaroidWrapper, {
+                scale: 0,
+                opacity: 0,
+                duration: 0.3,
+                ease: "power2.in",
+                onComplete: () => {
+                    polaroidWrapper.remove(); // Fully remove from DOM
+                    checkAllOpened();
+                }
+            });
+            return;
+        }
+        
+        // DESKTOP: Animate BACK TO DESK
         gsap.to(polaroidWrapper, {
             x: startX, 
             y: startY, 
@@ -494,17 +510,15 @@ function openPolaroid(memoryData, envElement, index) {
             ease: "back.out(1.2)",
             onComplete: () => {
                 // Add subtle floating effect for polaroid on desk
-                if (finalDeskScale > 0) {
-                    gsap.to(polaroidWrapper, {
-                        y: "+=10",
-                        rotation: endRot + (Math.random() * 4 - 2),
-                        duration: 2 + Math.random(),
-                        yoyo: true,
-                        repeat: -1,
-                        ease: "sine.inOut"
-                    });
-                }
-                     checkAllOpened(); // Trigger heart check here!
+                gsap.to(polaroidWrapper, {
+                    y: "+=10",
+                    rotation: endRot + (Math.random() * 4 - 2),
+                    duration: 2 + Math.random(),
+                    yoyo: true,
+                    repeat: -1,
+                    ease: "sine.inOut"
+                });
+                checkAllOpened();
                 
                 // Allow reopening the polaroid from the desk!
                 polaroidWrapper.onclick = (e) => {

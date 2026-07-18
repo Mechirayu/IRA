@@ -2229,47 +2229,53 @@ body{
     }
 
     /* ---- 5. VINYL ROOM (MUSIC PLAYER) SCREEN ---- */
-    /* 
-     * KEY FIX: We target each element individually instead of using 
-     * wildcard selectors. The wildcard `transform: none !important` 
-     * was destroying GSAP animations, play button visibility, 
-     * vinyl disc scale, and tonearm rotation.
-     */
     #vinylRoomPage {
         padding: 0 !important;
         overflow-x: hidden !important;
         overflow-y: auto !important;
     }
 
-    /* The header: remove absolute positioning, make it flow naturally */
-    #vinylRoomPage .lyrics-header.global-header {
+    /* FORCE the header out of absolute positioning */
+    .global-header,
+    .lyrics-header.global-header,
+    #vinylRoomPage .lyrics-header.global-header,
+    #vinylRoomPage .global-header {
         position: relative !important;
         top: auto !important;
         left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
         transform: none !important;
         width: 100% !important;
-        padding: 20px 16px 10px !important;
+        max-width: 100vw !important;
+        padding: 25px 20px 10px !important;
         text-align: center !important;
         word-wrap: break-word !important;
-        order: -1;
+        overflow-wrap: break-word !important;
+        box-sizing: border-box !important;
     }
-    #vinylRoomPage .lyrics-header .gold-serif {
-        font-size: 0.75rem !important;
+    #vinylRoomPage .gold-serif {
+        font-size: 0.7rem !important;
         letter-spacing: 2px !important;
         margin-bottom: 6px !important;
+        max-width: 100% !important;
     }
-    #vinylRoomPage .lyrics-header .italic-script {
-        font-size: clamp(1.2rem, 5vw, 1.6rem) !important;
+    #vinylRoomPage .italic-script {
+        font-size: clamp(1.1rem, 4.5vw, 1.5rem) !important;
         line-height: 1.3 !important;
+        max-width: 100% !important;
+        white-space: normal !important;
     }
 
-    /* Layout: vertical column */
+    /* Layout: force vertical column */
     .vinyl-room-layout {
         flex-direction: column !important;
         align-items: center !important;
         width: 100% !important;
+        max-width: 100vw !important;
         padding: 0 16px !important;
         gap: 0 !important;
+        box-sizing: border-box !important;
     }
 
     /* Vinyl column */
@@ -2282,10 +2288,10 @@ body{
 
     /* The vinyl record - compact for mobile */
     .vinyl-container {
-        width: 180px !important;
-        height: 180px !important;
+        width: 160px !important;
+        height: 160px !important;
         margin: 10px auto !important;
-        position: relative !important; /* Keep relative for inner absolute children */
+        position: relative !important;
     }
 
     /* Controls: remove absolute, stack naturally */
@@ -2298,56 +2304,58 @@ body{
         flex-direction: column !important;
         align-items: center !important;
         width: 100% !important;
-        gap: 15px !important;
-        padding: 10px 0 !important;
+        gap: 12px !important;
+        padding: 8px 0 !important;
     }
 
-    /* Play button — DON'T override transform (GSAP uses translateY for visibility) */
+    /* Play button */
     .play-record-btn {
-        padding: 12px 30px !important;
-        font-size: 16px !important;
+        padding: 10px 24px !important;
+        font-size: 14px !important;
         letter-spacing: 2px !important;
     }
 
     /* Next game button */
     .vinyl-next-game-btn {
-        font-size: 1.1rem !important;
-        padding: 14px 36px !important;
+        font-size: 1rem !important;
+        padding: 12px 32px !important;
+        max-width: 80vw !important;
     }
 
     /* Lyrics column */
     .lyrics-col {
         width: 100% !important;
         flex: none !important;
-        padding: 0 !important;
+        padding: 0 10px !important;
+        box-sizing: border-box !important;
     }
 
     /* Track switcher tabs - horizontal centered row */
     .track-switcher {
-        padding: 0 0 15px 0 !important;
-        gap: 10px !important;
+        padding: 0 0 10px 0 !important;
+        gap: 8px !important;
         flex-wrap: wrap !important;
         justify-content: center !important;
     }
     .track-btn {
-        padding: 8px 16px !important;
+        padding: 6px 12px !important;
     }
     .track-title {
-        font-size: clamp(18px, 4.5vw, 28px) !important;
+        font-size: clamp(14px, 4vw, 22px) !important;
         letter-spacing: 1px !important;
     }
 
     /* Lyrics container */
     .lyrics-container {
-        height: 200px !important;
+        height: 150px !important;
         max-width: 100% !important;
     }
     .lyrics-inner {
-        padding: 80px 10px !important;
-        gap: 18px !important;
+        padding: 60px 10px !important;
+        gap: 14px !important;
     }
     .lyric-line {
-        font-size: clamp(16px, 4vw, 24px) !important;
+        font-size: clamp(14px, 3.5vw, 20px) !important;
     }
 
     /* ---- 6. MEMORY MATCH GAME SCREEN ---- */
