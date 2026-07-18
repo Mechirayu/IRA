@@ -1,23 +1,22 @@
-// 18 Snaps and Notes
-const memoriesData = [
-    { video: "video-snaps/VN20260717_033554.mp4" },
-    { video: "video-snaps/VN20260717_033929.mp4" },
-    { video: "video-snaps/VN20260717_034038.mp4" },
-    { video: "video-snaps/VN20260717_034318.mp4" }, // index 3
-    { video: "video-snaps/VN20260717_034652.mp4" },
-    { video: "video-snaps/VN20260717_035013.mp4" },
-    { video: "video-snaps/VN20260717_035258.mp4" },
-    { video: "video-snaps/VN20260717_042216.mp4" }, // index 7
-    { video: "video-snaps/VN20260717_042620.mp4" },
-    { video: "video-snaps/VN20260717_042713.mp4" },
-    { video: "video-snaps/VN20260717_042805.mp4" },
-    { video: "video-snaps/VN20260717_042933.mp4" },
-    { video: "video-snaps/VN20260717_043042.mp4" },
-    { video: "video-snaps/VN20260717_043156.mp4" },
-    { video: "video-snaps/VN20260717_043319.mp4" },
-    { video: "video-snaps/VN20260717_043613.mp4" },
-    { video: "video-snaps/VN20260717_043722.mp4" },
-    { video: "video-snaps/VN20260717_120339.mp4" }
+const MEMORY_CONFIG = [
+    { video: "video-snaps/VN20260717_033554.mp4", type: "landscape", rotation: 90 }, // index 0 (Memory 1)
+    { video: "video-snaps/VN20260717_033929.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_034038.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_034318.mp4", type: "portrait", rotation: 0 },  // index 3 (Memory 4)
+    { video: "video-snaps/VN20260717_034652.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_035013.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_035258.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_042216.mp4", type: "portrait", rotation: 0 },  // index 7 (Memory 8)
+    { video: "video-snaps/VN20260717_042620.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_042713.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_042805.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_042933.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_043042.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_043156.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_043319.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_043613.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_043722.mp4", type: "landscape", rotation: 90 },
+    { video: "video-snaps/VN20260717_120339.mp4", type: "landscape", rotation: 90 }  // index 17 (Memory 18)
 ];
 
 // Global Asset Cache & Queue
@@ -50,11 +49,11 @@ const MediaManager = {
     init: function() {
         console.log("MediaManager: Aggressive background preload started.");
         // Instantly fire load requests for all memories
-        memoriesData.forEach((_, i) => this.preloadMedia(i));
+        MEMORY_CONFIG.forEach((_, i) => this.preloadMedia(i));
     },
     
     preloadMedia: function(index) {
-        const memory = memoriesData[index];
+        const memory = MEMORY_CONFIG[index];
         const id = memory.video || memory.image;
         
         if (this.cache.has(id) || this.pending.has(id)) return;
@@ -81,7 +80,13 @@ const MediaManager = {
                             video.pause();
                         } catch(e) {} // Ignore autoplay block during warming
                         
-                        const result = { element: video, isVid: true };
+                        // Strict adherence to config, no fallback logic
+                        const result = { 
+                            element: video, 
+                            isVid: true,
+                            type: memory.type,
+                            rotation: memory.rotation
+                        };
                         this.cache.set(id, result);
                         this.pending.delete(id);
                         resolve(result);
@@ -100,7 +105,12 @@ const MediaManager = {
                 const img = new Image();
                 img.src = memory.image;
                 img.onload = () => {
-                    const result = { element: img, isVid: false };
+                    const result = { 
+                        element: img, 
+                        isVid: false,
+                        type: memory.type,
+                        rotation: memory.rotation
+                    };
                     this.cache.set(id, result);
                     this.pending.delete(id);
                     resolve(result);
@@ -117,7 +127,7 @@ const MediaManager = {
     },
     
     getMedia: async function(index) {
-        const memory = memoriesData[index];
+        const memory = MEMORY_CONFIG[index];
         const id = memory.video || memory.image;
         
         if (this.cache.has(id)) return this.cache.get(id);
@@ -526,9 +536,14 @@ function openPolaroidStrict(mediaObj, envElement, index, cloneElement, originalR
     const displayNode = mediaObj.element;
     const isVid = mediaObj.isVid;
     
-    // STRICT Layout overrides
-    const isPortrait = (index === 3 || index === 7);
-    const orientationClass = isPortrait ? 'portrait' : 'landscape';
+    // STRICT Layout mapping (from MEMORY_CONFIG as single source of truth)
+    const orientationClass = mediaObj.type;
+    
+    if (mediaObj.rotation === 90) {
+        displayNode.classList.add('rotated-90');
+    } else {
+        displayNode.classList.remove('rotated-90');
+    }
     
     polaroidWrapper.className = 'desk-polaroid-wrapper is-open';
     polaroidWrapper.innerHTML = `

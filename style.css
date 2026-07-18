@@ -2620,9 +2620,10 @@ body{
 
 /* Landscape Videos (Everything except 4 & 8) */
 .video-frame.landscape {
-    width: 90vw;
-    max-width: 800px;
-    aspect-ratio: 16/9;
+    --frame-width: min(90vw, 800px);
+    --frame-height: calc(var(--frame-width) * 9 / 16);
+    width: var(--frame-width);
+    height: var(--frame-height);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2635,6 +2636,12 @@ body{
     height: 100%;
     object-fit: cover;
     border-radius: 10px;
+}
+.video-frame.landscape video.rotated-90 {
+    width: var(--frame-height) !important;
+    height: var(--frame-width) !important;
+    transform: rotate(90deg);
+    object-fit: cover;
 }
 
 /* Portrait Videos (Only 4 & 8) */
