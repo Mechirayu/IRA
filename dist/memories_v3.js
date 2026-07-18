@@ -60,9 +60,9 @@ const MediaManager = {
         const memory = MEMORY_CONFIG[memoryKey];
         const id = memory.video || memory.image;
         
-        if (this.cache.has(id) || this.pending.has(id)) return this.pending.get(id) || Promise.resolve(this.cache.get(id));
+        if (this.cache.has(id) || this.pending.has(id)) return;
         
-        const loadPromise = new Promise(async (resolve, reject) => {
+        const loadPromise = new Promise(async (resolve) => {
             const isVid = !!memory.video;
             try {
                 const response = await fetch(id);
@@ -80,7 +80,14 @@ const MediaManager = {
                 resolve(result);
             } catch (e) {
                 this.pending.delete(id);
-                reject(e);
+                // On failure, cache the fallback to stream normally
+                const result = { 
+                    src: id, 
+                    isVid: isVid,
+                    frame: memory.frame
+                };
+                this.cache.set(id, result);
+                resolve(result);
             }
         });
         
@@ -92,30 +99,17 @@ const MediaManager = {
         const memoryKey = typeof indexOrKey === "number" && indexOrKey < 18 ? indexOrKey + 1 : indexOrKey;
         const memory = MEMORY_CONFIG[memoryKey];
         const id = memory.video || memory.image;
+        const isVid = !!memory.video;
         
+        // Return instantly if fully preloaded
         if (this.cache.has(id)) return this.cache.get(id);
         
-        const forceOpen = () => {
-            console.warn(`MediaManager: Timeout/Error waiting for ${id}. Forcing open.`);
-            const isVid = !!memory.video;
-            const result = { 
-                src: id, 
-                isVid: isVid,
-                frame: memory.frame
-            };
-            this.cache.set(id, result);
-            return result;
+        // Return the original URL instantly so it can stream without a 4-second delay
+        return {
+            src: id,
+            isVid: isVid,
+            frame: memory.frame
         };
-
-        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(forceOpen()), 4000));
-        let loadPromise = this.pending.get(id) || this.preloadMedia(indexOrKey);
-        
-        loadPromise = loadPromise.catch(e => {
-            console.error("MediaManager: preload failed", e);
-            return forceOpen();
-        });
-        
-        return Promise.race([loadPromise, timeoutPromise]);
     }
 };
 
