@@ -127,7 +127,7 @@ function triggerScatterExplosion() {
     // Envelope Math: Instead of random percentages, 
     // we calculate columns and rows based on actual screen size.
     let slotPositions = [];
-    if (W <= 768) {
+    if (W <= 1024) {
         // Mobile Layout: 3 cols x 6 rows (18 items)
         const cols = 3;
         const rows = 6;
@@ -411,7 +411,7 @@ function openPolaroid(memoryData, envElement, index) {
     // Pause video immediately to prevent lag during the GSAP zoom animation
     video.pause();
     
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = window.innerWidth <= 1024;
     const deskScale = isMobile ? 0.45 : 1;
 
     // Show Backdrop - darker on mobile to hide closed envelopes completely
@@ -479,7 +479,7 @@ function openPolaroid(memoryData, envElement, index) {
         const endRot = rot + (Math.random() * 10 - 5);
         
         // On mobile, shrink to 0 so it disappears completely and clears the screen!
-        const finalDeskScale = window.innerWidth <= 768 ? 0 : deskScale;
+        const finalDeskScale = isMobile ? 0 : deskScale;
         
         if (finalDeskScale === 0) {
             // MOBILE: Just hide it immediately and remove from DOM
@@ -540,7 +540,7 @@ function openPolaroid(memoryData, envElement, index) {
                     const currentRot = gsap.getProperty(polaroidWrapper, "rotation");
                     
                     // Show Backdrop - darker on mobile
-                    backdrop.style.background = window.innerWidth <= 768 ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
+                    backdrop.style.background = isMobile ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
                     backdrop.style.opacity = '1';
                     backdrop.style.pointerEvents = 'auto';
                     
