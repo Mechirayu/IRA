@@ -2145,7 +2145,6 @@ body{
 
     /* 2. Fix The Music Player Screen */
     #vinylRoomPage {
-        display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
@@ -2223,7 +2222,6 @@ body{
         height: 100dvh !important;
         width: 100vw !important;
         overflow: hidden !important;
-        display: flex !important;
         flex-direction: column !important;
         justify-content: center !important;
         align-items: center !important;
