@@ -46,17 +46,17 @@ async function preloadAllMedia(onProgress) {
                     resolve(video);
                 }
         video.preload = 'auto';
-        video.muted = true;
-        video.loop = true;
-        video.playsInline = true;
-        video.src = url;
-        
-        window.AssetCache.videos.set(url, video);
-        
-        video.oncanplay = () => resolve(video);
-        video.onerror = () => resolve(video); // Fallback if error
-        video.load();
+            };
+            video.oncanplay = markLoaded;
+            video.onerror = (e) => {
+                console.error("Preload failed for:", memory.video, e);
+                markLoaded(); // Resolve anyway to avoid infinite hang
+            };
+            video.load();
+        });
     });
+    
+    await Promise.allSettled(promises);
 }
 
 function processPreloadQueue() {
@@ -74,8 +74,6 @@ function processPreloadQueue() {
         });
     });
 }
-
-let openedCount = 0;
 
 function initMemories() {
     const bigEnvelope = document.getElementById('bigEnvelopeContainer');
@@ -150,32 +148,11 @@ function initMemories() {
 }
 
 async function triggerScatterExplosion() {
+    console.log("Entering gallery");
     const desk = document.getElementById('memoriesDesk');
     
-    // 1. Show Loading Overlay
-    const loader = document.createElement('div');
-    loader.id = 'memoriesLoader';
-    loader.style.cssText = 'position:fixed; inset:0; z-index:99990; display:flex; justify-content:center; align-items:center; flex-direction:column; background:rgba(25,10,15,0.95); transition:opacity 0.5s;';
-    loader.innerHTML = `
-        <h2 style="font-family:'Quicksand', sans-serif; color:#ff6699; font-size:1.5rem; margin-bottom: 20px;">Developing Polaroids... <span id="memProgressText">0%</span></h2>
-        <div style="width:250px; height:6px; background:rgba(255,255,255,0.2); border-radius:3px; overflow:hidden;">
-            <div id="memProgressBar" style="width:0%; height:100%; background:#ff3377; transition: width 0.3s;"></div>
-        </div>
-    `;
-    document.body.appendChild(loader);
-    
-    // 2. Synchronous Preload Barrier
-    await preloadAllMedia((loaded, total) => {
-        const pct = Math.round((loaded / total) * 100);
-        document.getElementById('memProgressText').innerText = pct + '%';
-        document.getElementById('memProgressBar').style.width = pct + '%';
-    });
-    
-    // 3. Fade out loader
-    loader.style.opacity = '0';
-    setTimeout(() => loader.remove(), 500);
-
-    // 4. Populate immutable grid
+    console.log("Creating grid");
+    // 1. Populate immutable grid IMMEDIATELY (Do not block on preload)
     memoriesData.forEach((memory, index) => {
         const env = document.createElement('div');
         env.className = 'mini-envelope';
@@ -247,8 +224,15 @@ async function triggerScatterExplosion() {
                     ease: "power2.out"
                 });
                 
-                // Await instantly from cache
-                const videoNode = mediaCache.get(memory.video);
+                // Await instantly from cache, or fallback if preload hasn't finished
+                let videoNode = mediaCache.get(memory.video);
+                if (!videoNode) {
+                    console.log("Media not fully preloaded yet, buffering natively:", memory.video);
+                    videoNode = document.createElement("video");
+                    videoNode.src = memory.video;
+                    videoNode.playsInline = true;
+                    videoNode.preload = "auto";
+                }
                 
                 if (!env.classList.contains('opened')) {
                     env.classList.add('opened');
@@ -264,8 +248,14 @@ async function triggerScatterExplosion() {
             }
         });
     });
-        
-        desk.appendChild(env);
+    
+    console.log("Grid created");
+    
+    // Run preload in the background silently
+    console.log("Starting preload");
+    preloadAllMedia().then(() => {
+        console.log("Preload complete");
+    });
         
     // 5. Clone Intro Scatter Animation
     // This allows us to animate an explosion WITHOUT mutating the real grid DOM
@@ -319,7 +309,7 @@ async function triggerScatterExplosion() {
     });
     
     // Add flying hearts!
-    createBurstingHearts(desk, deskRect);
+    createBurstingHearts(desk, desk.getBoundingClientRect());
 }
 
 function createBurstingHearts(container, deskRect) {
