@@ -47,55 +47,25 @@ const EnvelopeClonePool = {
 };
 
 // ─────────────────────────────────────────────────────────
-// MEDIA MANAGER — blob cache + aggressive parallel preload
+// MEDIA MANAGER — Avoid Blob preloading for videos to prevent Out Of Memory black screens on mobile
 // ─────────────────────────────────────────────────────────
 const MediaManager = {
-    cache: new Map(),   // id → { src: blobURL, isVid, frame }
-    pending: new Map(), // id → Promise
-
     init() {
-        console.log('[MediaManager] Starting preload of', Object.keys(MEMORY_CONFIG).length, 'videos');
+        console.log('[MediaManager] Preloading images, letting browser stream videos natively.');
         for (let i = 1; i <= Object.keys(MEMORY_CONFIG).length; i++) {
-            this._preload(i);
+            const mem = MEMORY_CONFIG[i];
+            if (mem.image) {
+                const img = new Image();
+                img.src = mem.image;
+            }
         }
     },
 
-    _preload(memKey) {
-        const mem = MEMORY_CONFIG[memKey];
-        const id  = mem.video || mem.image;
-        if (this.cache.has(id) || this.pending.has(id)) return;
-
-        const p = (async () => {
-            try {
-                const res  = await fetch(id);
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const blob = await res.blob();
-                const url  = URL.createObjectURL(blob);
-                const obj  = { src: url, isVid: !!mem.video, frame: mem.frame };
-                this.cache.set(id, obj);
-                this.pending.delete(id);
-                console.log('[MediaManager] Cached', id);
-                return obj;
-            } catch (e) {
-                console.warn('[MediaManager] Fetch failed, will stream:', id, e);
-                const obj = { src: id, isVid: !!mem.video, frame: mem.frame };
-                this.cache.set(id, obj);
-                this.pending.delete(id);
-                return obj;
-            }
-        })();
-
-        this.pending.set(id, p);
-        return p;
-    },
-
-    // Returns immediately — either from cache or direct URL fallback
+    // Returns direct URL so the browser can use byte-range requests and avoid RAM explosion
     get(memKey) {
         const k   = typeof memKey === 'number' ? memKey : Number(memKey);
         const mem = MEMORY_CONFIG[k];
         const id  = mem.video || mem.image;
-        if (this.cache.has(id)) return this.cache.get(id);
-        // Not cached yet — stream directly so user doesn't wait
         return { src: id, isVid: !!mem.video, frame: mem.frame };
     },
 };
