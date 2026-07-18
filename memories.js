@@ -102,11 +102,23 @@ function triggerScatterExplosion() {
     // Pre-calculated positions as percentage offsets from center (0,0).
     // Arranged in a clean perimeter: 6 top, 3 left-middle, 3 right-middle, 6 bottom.
     // The entire center is left completely empty for the collector heart.
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    
-    // We position relative to the center of the desk (which is at 50%, 50%).
-    // Values are pixel offsets from center.
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+
+    // Preload videos in the background to prevent the 3-4s buffering lag on mobile
+    if (!window.memoriesPreloaded) {
+        window.memoriesPreloaded = true;
+        memoriesData.forEach(mem => {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'video';
+            link.href = mem.video;
+            document.head.appendChild(link);
+        });
+    }
+
+    // Envelope Math: Instead of random percentages, 
+    // we calculate columns and rows based on actual screen size.
     let slotPositions = [];
     if (W <= 768) {
         // Mobile Layout: 3 cols x 6 rows (18 items)
