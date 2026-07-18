@@ -210,7 +210,8 @@ function triggerScatterExplosion() {
                 const rot = gsap.getProperty(env, "rotation") || 0;
                 gsap.set(clone, { rotation: rot, transformOrigin: "center center" });
                 
-                document.body.appendChild(clone);
+                const modalLayer = document.getElementById('modalLayer') || document.body;
+                modalLayer.appendChild(clone);
                 env.style.opacity = '0'; // Hide original, but NEVER transform it
                 
                 // Immediate Tap Feedback on Clone
@@ -460,13 +461,16 @@ function openPolaroid(memoryData, envElement, index, videoNode, cloneElement) {
     // Reuse preloaded video for ZERO lag
     if (videoNode && videoNode.parentNode) videoNode.parentNode.removeChild(videoNode);
     if (videoNode) {
-        videoNode.style.cssText = "width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: cover; pointer-events: auto;";
+        videoNode.style.cssText = "width: 100%; height: 100%; max-height: 85vh; display: block; border-radius: 4px; object-fit: contain; pointer-events: auto;";
         videoNode.autoplay = true;
+        if (memoryData.type === 'video') {
+            videoNode.play().catch(e => console.log('play prevented', e));
+        }
         polaroidWrapper.querySelector('.vid-container').appendChild(videoNode);
     }
     
-    const page = document.getElementById('memoriesPage');
-    page.appendChild(polaroidWrapper);
+    const modalLayer = document.getElementById('modalLayer') || document.body;
+    modalLayer.appendChild(polaroidWrapper);
     
     const inner = polaroidWrapper.querySelector('.desk-polaroid-inner');
     const video = polaroidWrapper.querySelector('video');
