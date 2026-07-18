@@ -62,37 +62,37 @@ function initConstellation() {
     const cx = cw / 2;
     const cy = ch / 2 - 20;
 
+    // Perfectly spaced 't' values to prevent clustering at the cleft/bottom
+    const heartT = [
+        0, 0.3, 0.6, 0.9, 1.25, 1.57, 1.95, 2.35, 2.75, // Right side
+        Math.PI, // Bottom
+        3.53, 3.93, 4.33, 4.71, 5.03, 5.38, 5.68, 5.98 // Left side
+    ];
+
     for (let i = 0; i < TOTAL_STARS; i++) {
-        // Calculate the parameter t for the heart equation
-        // We want a full loop from 0 to 2PI. 
-        // We offset it so the first point is at the top cleft and draws downwards.
-        let t = (i / TOTAL_STARS) * Math.PI * 2;
+        let t = heartT[i];
         
         // Parametric Heart Equation
         let hx = 16 * Math.pow(Math.sin(t), 3);
-        let hy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)); // negative because y goes down in screen space
+        let hy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)); 
         
         let targetX = cx + hx * scale;
         let targetY = cy + hy * scale;
 
         // Start them in the shape of an 'S'
-        let R = Math.min(cw, ch) * 0.16; // Radius for the arcs
+        let R = Math.min(cw, ch) * 0.16; 
         let sx, sy;
         let yOffset = 50; 
         
-        // Use a continuous parameter 'p' from 0 to 1 across the total 540 degree sweep
-        // This ensures perfectly even spacing across both arcs and prevents overlapping stars
         let p = i / 17;
         let angleInSweep = p * 540; 
         
         if (angleInSweep <= 240) {
-            // Top Arc: 240 degree sweep, starting at -30 deg going counter-clockwise
             let deg = -30 - angleInSweep;
             let rad = deg * Math.PI / 180;
             sx = cx + Math.cos(rad) * R;
             sy = (cy - R) + Math.sin(rad) * R;
         } else {
-            // Bottom Arc: 300 degree sweep, starting at -90 deg going clockwise
             let excess = angleInSweep - 240;
             let deg = -90 + excess;
             let rad = deg * Math.PI / 180;
@@ -100,7 +100,7 @@ function initConstellation() {
             sy = (cy + R) + Math.sin(rad) * R;
         }
         
-        sy += yOffset; // Apply offset to clear the heading text
+        sy += yOffset; 
 
         // Almost zero jitter so the curves stay perfectly clean
         let startX = sx + (Math.random() - 0.5) * 6;
@@ -136,7 +136,7 @@ function initConstellation() {
 }
 
 function climaxConstellation() {
-    // Hide the prompt - must remove animation so opacity takes effect
+    // Hide the prompt
     promptEl.style.animation = 'none';
     promptEl.style.opacity = 0;
     
@@ -147,23 +147,35 @@ function climaxConstellation() {
         }
     }, 1000);
 
-    // 1. Move all stars to their heart formation smoothly
+    // 1. Move all stars to their heart formation smoothly with a stagger
     stars.forEach((s, i) => {
         gsap.to(s.el, {
             x: s.targetX,
             y: s.targetY,
-            duration: 2.5,
-            ease: "power3.inOut",
-            delay: 0.5 // small dramatic pause before they move
+            duration: 3,
+            ease: "power2.inOut",
+            delay: 0.5 + (i * 0.04) // Buttery smooth staggered wave effect
         });
     });
 
-    // 2. Build the SVG path that forms the heart
-    let d = `M ${stars[0].targetX} ${stars[0].targetY} `;
-    for(let i=1; i<TOTAL_STARS; i++) {
-        d += `L ${stars[i].targetX} ${stars[i].targetY} `;
+    // 2. Build the SVG path that forms a PERFECT smooth heart (100 points)
+    const cw = window.innerWidth;
+    const ch = window.innerHeight;
+    const scale = Math.min(cw, ch) / 45;
+    const cx = cw / 2;
+    const cy = ch / 2 - 20;
+
+    let d = '';
+    for(let i = 0; i <= 100; i++) {
+        let t = (i / 100) * Math.PI * 2;
+        let hx = 16 * Math.pow(Math.sin(t), 3);
+        let hy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+        let px = cx + hx * scale;
+        let py = cy + hy * scale;
+        if (i === 0) d += `M ${px} ${py} `;
+        else d += `L ${px} ${py} `;
     }
-    d += 'Z'; // Close the heart
+    d += 'Z'; // Close the perfect heart
 
     constPath.setAttribute('d', d);
     
@@ -174,9 +186,9 @@ function climaxConstellation() {
     // 3. Animate the line drawing, tracing the heart
     gsap.to(constPath, {
         strokeDashoffset: 0,
-        duration: 3,
+        duration: 2.5,
         ease: "power2.inOut",
-        delay: 3 // Start drawing after they finish moving into position
+        delay: 3 // Start drawing just as stars settle
     });
 
     // 4. The Cinematic Shift (Translate the heart to the left)
