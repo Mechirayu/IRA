@@ -12,7 +12,7 @@
 <body>
 
   <!-- Slick Skip Button -->
-  <button id="globalSkipBtn" onclick="skipScene()" style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); color: var(--gold); padding: 10px 20px; border-radius: 30px; font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 14px; backdrop-filter: blur(10px); cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">Skip &gt;&gt;</button>
+  <button id="mainSkipBtn" class="global-skip-btn" onclick="skipScene()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); color: var(--gold); padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 14px; backdrop-filter: blur(10px); cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">Skip &gt;&gt;</button>
 
   <!-- SVG Filters for procedural textures -->
   <svg width="0" height="0" style="position:absolute; z-index:-1;">
@@ -32,7 +32,6 @@
   <button class="music-btn heartbeat" id="musicBtn" style="display: none;"><span class="note">🎵</span><span id="musicLabel">Music</span></button>
   <div class="topbar" style="display: none;"><div class="dots" id="dots"></div></div>
   <button class="nav-back hidden" id="backBtn" style="display:none !important;">‹ back</button>
-  <button id="globalSkipBtn" class="global-skip-btn" onclick="skipNext()">Skip &rarr;</button>
 
 
     <!-- 0 WELCOME -->
