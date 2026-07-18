@@ -56,8 +56,8 @@ function initConstellation() {
     promptEl.innerText = `Tap to light up these 18 stars, representing 18 beautiful chapters of your life. (0/${TOTAL_STARS})`;
     constPath.setAttribute('d', '');
     
-    const cw = window.innerWidth;
-    const ch = window.innerHeight;
+    const cw = 500;
+    const ch = 500;
     const scale = Math.min(cw, ch) / 45;
     const cx = cw / 2;
     const cy = ch / 2 - 20;
@@ -111,12 +111,17 @@ function initConstellation() {
         // Add actual star shape
         starEl.innerHTML = `<svg viewBox="0 0 24 24" class="star-icon"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
         
-        // Position them at their random start positions
-        gsap.set(starEl, { x: startX, y: startY });
+        let startPctX = (startX / cw) * 100;
+        let startPctY = (startY / ch) * 100;
+        let targetPctX = (targetX / cw) * 100;
+        let targetPctY = (targetY / ch) * 100;
+
+        // Position them using percentage for responsive scaling
+        gsap.set(starEl, { left: startPctX + '%', top: startPctY + '%' });
         
         starContainer.appendChild(starEl);
 
-        const starObj = { el: starEl, targetX, targetY, startX, startY, ignited: false };
+        const starObj = { el: starEl, targetPctX, targetPctY, startPctX, startPctY, ignited: false };
         stars.push(starObj);
 
         // Click interaction
@@ -150,8 +155,8 @@ function climaxConstellation() {
     // 1. Move all stars to their heart formation smoothly with a stagger
     stars.forEach((s, i) => {
         gsap.to(s.el, {
-            x: s.targetX,
-            y: s.targetY,
+            left: s.targetPctX + '%',
+            top: s.targetPctY + '%',
             duration: 3,
             ease: "power2.inOut",
             delay: 0.5 + (i * 0.04) // Buttery smooth staggered wave effect
@@ -159,8 +164,8 @@ function climaxConstellation() {
     });
 
     // 2. Build the SVG path that forms a PERFECT smooth heart (100 points)
-    const cw = window.innerWidth;
-    const ch = window.innerHeight;
+    const cw = 500;
+    const ch = 500;
     const scale = Math.min(cw, ch) / 45;
     const cx = cw / 2;
     const cy = ch / 2 - 20;
@@ -197,7 +202,7 @@ function climaxConstellation() {
     const shiftY = isMobile ? -window.innerHeight * 0.2 : 0;
     const scaleDown = isMobile ? 0.6 : 0.7;
     
-    gsap.to([starContainer, svgContainer], {
+    gsap.to('.constellation-wrapper', {
         x: shiftX,
         y: shiftY,
         scale: scaleDown,

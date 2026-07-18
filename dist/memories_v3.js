@@ -108,51 +108,26 @@ function triggerScatterExplosion() {
     // Preload videos in the background to prevent the 3-4s buffering lag on mobile
     if (!window.memoriesPreloaded) {
         window.memoriesPreloaded = true;
+        window.preloadedVideos = [];
         const preloadContainer = document.createElement('div');
         preloadContainer.style.display = 'none';
         document.body.appendChild(preloadContainer);
-        memoriesData.forEach(mem => {
+        memoriesData.forEach((mem, i) => {
             const vid = document.createElement('video');
             vid.preload = 'auto';
             vid.muted = true;
+            vid.loop = true;
             vid.playsInline = true;
             vid.src = mem.video;
             preloadContainer.appendChild(vid);
+            window.preloadedVideos[i] = vid;
         });
     }
 
-    // Envelope Math: Instead of random percentages, 
-    // we calculate columns and rows based on actual screen size.
-    let slotPositions = [];
-    if (W <= 768) {
-        // Mobile Layout: 3 cols x 6 rows (18 items)
-        const cols = 3;
-        const rows = 6;
-        const envelopeWidth = Math.min(100, W * 0.25);
-        const envelopeHeight = envelopeWidth / 1.6;
-        const spacingX = envelopeWidth + 15; 
-        const spacingY = envelopeHeight + 15; 
-        
-        const gridTotalWidth = (cols - 1) * spacingX;
-        const gridTotalHeight = (rows - 1) * spacingY;
-        
-        const startX = -gridTotalWidth / 2;
-        const startY = -gridTotalHeight / 2 + (H * 0.05); // shift down slightly
-        
-        for(let r=0; r<rows; r++) {
-            for(let c=0; c<cols; c++) {
-                slotPositions.push({ x: startX + c*spacingX, y: startY + r*spacingY });
-            }
-        }
-    } else {
-        // Desktop Layout: 6 top, 3 left, 3 right, 6 bottom
-        slotPositions = [
-            { x: -W * 0.40, y: -H * 0.15 }, { x: -W * 0.24, y: -H * 0.15 }, { x: -W * 0.08, y: -H * 0.15 }, { x:  W * 0.08, y: -H * 0.15 }, { x:  W * 0.24, y: -H * 0.15 }, { x:  W * 0.40, y: -H * 0.15 },
-            { x: -W * 0.40, y:  H * 0.08 }, { x: -W * 0.24, y:  H * 0.08 }, { x: -W * 0.08, y:  H * 0.08 }, { x:  W * 0.08, y:  H * 0.08 }, { x:  W * 0.24, y:  H * 0.08 }, { x:  W * 0.40, y:  H * 0.08 },
-            { x: -W * 0.40, y:  H * 0.30 }, { x: -W * 0.24, y:  H * 0.30 }, { x: -W * 0.08, y:  H * 0.30 }, { x:  W * 0.08, y:  H * 0.30 }, { x:  W * 0.24, y:  H * 0.30 }, { x:  W * 0.40, y:  H * 0.30 }
-        ];
-    }
+    // Envelope layout is now natively handled by CSS Grid!
+    // No hardcoded coordinate math is necessary.
     
+
     memoriesData.forEach((memory, index) => {
         const env = document.createElement('div');
         env.className = 'mini-envelope';
@@ -184,24 +159,32 @@ function triggerScatterExplosion() {
         
         desk.appendChild(env);
         
-        const slot = slotPositions[index];
         const randomRot = (Math.random() * 14) - 7;
         
-        // Store position on the element for polaroid return
-        env._slotX = slot.x;
-        env._slotY = slot.y;
+        // Let CSS Grid place it naturally, but apply the resting rotation immediately
+        gsap.set(env, { scale: 1, opacity: 1, rotation: randomRot, x: 0, y: 0, xPercent: 0, yPercent: 0 });
         
-        gsap.to(env, {
-            x: slot.x,
-            y: slot.y,
-            xPercent: -50,
-            yPercent: -50,
-            rotation: randomRot,
-            scale: 1,
-            opacity: 1,
-            duration: 0.7 + Math.random() * 0.3, 
-            delay: index * 0.06,
-            ease: "back.out(1.2)"
+        // Animate from the center of the screen to its natural grid slot
+        requestAnimationFrame(() => {
+            const rect = env.getBoundingClientRect();
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            // Distance from screen center to the envelope's natural grid center
+            const dx = centerX - (rect.left + rect.width / 2);
+            const dy = centerY - (rect.top + rect.height / 2);
+            
+            gsap.from(env, {
+                x: dx,
+                y: dy,
+                scale: 0,
+                opacity: 0,
+                rotation: (Math.random() * 360), // spin out
+                duration: 0.7 + Math.random() * 0.3, 
+                delay: index * 0.06,
+                ease: "back.out(1.2)",
+                clearProps: "x,y" // Clean up transform when done so grid resizing is fluid
+            });
         });
     });
     
@@ -367,12 +350,15 @@ function openPolaroid(memoryData, envElement, index) {
     // Stop envelope animations
     gsap.killTweensOf(envElement);
     
-    // Get its current position values from GSAP
-    const startX = gsap.getProperty(envElement, "x");
-    const startY = gsap.getProperty(envElement, "y");
+    // Get envelope's visual center relative to the viewport center
+    const envRect = envElement.getBoundingClientRect();
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const startX = (envRect.left + envRect.width / 2) - centerX;
+    const startY = (envRect.top + envRect.height / 2) - centerY;
     const rot = gsap.getProperty(envElement, "rotation");
     
-    // Shrink envelope
+    // Hide envelope entirely while its polaroid is active
     gsap.to(envElement, {
         scale: 0,
         opacity: 0,
@@ -383,12 +369,22 @@ function openPolaroid(memoryData, envElement, index) {
     // Create polaroid wrapper
     const polaroidWrapper = document.createElement('div');
     polaroidWrapper.className = 'desk-polaroid-wrapper is-open';
+    polaroidWrapper._envElement = envElement; // Save reference for resize reflow
     
     polaroidWrapper.innerHTML = `
-        <div class="desk-polaroid-inner" style="pointer-events: none; padding: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); background: #fff; border-radius: 8px; aspect-ratio: 9/16; overflow: hidden;">
-            <video src="${memoryData.video}" autoplay loop muted playsinline style="width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: cover; pointer-events: auto;"></video>
+        <div class="desk-polaroid-inner" style="pointer-events: none; padding: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); background: #fff; border-radius: 8px; aspect-ratio: 9/16; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <div class="vid-container" style="width: 100%; height: 100%;"></div>
         </div>
     `;
+    
+    // Reuse preloaded video for ZERO lag
+    const videoNode = window.preloadedVideos[index];
+    if (videoNode && videoNode.parentNode) videoNode.parentNode.removeChild(videoNode);
+    if (videoNode) {
+        videoNode.style.cssText = "width: 100%; height: 100%; display: block; border-radius: 4px; object-fit: cover; pointer-events: auto;";
+        videoNode.autoplay = true;
+        polaroidWrapper.querySelector('.vid-container').appendChild(videoNode);
+    }
     
     const page = document.getElementById('memoriesPage');
     page.appendChild(polaroidWrapper);
@@ -399,9 +395,22 @@ function openPolaroid(memoryData, envElement, index) {
     // Pause video immediately to prevent lag during the GSAP zoom animation
     video.pause();
     
-    // Show Backdrop
+    const isMobile = window.innerWidth <= 1024;
+    const deskScale = isMobile ? 0.6 : 1; // Scale down so it fits perfectly in the grid slot without overlapping
+
+    // Show Backdrop - darker on mobile to hide closed envelopes completely
+    backdrop.style.background = isMobile ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
     backdrop.style.opacity = '1';
     backdrop.style.pointerEvents = 'auto';
+    
+    // Allow clicking the photo itself to close it, preventing click bleed
+    polaroidWrapper.onclick = (e) => {
+        if (e) e.stopPropagation();
+        if (polaroidWrapper.classList.contains('is-open')) {
+            closeIt(e);
+        }
+    };
+    polaroidWrapper.style.cursor = 'pointer';
     
     // Set polaroid starting position and z-index to be strictly over the backdrop
     gsap.set(polaroidWrapper, { x: startX, y: startY, rotation: rot, scale: 0, opacity: 0, zIndex: 500 });
@@ -414,12 +423,12 @@ function openPolaroid(memoryData, envElement, index) {
     
     let targetScale;
     if (isVertical) {
-        // Fit 75% of screen height for vertical videos
-        const targetHeight = window.innerHeight * 0.75;
+        // Fit 75% of screen height for vertical videos (85% on mobile)
+        const targetHeight = window.innerHeight * (isMobile ? 0.85 : 0.75);
         targetScale = targetHeight / startHeight;
     } else {
-        // Fit 60% of screen width for horizontal videos
-        const targetWidth = window.innerWidth * 0.60;
+        // Fit 60% of screen width for horizontal videos (90% on mobile)
+        const targetWidth = window.innerWidth * (isMobile ? 0.90 : 0.60);
         targetScale = targetWidth / startHeight;
     }
     
@@ -439,7 +448,8 @@ function openPolaroid(memoryData, envElement, index) {
     });
     
     // Handle close function
-    const closeIt = () => {
+    const closeIt = (e) => {
+        if (e) e.stopPropagation();
         window.activePolaroid = false;
         polaroidWrapper.classList.remove('is-open'); // Re-enable CSS hover
         video.pause(); // Pause video when returning to desk to prevent lag
@@ -452,18 +462,39 @@ function openPolaroid(memoryData, envElement, index) {
         
         const endRot = rot + (Math.random() * 10 - 5);
         
-        // Animate BACK TO DESK
+        // Recalculate envRect just in case window was resized while polaroid was open
+        const newEnvRect = envElement.getBoundingClientRect();
+        const newCenterX = window.innerWidth / 2;
+        const newCenterY = window.innerHeight / 2;
+        const newStartX = (newEnvRect.left + newEnvRect.width / 2) - newCenterX;
+        const newStartY = (newEnvRect.top + newEnvRect.height / 2) - newCenterY;
+        
+        // Use deskScale for both mobile and desktop so it shrinks nicely into the grid
+        const finalDeskScale = deskScale;
+        
+        // DESKTOP & MOBILE: Animate BACK TO DESK
         gsap.to(polaroidWrapper, {
-            x: startX, 
-            y: startY, 
+            x: newStartX, 
+            y: newStartY, 
             rotation: endRot, 
-            scale: 1, 
+            scale: finalDeskScale, 
             xPercent: -50,
             yPercent: -50,
-            zIndex: 50,
-            duration: 0.6, 
-            ease: "back.out(1.2)",
+            zIndex: 1, // Fix z-index stacking context! Unopened envelopes are z-index: 10
+            duration: 0.5, 
+            ease: "back.in(1.2)",
             onComplete: () => {
+                // Restore the envelope visually beneath it
+                gsap.to(envElement, {
+                    scale: 1,
+                    opacity: 1,
+                    duration: 0.3,
+                    ease: "back.out(1.2)"
+                });
+                
+                // CRITICAL: Ensure z-index prevents it from blocking unopened envelopes (handled above with zIndex: 1)
+                polaroidWrapper.style.pointerEvents = 'auto';
+                
                 // Add subtle floating effect for polaroid on desk
                 gsap.to(polaroidWrapper, {
                     y: "+=10",
@@ -473,13 +504,13 @@ function openPolaroid(memoryData, envElement, index) {
                     repeat: -1,
                     ease: "sine.inOut"
                 });
-                     checkAllOpened(); // Trigger heart check here!
+                checkAllOpened();
                 
                 // Allow reopening the polaroid from the desk!
                 polaroidWrapper.onclick = (e) => {
                     e.stopPropagation();
                     if (polaroidWrapper.classList.contains('is-open')) {
-                        closeIt();
+                        closeIt(e);
                         return;
                     }
                     if (window.activePolaroid) return;
@@ -493,7 +524,8 @@ function openPolaroid(memoryData, envElement, index) {
                     const currentY = gsap.getProperty(polaroidWrapper, "y");
                     const currentRot = gsap.getProperty(polaroidWrapper, "rotation");
                     
-                    // Show Backdrop
+                    // Show Backdrop - darker on mobile
+                    backdrop.style.background = isMobile ? 'rgba(0,0,0,0.95)' : 'rgba(0,0,0,0.8)';
                     backdrop.style.opacity = '1';
                     backdrop.style.pointerEvents = 'auto';
                     
@@ -670,3 +702,21 @@ function devOpenAll() {
     
     checkAllOpened();
 }
+
+// Ensure closed polaroids reflow correctly if the device is rotated or window is resized
+window.addEventListener('resize', () => {
+    if (!document.getElementById('memoriesPage').classList.contains('active')) return;
+    
+    document.querySelectorAll('.desk-polaroid-wrapper:not(.is-open)').forEach(pw => {
+        const env = pw._envElement;
+        if (env) {
+            const rect = env.getBoundingClientRect();
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            gsap.set(pw, { 
+                x: (rect.left + rect.width / 2) - cx, 
+                y: (rect.top + rect.height / 2) - cy 
+            });
+        }
+    });
+});
