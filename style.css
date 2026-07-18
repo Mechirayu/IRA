@@ -2483,3 +2483,45 @@ body{
         max-width: 80vw !important;
     }
 }
+
+/* ==========================================================================
+   GLOBAL SKIP BUTTON
+   ========================================================================== */
+.global-skip-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999999;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 700;
+    font-size: clamp(14px, 3vw, 16px);
+    padding: 12px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.global-skip-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+.global-skip-btn:active {
+    transform: translateY(1px);
+}
+@media (max-width: 768px) {
+    .global-skip-btn {
+        top: 15px;
+        right: 15px;
+        padding: 10px 20px;
+    }
+}
