@@ -497,12 +497,13 @@ function openPolaroidStrict(memoryData, envElement, index, videoNode, cloneEleme
     
     if (videoNode && videoNode.parentNode) videoNode.parentNode.removeChild(videoNode);
     if (videoNode) {
-        const isVid = memoryData.type === 'video';
+        // If there is a video property, it's a video.
+        const isVid = !!memoryData.video;
         const displayNode = isVid ? videoNode : videoNode.cloneNode(true);
         displayNode.style.cssText = "width: 100%; height: auto; max-height: 85vh; display: block; border-radius: 4px; object-fit: contain; pointer-events: auto;";
         if (isVid) {
             displayNode.autoplay = true;
-            displayNode.muted = false;
+            displayNode.muted = false; // Ensure volume is on
             displayNode.play().catch(e => console.log('play prevented', e));
         }
         polaroidWrapper.querySelector('.vid-container').appendChild(displayNode);
