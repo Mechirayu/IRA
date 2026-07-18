@@ -2619,3 +2619,20 @@ body.is-paused-background .star,
 body.is-paused-background .heart {
     animation-play-state: paused !important;
 }
+
+#memory-loading-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 10000;
+    color: var(--gold);
+    font-family: 'Quicksand', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    animation: pulseText 1.5s infinite alternate;
+}
