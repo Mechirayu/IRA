@@ -131,8 +131,11 @@ function startFloralPhysics() {
     let petals = [];
     let isWiping = false;
 
+    const isMobile = window.innerWidth < 768;
+    const burstCount = isMobile ? 60 : 200;
+
     // Phase 1: 360 Burst
-    for(let i=0; i<200; i++) {
+    for(let i=0; i<burstCount; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = Math.random() * 12 + 5;
         petals.push({
@@ -152,7 +155,10 @@ function startFloralPhysics() {
     // Phase 2: Slow Falling Curtain (Depth of Field)
     setTimeout(() => {
         isWiping = true;
-        const types = [
+        const types = isMobile ? [
+            { count: 40, cache: caches.sharp, sizeRange: [0.3, 0.6], speedY: [3, 6], z: 'bg' },
+            { count: 20, cache: caches.blurMid, sizeRange: [0.8, 1.2], speedY: [6, 12], z: 'mid' }
+        ] : [
             { count: 100, cache: caches.sharp, sizeRange: [0.3, 0.6], speedY: [3, 6], z: 'bg' },
             { count: 60, cache: caches.blurMid, sizeRange: [0.8, 1.2], speedY: [6, 12], z: 'mid' },
             { count: 15, cache: caches.blurHeavy, sizeRange: [1.5, 2.5], speedY: [15, 25], z: 'fg' }
