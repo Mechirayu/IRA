@@ -337,6 +337,11 @@ body{
     width: 95%;
     pointer-events: none;
 }
+@media (max-width: 768px) {
+    .memories-heading-block {
+        top: 2%; /* Move higher on mobile */
+    }
+}
 .memories-heading {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 700;
@@ -396,11 +401,11 @@ body{
     pointer-events: none; /* Let clicks pass through if needed, except on envelopes */
     display: grid;
     /* Fluid responsive grid for mobile/tablet */
-    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 10px;
     justify-content: center;
-    align-content: center;
-    padding: 20px;
+    align-content: start;
+    padding: 15vh 10px 20px 10px;
 }
 /* Ensure envelopes receive clicks */
 #memoriesDesk > .mini-envelope {
@@ -418,6 +423,7 @@ body{
         grid-auto-rows: min-content;
         gap: 20px;
         padding: 40px;
+        align-content: center;
     }
     
     /* Create the hollow center: 
@@ -523,6 +529,16 @@ body{
 }
 .mini-envelope:hover {
     box-shadow: 4px 10px 25px rgba(0,0,0,0.8);
+}
+
+/* Loading animation when clicked but media is buffering */
+.envelope-loading {
+    animation: pulseGlow 1s infinite alternate;
+    pointer-events: none !important;
+}
+@keyframes pulseGlow {
+    0% { filter: brightness(1) saturate(1); transform: scale(1); }
+    100% { filter: brightness(1.3) saturate(1.5); transform: scale(1.05); box-shadow: 0 0 20px rgba(255,255,255,0.8); }
 }
 .mini-envelope .me-num {
     font-family: 'Quicksand', sans-serif;

@@ -236,23 +236,26 @@ function climaxConstellation() {
         ease: "power2.out"
     });
 
-    // 6. Hold for reading, then transition seamlessly
+    // 6. Hold for reading, then transition sequentially
     gsap.delayedCall(11, () => {
-        // Start the next scene (Envelope) underneath
-        if (typeof window.go === 'function') window.go(2);
-        else if (typeof go === 'function') go(2);
-        
-        // Force constellation page to stay visible above the new page
-        gsap.set('#constellationPage', { display: 'flex', zIndex: 999 });
-        
-        // Slowly fade it out for a cinematic crossfade
+        // Fade out completely before initializing the next scene
         gsap.to('#constellationPage', {
             opacity: 0,
-            duration: 2.0,
+            duration: 1.5,
             ease: "power2.inOut",
             onComplete: () => {
-                // Cleanup and reset - MUST be none/0 so it doesn't overlap the next page
-                gsap.set('#constellationPage', { display: 'none', zIndex: '-1', opacity: 0 });
+                // Total cleanup of current scene GSAP
+                gsap.killTweensOf('#constellationPage');
+                gsap.killTweensOf('.c-prompt');
+                gsap.killTweensOf('.v-prompt');
+                
+                // Hide current scene completely from DOM layout
+                gsap.set('#constellationPage', { display: 'none', zIndex: '-1', opacity: 0, pointerEvents: 'none' });
+                document.getElementById('constellationPage').classList.remove('active');
+
+                // ONLY THEN initialize the next scene
+                if (typeof window.go === 'function') window.go(2);
+                else if (typeof go === 'function') go(2);
             }
         });
     });
