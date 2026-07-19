@@ -203,51 +203,6 @@ function startBouquetAnimation() {
     if (typeof go === 'function') {
         go(6);
     }
-
-
-    // Fade in text and next button after bouquet draws (approx 3.5s)
-    setTimeout(() => {
-        const header = document.getElementById('bqHeader');
-        const nextBtn = document.getElementById('bqNextBtn');
-        const eyebrow = document.getElementById('bqEyebrow');
-        const cap = document.getElementById('bqCap');
-        
-        const tl = gsap.timeline();
-        
-        if (eyebrow) {
-            tl.to(eyebrow, { opacity: 1, duration: 1, ease: "power2.out" }, 0);
-        }
-        
-        if (cap) {
-            tl.to(cap, { opacity: 1, duration: 1, ease: "power2.out" }, 0);
-        }
-
-        tl.to([header, nextBtn], {
-            opacity: 1,
-            y: 0,
-            duration: 1.5,
-            ease: "power2.out",
-            onStart: () => {
-                header.classList.remove('hidden');
-                nextBtn.classList.remove('hidden');
-                gsap.set(header, { y: -20 });
-            }
-        }, 0.5);
-        
-        // Swirl ambient particles around the bouquet
-        const ambientParticles = document.querySelectorAll('.star, .heart');
-        if (ambientParticles.length > 0) {
-            gsap.to(ambientParticles, {
-                x: "random(-100, 100)",
-                y: "random(-100, 100)",
-                rotation: "random(-45, 45)",
-                duration: 5,
-                ease: "sine.inOut",
-                repeat: -1,
-                yoyo: true
-            });
-        }
-    }, 3500);
 }
 
 function startMemoryMatchTransition() {
