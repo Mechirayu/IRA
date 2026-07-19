@@ -1401,6 +1401,18 @@ body{
 .bqcap { margin-top: 6px; opacity: 0; animation: fadeUp 1s ease-out forwards; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
+#bqPage #bqNextBtn {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: fixed !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: 32px !important;
+    z-index: 9999 !important;
+}
+
 .golden-seed {
     position: fixed;
     width: 6px;
@@ -2634,9 +2646,7 @@ body{
         margin-top: 20px !important;
         margin-bottom: 32px !important;
     }
-    #bqNextBtn {
-        margin: 0 auto !important;
-    }
+    /* Next button styled globally */
 
     /* ---- 8. LETTER GRID ("Everything About You") ---- */
     #letterGridOverlay {
