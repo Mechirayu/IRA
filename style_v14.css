@@ -2668,11 +2668,6 @@ body{
     background: #000;
 }
 
-/* Crop out baked-in black borders only on landscape videos */
-.mem-video-frame.landscape .mem-media {
-    transform: scale(1.20);
-}
-
 /* Spinning heart loader */
 .mem-spinner {
     position: absolute;
