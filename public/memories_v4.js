@@ -51,16 +51,14 @@ const EnvelopeClonePool = {
 // ─────────────────────────────────────────────────────────
 const MediaManager = {
     init() {
-        console.log('[MediaManager] Eagerly queueing media for background load...');
+        console.log('[MediaManager] Eagerly queueing media for background load (Stage 1)...');
+        const assets = [];
         for (let i = 1; i <= Object.keys(MEMORY_CONFIG).length; i++) {
             const mem = MEMORY_CONFIG[i];
             const id = mem.video || mem.image;
-            if (mem.video) {
-                window.AssetLoader.loadAsset(id, id, 'video');
-            } else if (mem.image) {
-                window.AssetLoader.loadAsset(id, id, 'image');
-            }
+            assets.push({ id: id, url: id, type: mem.video ? 'video' : 'image' });
         }
+        window.AssetLoader.addStage(1, assets);
     },
 
     get(memKey) {

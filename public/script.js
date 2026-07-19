@@ -1,23 +1,76 @@
-/* Asset Loader */
+/* Priority Background Asset Loader */
 window.AssetLoader = {
     cache: new Map(),
-    pending: 0,
-    total: 0,
-    onProgress: null,
-    onComplete: null,
+    queue: [], // array of { id, url, type, stage, resolve, reject, status: 'pending'|'loading'|'done', retryCount: 0 }
+    activeLoads: 0,
+    maxConcurrent: 4,
+    stageStatus: { 1: false, 2: false, 3: false, 4: false },
     
-    async loadAsset(id, url, type) {
-        if (this.cache.has(id)) return this.cache.get(id);
+    loadAsset(id, url, type, stage = 4) {
+        if (this.cache.has(id)) return Promise.resolve(this.cache.get(id));
         
         return new Promise((resolve, reject) => {
-            if (type === 'image') {
+            let item = this.queue.find(q => q.id === id);
+            if (!item) {
+                item = { id, url, type, stage, resolve: [resolve], reject: [reject], status: 'pending', retryCount: 0 };
+                this.queue.push(item);
+                this.sortQueue();
+                this.processQueue();
+            } else if (item.status === 'done') {
+                resolve(this.cache.get(id));
+            } else {
+                item.resolve.push(resolve);
+                item.reject.push(reject);
+            }
+        });
+    },
+
+    sortQueue() {
+        this.queue.sort((a, b) => a.stage - b.stage);
+    },
+
+    processQueue() {
+        if (this.activeLoads >= this.maxConcurrent) return;
+        
+        const nextItem = this.queue.find(q => q.status === 'pending');
+        if (!nextItem) {
+            this.checkStages();
+            return;
+        }
+
+        nextItem.status = 'loading';
+        this.activeLoads++;
+
+        const finish = (result) => {
+            this.cache.set(nextItem.id, result);
+            nextItem.status = 'done';
+            nextItem.resolve.forEach(res => res(result));
+            this.activeLoads--;
+            this.processQueue();
+        };
+
+        const fail = () => {
+            nextItem.retryCount++;
+            const backoff = Math.min(1000 * Math.pow(2, nextItem.retryCount), 10000); // Exp backoff max 10s
+            console.warn(`[AssetLoader] Retry ${nextItem.type} ${nextItem.id} in ${backoff}ms`);
+            
+            setTimeout(() => {
+                nextItem.status = 'pending';
+                this.processQueue();
+            }, backoff);
+            
+            this.activeLoads--;
+            this.processQueue();
+        };
+
+        try {
+            if (nextItem.type === 'image') {
                 const img = new Image();
-                img.onload = () => { this.cache.set(id, img); this.tick(); resolve(img); };
-                img.onerror = () => { console.warn("Retry img", url); this.retry(id, url, type, resolve); };
-                img.src = url;
-            } else if (type === 'video') {
-                // Fetch as blob for perfect caching & instant playback
-                fetch(url)
+                img.onload = () => finish(img);
+                img.onerror = fail;
+                img.src = nextItem.url;
+            } else if (nextItem.type === 'video') {
+                fetch(nextItem.url)
                     .then(r => r.blob())
                     .then(blob => {
                         const blobUrl = URL.createObjectURL(blob);
@@ -27,47 +80,84 @@ window.AssetLoader = {
                         vid.playsInline = true;
                         vid.muted = true;
                         vid.loop = true;
-                        vid.oncanplaythrough = () => {
-                            if(!this.cache.has(id)) {
-                                this.cache.set(id, vid);
-                                this.tick();
-                                resolve(vid);
-                            }
-                        };
-                        vid.onerror = () => this.retry(id, url, type, resolve);
+                        vid.oncanplaythrough = () => finish(vid);
+                        vid.onerror = fail;
                         vid.load();
                     })
-                    .catch(() => this.retry(id, url, type, resolve));
-            } else if (type === 'audio') {
+                    .catch(fail);
+            } else if (nextItem.type === 'audio') {
                 const aud = document.createElement('audio');
-                aud.src = url;
+                aud.src = nextItem.url;
                 aud.preload = 'auto';
-                aud.oncanplaythrough = () => { this.cache.set(id, aud); this.tick(); resolve(aud); };
-                aud.onerror = () => this.retry(id, url, type, resolve);
+                aud.oncanplaythrough = () => finish(aud);
+                aud.onerror = fail;
                 aud.load();
+            } else if (nextItem.type === 'json') {
+                fetch(nextItem.url)
+                    .then(r => r.json())
+                    .then(finish)
+                    .catch(fail);
+            }
+        } catch(e) {
+            fail();
+        }
+    },
+
+    checkStages() {
+        [1, 2, 3, 4].forEach(stageNum => {
+            const stageItems = this.queue.filter(q => q.stage === stageNum);
+            if (stageItems.length > 0 && stageItems.every(q => q.status === 'done')) {
+                this.stageStatus[stageNum] = true;
             }
         });
     },
-
-    retry(id, url, type, resolve) {
-        setTimeout(() => { this.loadAsset(id, url, type).then(resolve); }, 1000);
+    
+    addStage(stageNum, assets) {
+        assets.forEach(a => this.loadAsset(a.id, a.url, a.type, stageNum));
     },
 
-    tick() {
-        this.pending--;
-        if (this.onProgress) this.onProgress((this.total - this.pending) / this.total);
-        if (this.pending === 0 && this.onComplete) this.onComplete();
-    },
-
-    loadBatch(assets, onProgress, onComplete) {
-        this.total = assets.length;
-        this.pending = assets.length;
-        this.onProgress = onProgress;
-        this.onComplete = onComplete;
-        if (assets.length === 0) return onComplete();
-        
-        assets.forEach(a => this.loadAsset(a.id, a.url, a.type));
+    ensureStage(stageNum) {
+        return new Promise(resolve => {
+            const check = () => {
+                this.checkStages();
+                if (this.stageStatus[stageNum] || this.queue.filter(q => q.stage <= stageNum && q.status !== 'done').length === 0) {
+                    resolve();
+                } else {
+                    setTimeout(check, 100);
+                }
+            };
+            check();
+        });
     }
+};
+
+window.AssetLoader.startBackgroundPreload = function() {
+    // Stage 1: Intro backgrounds, envelope videos, love letter images
+    this.addStage(1, [
+        { id: 'her1', url: 'her1.jpg', type: 'image' },
+        { id: 'her2', url: 'her2.jpg', type: 'image' }
+        // Memory config will add videos to Stage 1 directly
+    ]);
+
+    // Stage 2: Scratch cards, overlay texture
+    this.addStage(2, [
+        { id: '1-path', url: 'assets/1-path-C81FMFiy.jpg', type: 'image' },
+        { id: '2-path', url: 'assets/2-path-xvwGV-k9.jpg', type: 'image' },
+        { id: '3-path', url: 'assets/3-path-BlvTE4mN.JPG', type: 'image' },
+        { id: '4-path', url: 'assets/4-path-D3hfgkf-.JPG', type: 'image' },
+        { id: '5-path', url: 'assets/5-path-cra6Hfp4.JPG', type: 'image' }
+    ]);
+
+    // Stage 3: Audio tracks & lyrics
+    this.addStage(3, [
+        { id: 'song1', url: 'song/1-song (1).mp3', type: 'audio' },
+        { id: 'song2', url: 'song/2-song (1).mp3', type: 'audio' }
+    ]);
+    
+    // Stage 4: Everything else
+    this.addStage(4, [
+        { id: 'blank_parchment', url: 'assets/blank_parchment_texture-CuPLaUqQ.png', type: 'image' }
+    ]);
 };
 
 /* stars */
@@ -97,7 +187,21 @@ const dots=dotsWrap.querySelectorAll('.dot');
 const backBtn=document.getElementById('backBtn');
 const BQ=6; // Bouquet page is index 6
 
-function go(n){
+function getStageForPage(n) {
+    if (n <= 2) return 1;
+    if (n === 3) return 2;
+    if (n === 4) return 3;
+    return 4;
+}
+
+let isNavigating = false;
+async function go(n){
+    if (isNavigating) return;
+    isNavigating = true;
+
+    // Wait for the required assets for this page
+    const requiredStage = getStageForPage(n);
+    await window.AssetLoader.ensureStage(requiredStage);
     // STRICT SCENE ISOLATION
     pages.forEach((p, i) => {
         if (i === n) {
@@ -128,6 +232,8 @@ function go(n){
     if(n===1 && typeof initConstellation === 'function') initConstellation();
     if(n===2 && typeof initMemories === 'function') initMemories();
     if(n===3 && typeof initPetalPath === 'function') initPetalPath();
+    
+    isNavigating = false;
 }
 window.go = go;
 window.skipNext = () => { if(current < TOTAL-1) go(current+1); };
@@ -151,33 +257,10 @@ window.skipScene = () => {
     }
 };
 
-// GLOBAL PRELOADER LOGIC
-function startApp() {
-    const preloader = document.getElementById('globalPreloader');
-    const bar = document.getElementById('loaderProgressFill');
-    
-    const coreAssets = [
-        { id: 'her1', url: 'her1.jpg', type: 'image' },
-        { id: 'her2', url: 'her2.jpg', type: 'image' },
-        { id: 'song1', url: 'song/1-song (1).mp3', type: 'audio' },
-        { id: 'song2', url: 'song/2-song (1).mp3', type: 'audio' }
-    ];
-    
-    window.AssetLoader.loadBatch(
-        coreAssets,
-        (progress) => {
-            if(bar) bar.style.width = (progress * 100) + '%';
-        },
-        () => {
-            if(preloader) {
-                preloader.style.opacity = '0';
-                setTimeout(() => preloader.classList.add('hidden'), 600);
-            }
-            go(0);
-        }
-    );
-}
-startApp();
+// Start app instantly without blocking
+go(0);
+// Wait a small tick so DOM initializes, then kick off aggressive silent background loading
+setTimeout(() => window.AssetLoader.startBackgroundPreload(), 100);
 backBtn.addEventListener('click',()=>{
     if(current>0) go(current-1);
 });

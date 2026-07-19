@@ -209,7 +209,7 @@ function initVinylPlayer() {
             setTimeout(() => {
                 // Setup Audio & Lyrics if not already done
                 if (!currentAudio) {
-                    currentAudio = document.getElementById('audioTrack1');
+                    currentAudio = window.AssetLoader.cache.get('song1') || document.getElementById('audioTrack1');
                     currentLyrics = LYRICS_TIMING_CONFIG.track1;
                     setupLyrics();
                 }
@@ -306,7 +306,7 @@ function syncLyrics() {
 
 function switchTrack(trackNum) {
     // Determine the target audio and lyrics
-    let nextAudio = document.getElementById(trackNum === 1 ? 'audioTrack1' : 'audioTrack2');
+    let nextAudio = window.AssetLoader.cache.get(trackNum === 1 ? 'song1' : 'song2') || document.getElementById(trackNum === 1 ? 'audioTrack1' : 'audioTrack2');
     let nextLyrics = trackNum === 1 ? LYRICS_TIMING_CONFIG.track1 : LYRICS_TIMING_CONFIG.track2;
 
     // Update buttons UI
