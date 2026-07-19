@@ -785,19 +785,19 @@ body{
 .row-right .scratch-note-inner {
     text-align: right;
 }
-
 /* Number e.g. "03" */
 .scratch-num {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(20px, 2.5vw, 28px);
+    font-size: 1.2rem;
     font-weight: 700;
     font-style: italic;
-    color: #e6b877; /* Subtle elegant gold */
+    color: #D9B26A;
     line-height: 1;
     display: inline-block;
     margin-bottom: 24px;
     position: relative;
     letter-spacing: 2px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.35);
 }
 
 /* Decorative swirl under the number */
@@ -809,7 +809,7 @@ body{
     transform: translateX(-50%);
     width: 40px;
     height: 1px;
-    background-color: #e6b877;
+    background-color: #D9B26A;
     opacity: 0.6;
 }
 
@@ -819,26 +819,31 @@ body{
     transform: none;
 }
 
-/* The main quote (Title) — MASSIVE */
+/* The small caption */
 .scratch-quote {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(64px, 8vw, 110px);
-    font-weight: 600;
+    font-size: 1.3rem;
     font-style: italic;
-    color: #fff;
-    margin: 0 0 28px 0;
-    line-height: 1.0;
-    letter-spacing: -1px;
-    text-shadow: 0 2px 30px rgba(0,0,0,0.5);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: #F8E7D5;
+    margin: 0 0 10px 0;
+    line-height: 1.2;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.35);
 }
 
-/* The sub text (Description) */
+/* The main description */
 .scratch-sub {
-    font-family: "SF Pro Display", "Inter", "Montserrat", system-ui, sans-serif;
-    font-size: clamp(1.5rem, 2.5vw, 2rem);
-    font-weight: 700;
-    color: #ffffff;
-    line-height: 1.6;
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #FFF8F5;
+    line-height: 1.5;
+    letter-spacing: 0.2px;
+    text-align: center;
+    max-width: 72%;
+    margin: 0 auto;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.35);
 }
 
 /* Separator line between rows */
@@ -2273,13 +2278,13 @@ body{
 .end-title {
     font-family: 'Great Vibes', cursive;
     color: #FFC2D2;
-    font-size: clamp(2.4rem, 5vw, 3rem);
+    font-size: clamp(2.8rem, 5vw, 3.5rem);
     font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: 0.5px;
-    text-shadow: 0 0 18px rgba(255,190,220,.45);
+    line-height: 1.1;
+    letter-spacing: 0.4px;
+    text-shadow: 0 0 20px rgba(255,180,210,.35);
     text-align: center;
-    background: linear-gradient(115deg, #FFC2D2, #FF7E9D, #E8C07D, #FFC2D2);
+    background: linear-gradient(90deg, #ffd6e8, #ffc7d7, #f8d08b);
     background-size: 250% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -2292,15 +2297,14 @@ body{
 
 .end-subtitle {
     font-family: 'Cormorant Garamond', serif;
-    color: #FFF8E7;
-    font-size: 1.35rem;
+    color: #F7EFEA;
+    font-size: 1.5rem;
     font-weight: 500;
-    line-height: 1.75;
+    line-height: 1.8;
     letter-spacing: 0.2px;
     text-align: center;
     max-width: 82%;
     margin: 0 auto;
-    opacity: 0.95;
 }
 .end-buttons {
     display: flex;
@@ -2428,23 +2432,7 @@ body{
         padding: 15px !important;
         border-radius: 12px !important;
     }
-    .scratch-num {
-        font-size: clamp(20px, 5vw, 28px) !important;
-        font-weight: 700 !important;
-    }
-    .scratch-quote {
-        margin-bottom: 0 !important;
-        font-size: clamp(19px, 4.8vw, 26px) !important;
-        font-weight: 600 !important;
-        text-shadow: 1px 1px 4px rgba(0,0,0,0.8) !important;
-    }
-    .scratch-sub {
-        margin-top: 0 !important;
-        font-family: "SF Pro Display", "Inter", "Montserrat", system-ui, sans-serif !important;
-        font-size: clamp(17px, 4.5vw, 24px) !important;
-        font-weight: 700 !important;
-        text-shadow: 1px 1px 4px rgba(0,0,0,0.8) !important;
-    }
+
 
     /* ---- 5. THE VINYL ROOM ---- */
     #vinylRoomPage.active {
