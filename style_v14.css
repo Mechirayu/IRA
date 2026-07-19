@@ -2441,62 +2441,89 @@ body{
 
     /* ---- 6. MEMORY MATCH GAME SCREEN ---- */
     #memoryMatchPage {
-        padding: 5px !important;
+        padding: 0 !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100svh !important;
-        overflow: hidden !important;
+        height: 100dvh !important; /* Force exact viewport height */
+        overflow: hidden !important; /* Absolutely no scrolling */
+        box-sizing: border-box;
     }
     .memory-layout {
         flex-direction: column-reverse !important;
-        padding: 10px !important;
-        gap: 10px !important; /* Reduced gap */
+        padding: 5px 10px 15px 10px !important;
+        gap: 10px !important; /* Compress gap */
         width: 100%;
         height: 100%;
-        max-height: 100svh;
-        margin-top: 5px !important; 
+        max-height: 100dvh;
+        margin-top: 0 !important; 
         justify-content: center;
+        box-sizing: border-box;
+    }
+    .memory-col-right {
+        /* Header section */
+        flex: 0 0 auto !important; /* Take exactly what it needs */
+        width: 100% !important;
+        padding-left: 0 !important;
+        text-align: center !important;
+        margin-bottom: 0 !important;
+        margin-top: 10px !important; 
+    }
+    .memory-col-right .gold-serif {
+        font-size: clamp(18px, 4.5vw, 24px) !important; /* Compress heading */
+        margin-bottom: 2px !important;
+    }
+    .memory-col-right .italic-script {
+        font-size: clamp(14px, 3.5vw, 18px) !important; 
+        line-height: 1.2 !important; 
+        margin-top: 2px !important;
+        margin-bottom: 0 !important;
     }
     .memory-col-left {
-        flex: 1 !important;
+        /* Grid container section */
+        flex: 1 1 auto !important; /* Fill ALL remaining height! */
         width: 100% !important;
-        margin-top: 5px !important;
+        margin-top: 0 !important;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        min-height: 0; /* Important to allow flex shrinking */
-    }
-    .memory-col-right {
-        flex: none !important;
-        width: 100% !important;
-        padding-left: 0 !important;
-        text-align: center !important;
-        margin-bottom: 5px !important;
-        margin-top: 15px !important; 
-    }
-    .memory-col-right .gold-serif {
-        font-size: clamp(20px, 4.5vw, 24px) !important; /* Reduced heading size slightly */
-        margin-bottom: 4px !important;
-    }
-    .memory-col-right .italic-script {
-        font-size: clamp(14px, 3.5vw, 18px) !important; 
-        line-height: 1.3 !important; 
-        margin-top: 4px !important;
-        margin-bottom: 0 !important;
+        min-height: 0; /* Crucial for flex shrinking */
+        /* Use container queries so grid scales to exact available remaining height */
+        container-type: size;
+        container-name: gridbox;
     }
     .memory-grid {
         grid-template-columns: repeat(3, 1fr) !important;
-        gap: clamp(4px, 1.5vh, 8px) !important;
-        /* Calculate max width so that 4 rows of 3:4 aspect ratio cards fit in ~55vh */
-        width: min(75vw, 32vh) !important; 
-        max-width: 100% !important;
+        grid-template-rows: repeat(4, 1fr) !important; /* 4 strict rows */
+        gap: clamp(4px, 1.5dvh, 8px) !important;
+        
+        /* Fallbacks */
+        width: min(75vw, 32dvh) !important;
+        height: min(107.5vw, 45.8dvh) !important;
         margin: 0 auto !important;
     }
+    
+    @supports (width: 100cqw) {
+        .memory-grid {
+            /* Grid expands to container but constrained by aspect ratio bounds */
+            width: 100% !important;
+            height: 100% !important;
+            /* ~3:4.3 overall aspect ratio to keep cards ~3:4 */
+            max-width: min(85cqw, 95cqh * 3 / 4.3) !important;
+            max-height: min(95cqh, 85cqw * 4.3 / 3) !important;
+        }
+    }
+    
+    .memory-card {
+        width: 100% !important;
+        height: 100% !important;
+        aspect-ratio: auto !important; /* Grid defines size now */
+    }
+    
     /* Enlarge and center text inside opened cards */
     .memory-card-front span {
-        font-size: clamp(18px, 4vw, 26px) !important; 
+        font-size: clamp(16px, 3.5vw, 24px) !important; 
         line-height: 1 !important;
         display: flex !important;
         align-items: center !important;
