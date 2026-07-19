@@ -2373,23 +2373,31 @@ body{
 
     /* ---- 5. THE VINYL ROOM ---- */
     #vinylRoomPage.active {
-        justify-content: flex-start !important;
-        padding: 50px 10px 10px 10px !important;
-        gap: 10px !important;
+        justify-content: space-evenly !important;
+        padding: clamp(20px, 4vh, 40px) 10px 20px 10px !important;
+        gap: 0 !important;
+        min-height: 100vh;
+        max-height: 100vh;
+        box-sizing: border-box;
     }
     #vinylRoomPage .global-header {
-        margin-bottom: 0 !important;
+        margin-bottom: 5px !important;
     }
     #vinylRoomPage .global-header h2 {
-        margin-top: 5px !important;
+        margin-top: 2px !important;
+        font-size: clamp(22px, 5.5vw, 28px) !important;
+    }
+    #vinylRoomPage .global-header .gold-serif {
+        font-size: clamp(12px, 3vw, 15px) !important;
+        margin-bottom: 5px !important;
     }
     .vinyl-room-layout {
         flex: 0 0 auto !important;
-        gap: 10px !important;
-        margin-bottom: 5px !important;
+        gap: 15px !important;
+        margin-bottom: 0 !important;
     }
     .vinyl-container {
-        width: clamp(160px, 45vw, 240px) !important;
+        width: clamp(140px, 38vw, 190px) !important;
     }
     .lyrics-col {
         padding: 0 !important;
@@ -2398,37 +2406,39 @@ body{
     }
     .track-switcher {
         padding: 0 !important;
-        gap: 15px !important;
-        margin-bottom: 0 !important;
+        gap: 12px !important;
+        margin-bottom: 5px !important;
     }
     .track-btn {
-        padding: 8px 16px 10px !important;
-        font-size: 14px !important;
+        padding: 6px 14px 8px !important;
+    }
+    .track-title {
+        font-size: clamp(18px, 4.5vw, 22px) !important;
     }
     .vinyl-center-controls {
         margin-top: 5px !important;
-        margin-bottom: 5px !important;
-        gap: 15px !important;
+        margin-bottom: 0 !important;
+        gap: 10px !important;
     }
     .play-record-btn {
         padding: 10px 24px !important;
-        font-size: 1.1rem !important;
+        font-size: 1rem !important;
     }
     .vinyl-next-game-btn {
-        padding: 12px 30px !important;
-        font-size: 1.2rem !important;
+        padding: 10px 24px !important;
+        font-size: 1.1rem !important;
     }
-    /* Mobile specific tweaks for lyrics if needed */
+    /* Move lyrics up by adjusting padding and container height */
     .lyrics-container {
-        height: 120px !important;
+        height: 80px !important;
     }
     .lyrics-inner {
-        padding: 60px 10px !important;
+        padding: 20px 10px 40px !important;
     }
     .play-record-btn.playing-state,
     .play-record-btn.paused-state {
-        padding: 10px 24px;
-        font-size: 16px;
+        padding: 8px 20px !important;
+        font-size: 15px !important;
     }
 
     /* ---- 6. MEMORY MATCH GAME SCREEN ---- */
