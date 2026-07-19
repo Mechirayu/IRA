@@ -40,7 +40,44 @@ function initMemoryMatch() {
         card.addEventListener('click', () => flipCard(card));
         grid.appendChild(card);
     });
+
+    // Wait for DOM to render cards, then calculate and apply scale if needed
+    requestAnimationFrame(() => {
+        scaleMemoryGridToFit();
+    });
 }
+
+// Function to scale the grid down if it exceeds available vertical space
+function scaleMemoryGridToFit() {
+    const grid = document.querySelector('.memory-grid');
+    const colLeft = document.querySelector('.memory-col-left');
+    
+    if (!grid || !colLeft) return;
+    
+    // Reset transform to measure natural height
+    grid.style.transform = 'none';
+    
+    const gridHeight = grid.scrollHeight;
+    const availableHeight = colLeft.clientHeight;
+    
+    // If grid is taller than available space minus a small padding
+    if (gridHeight > availableHeight && availableHeight > 0) {
+        const padding = 10; // 5px top and bottom
+        const scale = (availableHeight - padding) / gridHeight;
+        
+        if (scale < 1) {
+            grid.style.transform = `scale(${scale})`;
+            grid.style.transformOrigin = 'center center';
+        }
+    }
+}
+
+// Listen for window resize to recalculate scale
+window.addEventListener('resize', () => {
+    if (document.getElementById('memoryMatchPage').classList.contains('active')) {
+        scaleMemoryGridToFit();
+    }
+});
 
 function flipCard(card) {
     if (isBoardLocked) return;
