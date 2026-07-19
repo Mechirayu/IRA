@@ -348,7 +348,9 @@ function transitionToLetterGrid() {
         duration: 0.6,
         ease: "power2.inOut",
         onComplete: () => {
+            if (bqHeader) bqHeader.style.display = 'none';
             if (bqCap) bqCap.style.display = 'none';
+            if (bqEyebrow) bqEyebrow.style.display = 'none';
         }
     }, 0);
     
