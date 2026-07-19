@@ -2732,7 +2732,7 @@ body{
     }
     .final-screen-content {
         min-height: 100dvh !important;
-        display: flex !important;
+        display: flex;
         flex-direction: column !important;
         justify-content: center !important;
         align-items: center !important;

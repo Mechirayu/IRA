@@ -435,7 +435,11 @@ function openWaxSeal() {
     
     // 1. Break the seal & fade prompt
     tl.to(seal, { scale: 1.3, opacity: 0, duration: 0.5, ease: "power2.in" }, 0);
-    tl.to(promptText, { opacity: 0, duration: 0.5 }, 0);
+    tl.to(promptText, { 
+        opacity: 0, 
+        duration: 0.5,
+        onComplete: () => { promptText.style.display = 'none'; }
+    }, 0);
     tl.set(seal, { display: 'none' });
     
     // 2. Open the flap (rotateX 180)
