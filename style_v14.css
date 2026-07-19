@@ -2643,15 +2643,24 @@ body{
         max-width: 90vw !important;
     }
     .paper-letter-scroll {
+        transform: scale(0.93);
+        transform-origin: top center;
         max-width: 95vw !important;
         max-height: 85dvh !important;
     }
     .letter-text-container {
-        padding: 50px 16px 16px 16px !important;
+        padding: 30px 26px 36px 26px !important;
     }
     .letter-para {
-        font-size: clamp(13px, 3.5vw, 17px) !important;
-        line-height: 1.7 !important;
+        font-size: clamp(21px, 4.8vw, 26px) !important;
+        line-height: 1.75 !important;
+        letter-spacing: 0.01em !important;
+        font-weight: 500 !important;
+    }
+    .lp-greeting {
+        font-size: clamp(52px, 10vw, 82px) !important;
+        line-height: 1.05 !important;
+        text-align: center !important;
     }
 
     /* ---- 10. PROMISE & FINALE SCREENS ---- */
