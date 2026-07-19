@@ -2441,12 +2441,18 @@ body{
 
     /* ---- 6. MEMORY MATCH GAME SCREEN ---- */
     #memoryMatchPage {
-        padding: 10px !important;
+        padding: 5px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .memory-layout {
         flex-direction: column-reverse !important;
-        padding: 10px !important;
-        gap: 15px !important;
+        padding: 5px !important;
+        gap: 5px !important; /* Reduced space between grid and header */
+        width: 100%;
+        height: auto; /* Allow natural height, avoid overflow */
+        max-height: 100vh;
     }
     .memory-col-left {
         flex: none !important;
@@ -2457,20 +2463,26 @@ body{
         width: 100% !important;
         padding-left: 0 !important;
         text-align: center !important;
-        margin-bottom: 10px !important;
+        margin-bottom: 5px !important; /* Reduced space between subtitle and grid */
+        margin-top: 5px !important; /* Reduced top margin */
     }
     .memory-col-right .gold-serif {
-        font-size: clamp(20px, 5vw, 32px) !important;
+        font-size: clamp(18px, 4vw, 24px) !important; /* Reduced by ~15% */
+        margin-bottom: 2px !important; /* Tighten gap */
     }
     .memory-col-right .italic-script {
-        font-size: clamp(14px, 3.5vw, 20px) !important;
+        font-size: clamp(12px, 3vw, 16px) !important; /* Reduced by ~15% */
+        margin-top: 2px !important; /* Tighten gap */
     }
     .memory-grid {
         grid-template-columns: repeat(3, 1fr) !important;
-        gap: 8px !important;
+        gap: clamp(4px, 1.5vw, 8px) !important; /* Responsive gap */
+        width: 100% !important;
+        max-width: min(85vw, 45vh) !important; /* Prevent vertical overflow on short screens */
+        margin: 0 auto !important;
     }
     #win-heart {
-        font-size: clamp(150px, 40vw, 250px) !important;
+        font-size: clamp(120px, 35vw, 200px) !important;
     }
 
     /* ---- 7. BOUQUET SCREEN ---- */
