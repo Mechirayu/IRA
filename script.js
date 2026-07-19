@@ -26,6 +26,9 @@ const backBtn=document.getElementById('backBtn');
 const BQ=6; // Bouquet page is index 6
 
 function go(n){
+    // Abort if finale is active to prevent delayed timeouts from resetting the page
+    if (window.isFinaleActive) return;
+
     // STRICT SCENE ISOLATION
     pages.forEach((p, i) => {
         if (i === n) {
@@ -640,6 +643,26 @@ function acceptPromise() {
     const promiseScene = document.getElementById('promise-scene');
     const endScene = document.getElementById('end-scene');
     
+    // Safety check: Prevent any delayed page transitions from messing with the finale
+    window.isFinaleActive = true;
+    
+    // Hide all possible overlays that might intercept clicks
+    const overlays = ['letterGridOverlay', 'vintageEnvelopeContainer', 'polaroidBackdrop'];
+    overlays.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            el.style.display = 'none';
+            el.style.pointerEvents = 'none';
+        }
+    });
+    
+    // Ensure finale container allows pointer events
+    const finaleContainer = document.getElementById('finale-container');
+    if(finaleContainer) {
+        finaleContainer.style.pointerEvents = 'auto';
+        finaleContainer.style.zIndex = '999999'; // Ensure it's above everything
+    }
+    
     gsap.to(promiseScene, {
         opacity: 0,
         duration: 1,
@@ -647,6 +670,8 @@ function acceptPromise() {
             promiseScene.style.display = 'none';
             endScene.style.display = 'flex';
             endScene.style.opacity = 0;
+            endScene.style.pointerEvents = 'auto'; // Ensure it can be clicked
+            endScene.style.visibility = 'visible';
             gsap.to(endScene, { opacity: 1, duration: 2 });
             
             // Also fade out the dark background to reveal stars behind it
