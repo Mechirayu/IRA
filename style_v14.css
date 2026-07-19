@@ -2572,26 +2572,67 @@ body{
     }
 
     /* ---- 8. LETTER GRID ("Everything About You") ---- */
+    #letterGridOverlay {
+        height: 100svh !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+    #letterGridContent {
+        transform: scale(0.92) !important;
+        transform-origin: top center !important;
+        gap: 12px !important;
+        padding-top: 14px !important;
+        padding-bottom: 18px !important;
+    }
+    #letterGridContent h2.display {
+        font-size: clamp(26px, 7vw, 40px) !important;
+        line-height: 1.05 !important;
+        letter-spacing: .18em !important;
+        margin-bottom: 10px !important;
+    }
+    #letterGridContent p.sub {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        font-size: 16px !important;
+    }
     .letter-grid {
         grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
+        gap: 12px !important;
         width: 90vw !important;
         max-width: 100% !important;
         margin: 0 auto !important;
     }
     .letter-card {
-        min-height: 120px !important;
+        height: 170px !important;
+        min-height: auto !important;
+        border-radius: 20px !important;
+    }
+    .letter-card .ti {
+        font-size: 44px !important;
+        line-height: 1 !important;
+        margin-bottom: 10px !important;
+    }
+    .letter-card .title {
+        font-size: clamp(16px, 4vw, 18px) !important;
+    }
+    .letter-card .hint {
+        font-size: clamp(11px, 3vw, 12px) !important;
+        letter-spacing: .25em !important;
     }
     .card-back {
         padding: 12px !important;
-        font-size: 0.9rem !important;
+        font-size: clamp(18px, 4.5vw, 24px) !important;
         word-wrap: break-word !important;
         text-align: center !important;
     }
     .letter-modal {
-        width: 95vw !important;
+        width: 100vw !important;
         max-width: 100% !important;
-        padding: 20px 10px !important;
+        padding: 0 !important;
+    }
+    #viewLetterBtn {
+        margin-top: 14px !important;
+        margin-bottom: 18px !important;
     }
 
     /* ---- 9. VINTAGE ENVELOPE & LETTER ---- */
