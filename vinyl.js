@@ -41,6 +41,8 @@ const LYRICS_TIMING_CONFIG = {
 
 let currentAudio = null;
 let currentLyrics = LYRICS_TIMING_CONFIG.track1;
+let isVinylPlaying = false;
+let vinylHasStarted = false;
 
 function startVinylTransition(shell) {
     const vinylDisc = document.getElementById('vinylDisc');
@@ -177,12 +179,10 @@ function initVinylPlayer() {
     const arm = document.getElementById('vinylArm');
     const disc = document.getElementById('vinylDisc');
     const controlBtn = document.getElementById('vinylControlBtn');
-    let isPlaying = false;
-    let hasStarted = false;
     
     // Show the explicit play button after transition
     setTimeout(() => {
-        if (!hasStarted) {
+        if (!vinylHasStarted) {
             controlBtn.classList.add('visible');
         }
         // Show the "Next Game" button 5 seconds later
@@ -196,10 +196,10 @@ function initVinylPlayer() {
     controlBtn.addEventListener('click', function togglePlay() {
         const btnText = controlBtn.querySelector('span');
         
-        if (!hasStarted) {
+        if (!vinylHasStarted) {
             // First time play (Drop the Needle)
-            hasStarted = true;
-            isPlaying = true;
+            vinylHasStarted = true;
+            isVinylPlaying = true;
             
             // Move needle onto record
             arm.classList.add('playing');
@@ -207,25 +207,33 @@ function initVinylPlayer() {
             controlBtn.classList.add('playing-state');
             
             setTimeout(() => {
-                // Start spinning
-                disc.classList.add('spinning');
-                
                 // Setup Audio & Lyrics if not already done
                 if (!currentAudio) {
-                    currentAudio = document.getElementById('audioTrack1');
+                    currentAudio = window.AssetLoader.cache.get('song1') || document.getElementById('audioTrack1');
                     currentLyrics = LYRICS_TIMING_CONFIG.track1;
                     setupLyrics();
                 }
-                
-                currentAudio.play().catch(e => console.log("Audio autoplay blocked", e));
-                currentAudio.addEventListener('timeupdate', syncLyrics);
-                
+
+                // Wait for audio to be ready before spinning
+                const attemptPlay = () => {
+                    if (currentAudio.readyState >= 3) {
+                        btnText.innerText = 'PAUSE';
+                        disc.classList.add('spinning');
+                        currentAudio.play().catch(e => console.log("Audio autoplay blocked", e));
+                        currentAudio.addEventListener('timeupdate', syncLyrics);
+                    } else {
+                        btnText.innerText = 'LOADING...';
+                        currentAudio.load();
+                        currentAudio.addEventListener('canplaythrough', attemptPlay, { once: true });
+                    }
+                };
+                attemptPlay();
             }, 1200);
         } else {
             // Toggle play/pause
-            if (isPlaying) {
+            if (isVinylPlaying) {
                 // PAUSE
-                isPlaying = false;
+                isVinylPlaying = false;
                 arm.classList.remove('playing'); // swings off
                 disc.classList.remove('spinning'); // stops spinning
                 if (currentAudio) currentAudio.pause();
@@ -235,7 +243,7 @@ function initVinylPlayer() {
                 controlBtn.classList.add('paused-state');
             } else {
                 // RESUME
-                isPlaying = true;
+                isVinylPlaying = true;
                 arm.classList.add('playing'); // swings on
                 btnText.innerText = 'PAUSE';
                 controlBtn.classList.remove('paused-state');
@@ -297,49 +305,72 @@ function syncLyrics() {
 }
 
 function switchTrack(trackNum) {
-    if (!currentAudio) return;
-    
-    // Update buttons
+    // Determine the target audio and lyrics
+    let nextAudio = window.AssetLoader.cache.get(trackNum === 1 ? 'song1' : 'song2') || document.getElementById(trackNum === 1 ? 'audioTrack1' : 'audioTrack2');
+    let nextLyrics = trackNum === 1 ? LYRICS_TIMING_CONFIG.track1 : LYRICS_TIMING_CONFIG.track2;
+
+    // Update buttons UI
     document.getElementById('track1Btn').classList.toggle('active', trackNum === 1);
     document.getElementById('track2Btn').classList.toggle('active', trackNum === 2);
-    
-    // Fade out current audio
-    const oldAudio = currentAudio;
-    gsap.to(oldAudio, { volume: 0, duration: 1, onComplete: () => {
-        oldAudio.pause();
-        oldAudio.currentTime = 0;
-        oldAudio.volume = 1;
-    }});
-    
-    // Stop spinning briefly
+
+    const controlBtn = document.getElementById('vinylControlBtn');
+    const btnText = controlBtn.querySelector('span');
     const disc = document.getElementById('vinylDisc');
     const arm = document.getElementById('vinylArm');
-    
+
+    // Fade out current audio if it's already playing
+    let needDelay = false;
+    if (currentAudio) {
+        currentAudio.removeEventListener('timeupdate', syncLyrics);
+        const oldAudio = currentAudio;
+        gsap.to(oldAudio, { volume: 0, duration: 1, onComplete: () => {
+            oldAudio.pause();
+            oldAudio.currentTime = 0;
+            oldAudio.volume = 1;
+        }});
+        needDelay = true;
+    }
+
+    // Set new current state
+    currentAudio = nextAudio;
+    currentLyrics = nextLyrics;
+    currentAudio.currentTime = 0;
+    setupLyrics();
+
+    // Make sure control button is visible and marks player as started
+    controlBtn.classList.add('visible');
+    vinylHasStarted = true;
+    isVinylPlaying = true;
+
+    // Reset visual state instantly to prepare for switch
     arm.classList.remove('playing');
     disc.classList.remove('spinning');
+    btnText.innerText = 'PAUSE';
+    controlBtn.classList.remove('paused-state');
+    controlBtn.classList.add('playing-state');
     
+    // If we were already playing something, wait a tiny bit for the arm to retract,
+    // otherwise if this is the very first interaction, start instantly.
+    const delay = needDelay ? 1500 : 100;
+
     setTimeout(() => {
-        currentAudio.removeEventListener('timeupdate', syncLyrics);
-        
-        if (trackNum === 1) {
-            currentAudio = document.getElementById('audioTrack1');
-            currentLyrics = LYRICS_TIMING_CONFIG.track1;
-        } else {
-            currentAudio = document.getElementById('audioTrack2');
-            currentLyrics = LYRICS_TIMING_CONFIG.track2;
-        }
-        
-        setupLyrics();
-        
-        // Restart play
         arm.classList.add('playing');
         setTimeout(() => {
-            disc.classList.add('spinning');
-            currentAudio.play().catch(e => console.log(e));
-            currentAudio.addEventListener('timeupdate', syncLyrics);
+            const attemptPlay = () => {
+                if (currentAudio.readyState >= 3) {
+                    btnText.innerText = 'PAUSE';
+                    disc.classList.add('spinning');
+                    currentAudio.play().catch(e => console.log(e));
+                    currentAudio.addEventListener('timeupdate', syncLyrics);
+                } else {
+                    btnText.innerText = 'LOADING...';
+                    currentAudio.load();
+                    currentAudio.addEventListener('canplaythrough', attemptPlay, { once: true });
+                }
+            };
+            attemptPlay();
         }, 1000);
-        
-    }, 1500);
+    }, delay);
 }
 
 // === FALLBACK: Always ensure buttons appear when vinyl page is active ===
