@@ -51,6 +51,11 @@ window.AssetLoader = {
 
         const fail = () => {
             nextItem.retryCount++;
+            if (nextItem.retryCount > 3) {
+                console.error(`[AssetLoader] Giving up on ${nextItem.type} ${nextItem.id}`);
+                finish(null); // Resolve with null to unblock the queue
+                return;
+            }
             const backoff = Math.min(1000 * Math.pow(2, nextItem.retryCount), 10000); // Exp backoff max 10s
             console.warn(`[AssetLoader] Retry ${nextItem.type} ${nextItem.id} in ${backoff}ms`);
             
@@ -134,18 +139,22 @@ window.AssetLoader = {
 window.AssetLoader.startBackgroundPreload = function() {
     // Stage 1: Intro backgrounds, envelope videos, love letter images
     this.addStage(1, [
+        // her1.jpg / her2.jpg were from original config, maybe they exist, but if not it will fail safely now.
         { id: 'her1', url: 'her1.jpg', type: 'image' },
         { id: 'her2', url: 'her2.jpg', type: 'image' }
-        // Memory config will add videos to Stage 1 directly
     ]);
+    
+    if (typeof MediaManager !== 'undefined' && MediaManager.init) {
+        MediaManager.init();
+    }
 
     // Stage 2: Scratch cards, overlay texture
     this.addStage(2, [
-        { id: '1-path', url: 'assets/1-path-C81FMFiy.jpg', type: 'image' },
-        { id: '2-path', url: 'assets/2-path-xvwGV-k9.jpg', type: 'image' },
-        { id: '3-path', url: 'assets/3-path-BlvTE4mN.JPG', type: 'image' },
-        { id: '4-path', url: 'assets/4-path-D3hfgkf-.JPG', type: 'image' },
-        { id: '5-path', url: 'assets/5-path-cra6Hfp4.JPG', type: 'image' }
+        { id: '1-path', url: 'heart 5/1-path.jpg', type: 'image' },
+        { id: '2-path', url: 'heart 5/2-path.jpg', type: 'image' },
+        { id: '3-path', url: 'heart 5/3-path.JPG', type: 'image' },
+        { id: '4-path', url: 'heart 5/4-path.JPG', type: 'image' },
+        { id: '5-path', url: 'heart 5/5-path.JPG', type: 'image' }
     ]);
 
     // Stage 3: Audio tracks & lyrics
@@ -156,7 +165,8 @@ window.AssetLoader.startBackgroundPreload = function() {
     
     // Stage 4: Everything else
     this.addStage(4, [
-        { id: 'blank_parchment', url: 'assets/blank_parchment_texture-CuPLaUqQ.png', type: 'image' }
+        { id: 'blank_parchment', url: 'blank_parchment_texture.png', type: 'image' },
+        { id: 'wax_seal', url: 'wax_seal.png', type: 'image' }
     ]);
 };
 
