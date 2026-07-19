@@ -2517,16 +2517,58 @@ body{
     }
 
     /* ---- 7. BOUQUET SCREEN ---- */
+    #bqPage {
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        max-width: 100vw !important;
+        height: 100svh !important;
+    }
     #bqPage .inner {
-        width: 95vw !important;
+        width: 100% !important;
         max-width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        min-height: 100svh !important;
+        padding-top: calc(env(safe-area-inset-top) + 20px) !important;
+        padding-bottom: calc(env(safe-area-inset-bottom) + 24px) !important;
+        box-sizing: border-box !important;
+    }
+    #bqEyebrow {
+        position: relative !important;
+        margin-bottom: 5px !important;
     }
     #bqHeader {
-        font-size: clamp(18px, 4.5vw, 28px) !important;
-        width: 90% !important;
+        font-size: clamp(20px, 5vw, 32px) !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0.25em !important;
+        text-align: center !important;
+        max-width: 90% !important;
+        margin: 0 auto !important;
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
     }
     #bqWrap {
-        max-width: 85vw !important;
+        width: min(62vw, 300px) !important;
+        height: auto !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        transform: translateY(-20px) !important; /* Move upward slightly */
+    }
+    #bqWrap svg {
+        width: 100% !important;
+        height: auto !important;
+    }
+    #bqCap {
+        position: relative !important;
+        margin-top: 20px !important;
+        margin-bottom: 32px !important;
+    }
+    #bqNextBtn {
+        margin: 0 auto !important;
     }
 
     /* ---- 8. LETTER GRID ("Everything About You") ---- */
