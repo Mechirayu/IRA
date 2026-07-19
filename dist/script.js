@@ -1,175 +1,3 @@
-/* Priority Background Asset Loader */
-window.AssetLoader = {
-    cache: new Map(),
-    queue: [], // array of { id, url, type, stage, resolve, reject, status: 'pending'|'loading'|'done', retryCount: 0 }
-    activeLoads: 0,
-    maxConcurrent: 4,
-    stageStatus: { 1: false, 2: false, 3: false, 4: false },
-    
-    loadAsset(id, url, type, stage = 4) {
-        if (this.cache.has(id)) return Promise.resolve(this.cache.get(id));
-        
-        return new Promise((resolve, reject) => {
-            let item = this.queue.find(q => q.id === id);
-            if (!item) {
-                item = { id, url, type, stage, resolve: [resolve], reject: [reject], status: 'pending', retryCount: 0 };
-                this.queue.push(item);
-                this.sortQueue();
-                this.processQueue();
-            } else if (item.status === 'done') {
-                resolve(this.cache.get(id));
-            } else {
-                item.resolve.push(resolve);
-                item.reject.push(reject);
-            }
-        });
-    },
-
-    sortQueue() {
-        this.queue.sort((a, b) => a.stage - b.stage);
-    },
-
-    processQueue() {
-        if (this.activeLoads >= this.maxConcurrent) return;
-        
-        const nextItem = this.queue.find(q => q.status === 'pending');
-        if (!nextItem) {
-            this.checkStages();
-            return;
-        }
-
-        nextItem.status = 'loading';
-        this.activeLoads++;
-
-        const finish = (result) => {
-            this.cache.set(nextItem.id, result);
-            nextItem.status = 'done';
-            nextItem.resolve.forEach(res => res(result));
-            this.activeLoads--;
-            this.processQueue();
-        };
-
-        const fail = () => {
-            nextItem.retryCount++;
-            if (nextItem.retryCount > 3) {
-                console.error(`[AssetLoader] Giving up on ${nextItem.type} ${nextItem.id}`);
-                finish(null); // Resolve with null to unblock the queue
-                return;
-            }
-            const backoff = Math.min(1000 * Math.pow(2, nextItem.retryCount), 10000); // Exp backoff max 10s
-            console.warn(`[AssetLoader] Retry ${nextItem.type} ${nextItem.id} in ${backoff}ms`);
-            
-            setTimeout(() => {
-                nextItem.status = 'pending';
-                this.processQueue();
-            }, backoff);
-            
-            this.activeLoads--;
-            this.processQueue();
-        };
-
-        try {
-            if (nextItem.type === 'image') {
-                const img = new Image();
-                img.onload = () => finish(img);
-                img.onerror = fail;
-                img.src = nextItem.url;
-            } else if (nextItem.type === 'video') {
-                fetch(nextItem.url)
-                    .then(r => r.blob())
-                    .then(blob => {
-                        const blobUrl = URL.createObjectURL(blob);
-                        const vid = document.createElement('video');
-                        vid.src = blobUrl;
-                        vid.preload = 'auto';
-                        vid.playsInline = true;
-                        vid.muted = true;
-                        vid.loop = true;
-                        vid.oncanplaythrough = () => finish(vid);
-                        vid.onerror = fail;
-                        vid.load();
-                    })
-                    .catch(fail);
-            } else if (nextItem.type === 'audio') {
-                const aud = document.createElement('audio');
-                aud.src = nextItem.url;
-                aud.preload = 'auto';
-                aud.oncanplaythrough = () => finish(aud);
-                aud.onerror = fail;
-                aud.load();
-            } else if (nextItem.type === 'json') {
-                fetch(nextItem.url)
-                    .then(r => r.json())
-                    .then(finish)
-                    .catch(fail);
-            }
-        } catch(e) {
-            fail();
-        }
-    },
-
-    checkStages() {
-        [1, 2, 3, 4].forEach(stageNum => {
-            const stageItems = this.queue.filter(q => q.stage === stageNum);
-            if (stageItems.length > 0 && stageItems.every(q => q.status === 'done')) {
-                this.stageStatus[stageNum] = true;
-            }
-        });
-    },
-    
-    addStage(stageNum, assets) {
-        assets.forEach(a => this.loadAsset(a.id, a.url, a.type, stageNum));
-    },
-
-    ensureStage(stageNum) {
-        return new Promise(resolve => {
-            const check = () => {
-                this.checkStages();
-                if (this.stageStatus[stageNum] || this.queue.filter(q => q.stage <= stageNum && q.status !== 'done').length === 0) {
-                    resolve();
-                } else {
-                    setTimeout(check, 100);
-                }
-            };
-            check();
-        });
-    }
-};
-
-window.AssetLoader.startBackgroundPreload = function() {
-    // Stage 1: Intro backgrounds, envelope videos, love letter images
-    this.addStage(1, [
-        // her1.jpg / her2.jpg were from original config, maybe they exist, but if not it will fail safely now.
-        { id: 'her1', url: 'her1.jpg', type: 'image' },
-        { id: 'her2', url: 'her2.jpg', type: 'image' }
-    ]);
-    
-    if (typeof MediaManager !== 'undefined' && MediaManager.init) {
-        MediaManager.init();
-    }
-
-    // Stage 2: Scratch cards, overlay texture
-    this.addStage(2, [
-        { id: '1-path', url: 'heart 5/1-path.jpg', type: 'image' },
-        { id: '2-path', url: 'heart 5/2-path.jpg', type: 'image' },
-        { id: '3-path', url: 'heart 5/3-path.JPG', type: 'image' },
-        { id: '4-path', url: 'heart 5/4-path.JPG', type: 'image' },
-        { id: '5-path', url: 'heart 5/5-path.JPG', type: 'image' }
-    ]);
-
-    // Stage 3: Audio tracks & lyrics
-    this.addStage(3, [
-        { id: 'song1', url: 'song/1-song (1).mp3', type: 'audio' },
-        { id: 'song2', url: 'song/2-song (1).mp3', type: 'audio' }
-    ]);
-    
-    // Stage 4: Everything else
-    this.addStage(4, [
-        { id: 'blank_parchment', url: 'blank_parchment_texture.png', type: 'image' },
-        { id: 'wax_seal', url: 'wax_seal.png', type: 'image' }
-    ]);
-};
-
 /* stars */
 const starWrap=document.getElementById('stars');
 for(let i=0;i<55;i++){
@@ -197,21 +25,7 @@ const dots=dotsWrap.querySelectorAll('.dot');
 const backBtn=document.getElementById('backBtn');
 const BQ=6; // Bouquet page is index 6
 
-function getStageForPage(n) {
-    if (n <= 2) return 1;
-    if (n === 3) return 2;
-    if (n === 4) return 3;
-    return 4;
-}
-
-let isNavigating = false;
-async function go(n){
-    if (isNavigating) return;
-    isNavigating = true;
-
-    // Wait for the required assets for this page
-    const requiredStage = getStageForPage(n);
-    await window.AssetLoader.ensureStage(requiredStage);
+function go(n){
     // STRICT SCENE ISOLATION
     pages.forEach((p, i) => {
         if (i === n) {
@@ -242,8 +56,6 @@ async function go(n){
     if(n===1 && typeof initConstellation === 'function') initConstellation();
     if(n===2 && typeof initMemories === 'function') initMemories();
     if(n===3 && typeof initPetalPath === 'function') initPetalPath();
-    
-    isNavigating = false;
 }
 window.go = go;
 window.skipNext = () => { if(current < TOTAL-1) go(current+1); };
@@ -266,11 +78,7 @@ window.skipScene = () => {
         }
     }
 };
-
-// Start app instantly without blocking
 go(0);
-// Wait a small tick so DOM initializes, then kick off aggressive silent background loading
-setTimeout(() => window.AssetLoader.startBackgroundPreload(), 100);
 backBtn.addEventListener('click',()=>{
     if(current>0) go(current-1);
 });
@@ -627,7 +435,11 @@ function openWaxSeal() {
     
     // 1. Break the seal & fade prompt
     tl.to(seal, { scale: 1.3, opacity: 0, duration: 0.5, ease: "power2.in" }, 0);
-    tl.to(promptText, { opacity: 0, duration: 0.5 }, 0);
+    tl.to(promptText, { 
+        opacity: 0, 
+        duration: 0.5,
+        onComplete: () => { promptText.remove(); }
+    }, 0);
     tl.set(seal, { display: 'none' });
     
     // 2. Open the flap (rotateX 180)

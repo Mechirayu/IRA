@@ -2254,29 +2254,33 @@ body{
 .end-title {
     font-family: 'Great Vibes', cursive;
     color: #FFC2D2;
-    font-size: clamp(100px, 20vw, 180px);
-    line-height: 1.2;
-    padding: 10px;
+    font-size: clamp(2.4rem, 5vw, 3rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 18px rgba(255,190,220,.45);
+    text-align: center;
     background: linear-gradient(115deg, #FFC2D2, #FF7E9D, #E8C07D, #FFC2D2);
     background-size: 250% auto;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px rgba(255,126,157,.45));
     animation: shim 6s linear infinite;
-    margin-bottom: 20px;
+    margin: 0 auto;
 }
 @keyframes shim { to { background-position: 250% center; } }
 @keyframes beat { 0%,100%{transform:scale(1);} 25%{transform:scale(1.25);} 40%{transform:scale(1.1);} }
 
 .end-subtitle {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
+    font-family: 'Quicksand', sans-serif;
     color: #E0A6BB;
-    font-size: clamp(50px, 8vw, 80px);
-    line-height: 1.1;
-    margin-bottom: 30px;
-    font-weight: 600;
+    font-size: clamp(1.15rem, 2.7vw, 1.45rem);
+    font-weight: 500;
+    line-height: 1.75;
+    letter-spacing: 0.2px;
+    text-align: center;
+    max-width: 85%;
+    margin: 0 auto;
 }
 .end-buttons {
     display: flex;
@@ -2748,20 +2752,6 @@ body{
         gap: 22px !important;
         padding: 8dvh 6vw !important;
         box-sizing: border-box !important;
-    }
-    .end-title {
-        font-size: clamp(38px, 8vw, 54px) !important;
-        font-weight: 800 !important;
-        line-height: 1.25 !important;
-        text-align: center !important;
-        text-shadow: 0 0 15px rgba(255, 194, 210, 0.6) !important;
-    }
-    .end-subtitle {
-        font-size: clamp(20px, 5vw, 28px) !important;
-        line-height: 1.85 !important;
-        text-align: center !important;
-        max-width: 90% !important;
-        margin: 0 auto !important;
     }
     .end-buttons {
         margin-top: 32px !important;

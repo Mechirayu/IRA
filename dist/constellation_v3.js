@@ -196,10 +196,10 @@ function climaxConstellation() {
         delay: 3 // Start drawing just as stars settle
     });
 
-    // 4. The Cinematic Shift (Translate the heart to the left)
+    // 4. The Cinematic Shift (Keep the heart centered)
     const isMobile = window.innerWidth < 768;
-    const shiftX = isMobile ? 0 : -window.innerWidth * 0.25;
-    const shiftY = isMobile ? -window.innerHeight * 0.2 : 0;
+    const shiftX = 0;
+    const shiftY = 0;
     const scaleDown = isMobile ? 0.6 : 0.7;
     
     gsap.to('.constellation-wrapper', {

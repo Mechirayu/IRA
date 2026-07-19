@@ -207,27 +207,19 @@ function initVinylPlayer() {
             controlBtn.classList.add('playing-state');
             
             setTimeout(() => {
+                // Start spinning
+                disc.classList.add('spinning');
+                
                 // Setup Audio & Lyrics if not already done
                 if (!currentAudio) {
-                    currentAudio = window.AssetLoader.cache.get('song1') || document.getElementById('audioTrack1');
+                    currentAudio = document.getElementById('audioTrack1');
                     currentLyrics = LYRICS_TIMING_CONFIG.track1;
                     setupLyrics();
                 }
-
-                // Wait for audio to be ready before spinning
-                const attemptPlay = () => {
-                    if (currentAudio.readyState >= 3) {
-                        btnText.innerText = 'PAUSE';
-                        disc.classList.add('spinning');
-                        currentAudio.play().catch(e => console.log("Audio autoplay blocked", e));
-                        currentAudio.addEventListener('timeupdate', syncLyrics);
-                    } else {
-                        btnText.innerText = 'LOADING...';
-                        currentAudio.load();
-                        currentAudio.addEventListener('canplaythrough', attemptPlay, { once: true });
-                    }
-                };
-                attemptPlay();
+                
+                currentAudio.play().catch(e => console.log("Audio autoplay blocked", e));
+                currentAudio.addEventListener('timeupdate', syncLyrics);
+                
             }, 1200);
         } else {
             // Toggle play/pause
@@ -306,7 +298,7 @@ function syncLyrics() {
 
 function switchTrack(trackNum) {
     // Determine the target audio and lyrics
-    let nextAudio = window.AssetLoader.cache.get(trackNum === 1 ? 'song1' : 'song2') || document.getElementById(trackNum === 1 ? 'audioTrack1' : 'audioTrack2');
+    let nextAudio = document.getElementById(trackNum === 1 ? 'audioTrack1' : 'audioTrack2');
     let nextLyrics = trackNum === 1 ? LYRICS_TIMING_CONFIG.track1 : LYRICS_TIMING_CONFIG.track2;
 
     // Update buttons UI
@@ -356,19 +348,9 @@ function switchTrack(trackNum) {
     setTimeout(() => {
         arm.classList.add('playing');
         setTimeout(() => {
-            const attemptPlay = () => {
-                if (currentAudio.readyState >= 3) {
-                    btnText.innerText = 'PAUSE';
-                    disc.classList.add('spinning');
-                    currentAudio.play().catch(e => console.log(e));
-                    currentAudio.addEventListener('timeupdate', syncLyrics);
-                } else {
-                    btnText.innerText = 'LOADING...';
-                    currentAudio.load();
-                    currentAudio.addEventListener('canplaythrough', attemptPlay, { once: true });
-                }
-            };
-            attemptPlay();
+            disc.classList.add('spinning');
+            currentAudio.play().catch(e => console.log(e));
+            currentAudio.addEventListener('timeupdate', syncLyrics);
         }, 1000);
     }, delay);
 }

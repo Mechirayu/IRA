@@ -40,7 +40,44 @@ function initMemoryMatch() {
         card.addEventListener('click', () => flipCard(card));
         grid.appendChild(card);
     });
+
+    // Wait for DOM to render cards, then calculate and apply scale if needed
+    requestAnimationFrame(() => {
+        scaleMemoryGridToFit();
+    });
 }
+
+// Function to scale the grid down if it exceeds available vertical space
+function scaleMemoryGridToFit() {
+    const grid = document.querySelector('.memory-grid');
+    const colLeft = document.querySelector('.memory-col-left');
+    
+    if (!grid || !colLeft) return;
+    
+    // Reset transform to measure natural height
+    grid.style.transform = 'none';
+    
+    const gridHeight = grid.scrollHeight;
+    const availableHeight = colLeft.clientHeight;
+    
+    // If grid is taller than available space minus a small padding
+    if (gridHeight > availableHeight && availableHeight > 0) {
+        const padding = 10; // 5px top and bottom
+        const scale = (availableHeight - padding) / gridHeight;
+        
+        if (scale < 1) {
+            grid.style.transform = `scale(${scale})`;
+            grid.style.transformOrigin = 'center center';
+        }
+    }
+}
+
+// Listen for window resize to recalculate scale
+window.addEventListener('resize', () => {
+    if (document.getElementById('memoryMatchPage').classList.contains('active')) {
+        scaleMemoryGridToFit();
+    }
+});
 
 function flipCard(card) {
     if (isBoardLocked) return;
@@ -162,20 +199,11 @@ function winMemoryGame() {
 }
 
 function startBouquetAnimation() {
-    // 1. Set nav state
-    const bqPage = document.getElementById('bqPage');
-    if (typeof current !== 'undefined') current = 6;
-    if (typeof dots !== 'undefined') dots.forEach((d,i)=>d.classList.toggle('active',i===6));
-    
-    // Switch active page safely
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(p => p.classList.remove('active'));
-    bqPage.classList.add('active');
-
-    // Build the original complex bouquet from script.js
-    if (typeof buildBouquet === 'function') {
-        buildBouquet();
+    // Just use the main navigation function which handles display/opacity safely
+    if (typeof go === 'function') {
+        go(6);
     }
+
 
     // Fade in text and next button after bouquet draws (approx 3.5s)
     setTimeout(() => {
