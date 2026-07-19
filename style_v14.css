@@ -2690,10 +2690,17 @@ body{
         gap: 10px !important;
     }
     .end-title {
-        font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
+        font-size: clamp(34px, 7vw, 48px) !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        text-align: center !important;
     }
     .end-subtitle {
-        font-size: clamp(0.9rem, 3.5vw, 1.2rem) !important;
+        font-size: clamp(18px, 4.5vw, 24px) !important;
+        line-height: 1.7 !important;
+        text-align: center !important;
+        max-width: 90% !important;
+        margin: 0 auto !important;
     }
     .end-btn {
         padding: 12px 30px !important;
