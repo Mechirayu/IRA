@@ -199,7 +199,7 @@ function climaxConstellation() {
     // 4. The Cinematic Shift (Translate the heart to the left)
     const isMobile = window.innerWidth < 768;
     const shiftX = isMobile ? 0 : -window.innerWidth * 0.25;
-    const shiftY = isMobile ? -window.innerHeight * 0.2 : 0;
+    const shiftY = isMobile ? -window.innerHeight * 0.08 : 0;
     const scaleDown = isMobile ? 0.6 : 0.7;
     
     gsap.to('.constellation-wrapper', {
