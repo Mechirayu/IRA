@@ -2317,9 +2317,31 @@ body{
 
     /* ---- 1. WELCOME SCREEN ---- */
     #welcomePage .inner {
-        width: 90vw !important;
+        width: 100vw !important;
         max-width: 100% !important;
-        padding: 0 10px !important;
+        min-height: 100dvh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 12dvh 6vw 8dvh !important;
+        box-sizing: border-box !important;
+    }
+    #welcomePage .display {
+        font-size: clamp(28px, 9vw, 42px) !important;
+        line-height: 1.15 !important;
+        font-weight: 800 !important;
+    }
+    #welcomePage .lede {
+        font-size: clamp(18px, 4.5vw, 24px) !important;
+        font-style: normal !important;
+        line-height: 1.6 !important;
+        margin-top: 10px !important;
+    }
+    #welcomePage .hold-hint {
+        font-size: clamp(20px, 5.5vw, 28px) !important;
+        letter-spacing: 2px !important;
+        margin-top: 25px !important;
     }
 
     /* ---- 2. CONSTELLATION SCREEN ---- */
