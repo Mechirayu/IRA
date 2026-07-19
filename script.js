@@ -656,38 +656,74 @@ function acceptPromise() {
 }
 
 function startFallingPetals() {
-    var duration = 15 * 1000;
-    var animationEnd = Date.now() + duration;
-    var skew = 1;
-
-    function randomInRange(min, max) {
-        return Math.random() * (max - min) + min;
+    const container = document.getElementById('animation-layer') || document.body;
+    const petals = ['🌸', '🌹', '🌺', '🌷', '💮'];
+    
+    // Create petal styles if they don't exist
+    if (!document.getElementById('petal-styles')) {
+        const style = document.createElement('style');
+        style.id = 'petal-styles';
+        style.innerHTML = `
+            @keyframes petalFall {
+                0% { transform: translateY(-10vh) rotate(0deg) scale(1); opacity: 1; }
+                80% { opacity: 1; }
+                100% { transform: translateY(110vh) rotate(360deg) scale(1.2); opacity: 0; }
+            }
+            @keyframes petalDrift {
+                0% { transform: translateX(0px); }
+                50% { transform: translateX(80px); }
+                100% { transform: translateX(-80px); }
+            }
+            .falling-petal {
+                position: fixed;
+                top: 0;
+                z-index: 9105;
+                pointer-events: none;
+                user-select: none;
+                will-change: transform, opacity;
+                font-size: clamp(20px, 4vw, 32px);
+                animation: petalFall linear forwards;
+            }
+            .falling-petal-inner {
+                animation: petalDrift ease-in-out infinite alternate;
+                display: inline-block;
+            }
+        `;
+        document.head.appendChild(style);
     }
 
-    (function frame() {
-        var timeLeft = animationEnd - Date.now();
-        var ticks = Math.max(200, 500 * (timeLeft / duration));
-        skew = Math.max(0.8, skew - 0.001);
-
-        confetti({
-            particleCount: 2,
-            startVelocity: 0,
-            ticks: ticks,
-            origin: {
-                x: Math.random(),
-                // since particles fall down, skew start toward the top
-                y: (Math.random() * skew) - 0.2
-            },
-            colors: ['#FF7E9D', '#FFC2D2', '#E8C07D', '#C8264F', '#B574AE', '#FFFFFF'],
-            shapes: ['square', 'circle'],
-            gravity: randomInRange(0.3, 0.8),
-            scalar: randomInRange(1, 2.5),
-            drift: randomInRange(-1, 1)
-        });
-
-        // Loop infinitely instead of stopping
-        requestAnimationFrame(frame);
-    }());
+    function spawnPetal() {
+        const outer = document.createElement('div');
+        outer.className = 'falling-petal';
+        outer.style.left = Math.random() * 100 + 'vw';
+        
+        // Randomize fall duration (4s to 10s)
+        const fallDuration = 4 + Math.random() * 6;
+        outer.style.animationDuration = fallDuration + 's';
+        
+        const inner = document.createElement('div');
+        inner.className = 'falling-petal-inner';
+        inner.textContent = petals[Math.floor(Math.random() * petals.length)];
+        
+        // Randomize drift duration (2s to 5s)
+        const driftDuration = 2 + Math.random() * 3;
+        inner.style.animationDuration = driftDuration + 's';
+        
+        // Randomize initial drift position
+        inner.style.animationDelay = -(Math.random() * driftDuration) + 's';
+        
+        outer.appendChild(inner);
+        container.appendChild(outer);
+        
+        // Remove from DOM when animation ends
+        setTimeout(() => {
+            if (outer.parentNode) outer.remove();
+        }, fallDuration * 1000 + 100);
+    }
+    
+    // Spawn continuously for 15 seconds
+    const interval = setInterval(spawnPetal, 150);
+    setTimeout(() => clearInterval(interval), 15000);
 }
 
 window.startFinale = startFinale;
