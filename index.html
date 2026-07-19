@@ -1,18 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>For My Mast Billo 💌</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Quicksand:wght@500;600;700&family=Caveat:wght@500;700&family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style_v16.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>For My Mast Billo 💌</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Pacifico&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Quicksand:wght@500;600;700&family=Caveat:wght@500;700&family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Poppins:wght@500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style_v17.css">
 </head>
+
 <body>
 
   <!-- Slick Skip Button -->
-  <button id="mainSkipBtn" class="global-skip-btn" onclick="skipScene()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); color: var(--gold); padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 14px; backdrop-filter: blur(10px); cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">Skip &gt;&gt;</button>
+  <button id="mainSkipBtn" class="global-skip-btn" onclick="skipScene()"
+    style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); color: var(--gold); padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 14px; backdrop-filter: blur(10px); cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">Skip
+    &gt;&gt;</button>
 
   <!-- SVG Filters for procedural textures -->
   <svg width="0" height="0" style="position:absolute; z-index:-1;">
@@ -29,25 +35,33 @@
 
   <audio id="bg-music" src="placeholder_song.mp3" loop crossorigin="anonymous"></audio>
 
-  <button class="music-btn heartbeat" id="musicBtn" style="display: none;"><span class="note">🎵</span><span id="musicLabel">Music</span></button>
-  <div class="topbar" style="display: none;"><div class="dots" id="dots"></div></div>
+  <button class="music-btn heartbeat" id="musicBtn" style="display: none;"><span class="note">🎵</span><span
+      id="musicLabel">Music</span></button>
+  <div class="topbar" style="display: none;">
+    <div class="dots" id="dots"></div>
+  </div>
   <button class="nav-back hidden" id="backBtn" style="display:none !important;">‹ back</button>
 
 
-    <!-- 0 WELCOME -->
-  <section class="page active" id="welcomePage"><div class="inner">
-    <span class="eyebrow c-hidden" id="wel1">a little something</span>
-    <div class="emoji c-hidden" id="wel2">💌</div>
-    <h1 class="display c-hidden-no-blur" id="wel3">Someone made <em>this</em><br>just for you, Mast Billo</h1>
-    <p class="lede c-hidden" id="wel4">a few taps, a few surprises… ready?</p>
-    
-    <div class="hold-container c-hidden" id="wel5">
-      <div id="holdHeart" class="hold-heart heartbeat-idle">
-        <svg viewBox="0 0 24 24" fill="#ff0a33"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+  <!-- 0 WELCOME -->
+  <section class="page active" id="welcomePage">
+    <div class="inner">
+      <span class="eyebrow c-hidden" id="wel1">a little something</span>
+      <div class="emoji c-hidden" id="wel2">💌</div>
+      <h1 class="display c-hidden-no-blur" id="wel3">Someone made <em>this</em><br>just for you, Mast Billo</h1>
+      <p class="lede c-hidden" id="wel4">a few taps, a few surprises… ready?</p>
+
+      <div class="hold-container c-hidden" id="wel5">
+        <div id="holdHeart" class="hold-heart heartbeat-idle">
+          <svg viewBox="0 0 24 24" fill="#ff0a33">
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
+        </div>
+        <div class="hold-hint">Hold the heart...</div>
       </div>
-      <div class="hold-hint">Hold the heart...</div>
     </div>
-  </div></section>
+  </section>
 
   <!-- FLORAL CASCADE CANVAS -->
   <canvas id="floralCanvas" class="floral-canvas"></canvas>
@@ -56,11 +70,13 @@
   <section class="page" id="constellationPage">
     <div class="constellation-bg"></div>
     <div class="constellation-wrapper">
-        <svg id="constellationSvg" viewBox="0 0 500 500"></svg>
-        <div id="starContainer"></div>
+      <svg id="constellationSvg" viewBox="0 0 500 500"></svg>
+      <div id="starContainer"></div>
     </div>
-    <div id="constellationPrompt" class="c-prompt">Tap to light up these 18 stars, representing 18 beautiful chapters of your life. (0/18)</div>
-    <div id="constellationMessage" class="c-message">Just as you lit up these stars, you've lit up my entire world.</div>
+    <div id="constellationPrompt" class="c-prompt">Tap to light up these 18 stars, representing 18 beautiful chapters of
+      your life. (0/18)</div>
+    <div id="constellationMessage" class="c-message">Just as you lit up these stars, you've lit up my entire world.
+    </div>
     <div id="constellationFlash"></div>
   </section>
 
@@ -70,84 +86,95 @@
   <section class="page" id="memoriesPage">
     <div class="desk-bg"></div>
     <div class="memories-layout">
-        <div id="memoriesHeadingBlock" class="memories-heading-block">
-            <h1 class="memories-heading">18 Times You Melted My Heart</h1>
-            <p class="memories-subheading">Tap the envelopes to open them...</p>
-        </div>
-        <!-- THE DESK FOR SCATTERED ENVELOPES -->
-        <div id="memoriesDesk"></div>
+      <div id="memoriesHeadingBlock" class="memories-heading-block">
+        <h1 class="memories-heading">18 Times You Melted My Heart</h1>
+        <p class="memories-subheading">Tap the envelopes to open them...</p>
+      </div>
+      <!-- THE DESK FOR SCATTERED ENVELOPES -->
+      <div id="memoriesDesk"></div>
     </div>
 
     <!-- The Big Envelope Layers -->
     <div id="bigEnvelopeContainer">
-        <!-- BACK LAYER -->
-        <div class="big-envelope-layer" id="beBackLayer">
-            <svg class="be-svg-body" viewBox="0 0 400 250">
-                <rect x="10" y="10" width="380" height="230" rx="15" fill="#ff6699" stroke="#800020" stroke-width="8" />
-            </svg>
+      <!-- BACK LAYER -->
+      <div class="big-envelope-layer" id="beBackLayer">
+        <svg class="be-svg-body" viewBox="0 0 400 250">
+          <rect x="10" y="10" width="380" height="230" rx="15" fill="#ff6699" stroke="#800020" stroke-width="8" />
+        </svg>
+      </div>
+
+      <!-- Removed memoriesDesk from here -->
+
+      <!-- FRONT LAYER -->
+      <div class="big-envelope-layer" id="beFrontLayer">
+        <svg class="be-svg-body" viewBox="0 0 400 250">
+          <path d="M 10,25 L 170,140 L 10,235 Z" fill="#ff3377" stroke="#800020" stroke-width="8"
+            stroke-linejoin="round" />
+          <path d="M 390,25 L 230,140 L 390,235 Z" fill="#ff3377" stroke="#800020" stroke-width="8"
+            stroke-linejoin="round" />
+          <path d="M 10,235 L 200,100 L 390,235 Z" fill="#ff4d88" stroke="#800020" stroke-width="8"
+            stroke-linejoin="round" />
+          <!-- Stitches -->
+          <path d="M 25,220 L 195,115" fill="none" stroke="#800020" stroke-width="4" stroke-dasharray="8,6" />
+          <path d="M 375,220 L 205,115" fill="none" stroke="#800020" stroke-width="4" stroke-dasharray="8,6" />
+          <!-- Highlights -->
+          <path d="M 30,205 L 120,150" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"
+            opacity="0.6" />
+          <path d="M 370,205 L 280,150" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"
+            opacity="0.6" />
+        </svg>
+
+        <!-- Flap SVG -->
+        <div class="be-flap">
+          <svg class="be-svg-flap" viewBox="0 0 400 160">
+            <path d="M 10,15 L 200,150 L 390,15 Z" fill="#ff80a6" stroke="#800020" stroke-width="8"
+              stroke-linejoin="round" />
+            <!-- Stitches -->
+            <path d="M 25,30 L 195,140" fill="none" stroke="#800020" stroke-width="4" stroke-dasharray="8,6" />
+            <path d="M 375,30 L 205,140" fill="none" stroke="#800020" stroke-width="4" stroke-dasharray="8,6" />
+            <!-- Highlight -->
+            <path d="M 40,35 L 130,90" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"
+              opacity="0.6" />
+          </svg>
         </div>
 
-        <!-- Removed memoriesDesk from here -->
-
-        <!-- FRONT LAYER -->
-        <div class="big-envelope-layer" id="beFrontLayer">
-            <svg class="be-svg-body" viewBox="0 0 400 250">
-                <path d="M 10,25 L 170,140 L 10,235 Z" fill="#ff3377" stroke="#800020" stroke-width="8" stroke-linejoin="round" />
-                <path d="M 390,25 L 230,140 L 390,235 Z" fill="#ff3377" stroke="#800020" stroke-width="8" stroke-linejoin="round" />
-                <path d="M 10,235 L 200,100 L 390,235 Z" fill="#ff4d88" stroke="#800020" stroke-width="8" stroke-linejoin="round" />
-                <!-- Stitches -->
-                <path d="M 25,220 L 195,115" fill="none" stroke="#800020" stroke-width="4" stroke-dasharray="8,6" />
-                <path d="M 375,220 L 205,115" fill="none" stroke="#800020" stroke-width="4" stroke-dasharray="8,6" />
-                <!-- Highlights -->
-                <path d="M 30,205 L 120,150" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.6" />
-                <path d="M 370,205 L 280,150" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.6" />
-            </svg>
-
-            <!-- Flap SVG -->
-            <div class="be-flap">
-                <svg class="be-svg-flap" viewBox="0 0 400 160">
-                    <path d="M 10,15 L 200,150 L 390,15 Z" fill="#ff80a6" stroke="#800020" stroke-width="8" stroke-linejoin="round" />
-                    <!-- Stitches -->
-                    <path d="M 25,30 L 195,140" fill="none" stroke="#800020" stroke-width="4" stroke-dasharray="8,6" />
-                    <path d="M 375,30 L 205,140" fill="none" stroke="#800020" stroke-width="4" stroke-dasharray="8,6" />
-                    <!-- Highlight -->
-                    <path d="M 40,35 L 130,90" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.6" />
-                </svg>
-            </div>
-
-            <!-- Heart Sticker -->
-            <div class="be-seal">
-                <svg viewBox="0 0 100 100">
-                    <path d="M 50,90 C 50,90 10,60 10,35 C 10,15 35,15 50,35 C 65,15 90,15 90,35 C 90,60 50,90 50,90 Z" fill="#ff1a53" stroke="#800020" stroke-width="6" stroke-linejoin="round" />
-                    <path d="M 25,35 A 10,10 0 0 1 40,25" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.8" />
-                </svg>
+        <!-- Heart Sticker -->
+        <div class="be-seal">
+          <svg viewBox="0 0 100 100">
+            <path d="M 50,90 C 50,90 10,60 10,35 C 10,15 35,15 50,35 C 65,15 90,15 90,35 C 90,60 50,90 50,90 Z"
+              fill="#ff1a53" stroke="#800020" stroke-width="6" stroke-linejoin="round" />
+            <path d="M 25,35 A 10,10 0 0 1 40,25" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"
+              opacity="0.8" />
+          </svg>
         </div>
         <div id="bePrompt" class="v-prompt prompt-top">TAP TO OPEN THE ENVELOPE...</div>
-    </div>
-    
-    <!-- memoriesHeadingBlock was moved above -->
+      </div>
 
-    <div id="collectorHeart" class="collector-heart">
+      <!-- memoriesHeadingBlock was moved above -->
+
+      <div id="collectorHeart" class="collector-heart">
         <div class="ch-icon">💗</div>
         <div class="ch-text" id="chText">Tap to collect</div>
-    </div>
-    
-    <button class="btn" style="display:none !important; position:absolute; bottom: 20px; right: 120px; z-index: 500; font-size: 12px; padding: 5px 10px;" onclick="devOpenAll()">Open All (Dev)</button>
+      </div>
+
+      <button class="btn"
+        style="display:none !important; position:absolute; bottom: 20px; right: 120px; z-index: 500; font-size: 12px; padding: 5px 10px;"
+        onclick="devOpenAll()">Open All (Dev)</button>
 
   </section>
 
   <!-- 4 THE GOLDEN MEMORIES -->
   <section class="page" id="petalPathPage">
     <div id="scratchTimeline">
-      <canvas id="pathCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
+      <canvas id="pathCanvas"
+        style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
 
       <!-- MEMORY 1 — Heart Right -->
       <div class="scratch-row row-right">
         <div class="scratch-card-side">
           <div class="scratch-card-shell">
             <div class="scratch-card-hint">✦ scratch to reveal ✦</div>
-            <img src="heart%205/1-path.jpg"
-                 class="scratch-photo" alt="Memory 1">
+            <img src="heart%205/1-path.jpg" class="scratch-photo" alt="Memory 1">
             <canvas class="scratch-canvas"></canvas>
           </div>
         </div>
@@ -155,7 +182,8 @@
           <div class="scratch-note-inner">
             <span class="scratch-num">01</span>
             <p class="scratch-quote">Messy shirts, beautiful memories.</p>
-            <p class="scratch-sub">The absolute best part of my school days was sharing these smiles with my Cutie. ✨</p>
+            <p class="scratch-sub">The absolute best part of my school days was sharing these smiles with my Cutie. ✨
+            </p>
           </div>
         </div>
       </div>
@@ -165,8 +193,7 @@
         <div class="scratch-card-side">
           <div class="scratch-card-shell">
             <div class="scratch-card-hint">✦ scratch to reveal ✦</div>
-            <img src="heart%205/2-path.jpg"
-                 class="scratch-photo" alt="Memory 2">
+            <img src="heart%205/2-path.jpg" class="scratch-photo" alt="Memory 2">
             <canvas class="scratch-canvas"></canvas>
           </div>
         </div>
@@ -184,8 +211,7 @@
         <div class="scratch-card-side">
           <div class="scratch-card-shell" style="aspect-ratio: 4/3; max-width: 800px; width: min(95vw, 800px);">
             <div class="scratch-card-hint">✦ scratch to reveal ✦</div>
-            <img src="heart%205/3-path.JPG"
-                 class="scratch-photo" alt="Memory 3">
+            <img src="heart%205/3-path.JPG" class="scratch-photo" alt="Memory 3">
             <canvas class="scratch-canvas"></canvas>
           </div>
         </div>
@@ -203,8 +229,7 @@
         <div class="scratch-card-side">
           <div class="scratch-card-shell">
             <div class="scratch-card-hint">✦ scratch to reveal ✦</div>
-            <img src="heart%205/4-path.JPG"
-                 class="scratch-photo" alt="Memory 4">
+            <img src="heart%205/4-path.JPG" class="scratch-photo" alt="Memory 4">
             <canvas class="scratch-canvas"></canvas>
           </div>
         </div>
@@ -212,7 +237,8 @@
           <div class="scratch-note-inner">
             <span class="scratch-num">04</span>
             <p class="scratch-quote">Farewell diaries! 🖤</p>
-            <p class="scratch-sub">Look at us... though I was definitely just lucky to be standing next to the prettiest girl in the room.</p>
+            <p class="scratch-sub">Look at us... though I was definitely just lucky to be standing next to the prettiest
+              girl in the room.</p>
           </div>
         </div>
       </div>
@@ -222,8 +248,7 @@
         <div class="scratch-card-side">
           <div class="scratch-card-shell">
             <div class="scratch-card-hint">✦ scratch to reveal ✦</div>
-            <img src="heart%205/5-path.JPG"
-                 class="scratch-photo" alt="Memory 5">
+            <img src="heart%205/5-path.JPG" class="scratch-photo" alt="Memory 5">
             <canvas class="scratch-canvas"></canvas>
           </div>
         </div>
@@ -231,7 +256,8 @@
           <div class="scratch-note-inner">
             <span class="scratch-num">05</span>
             <p class="scratch-quote">Those squishy cheeks! 🥰</p>
-            <p class="scratch-sub">I promise to always annoy you, pull your cheeks, and make you smile exactly like this.</p>
+            <p class="scratch-sub">I promise to always annoy you, pull your cheeks, and make you smile exactly like
+              this.</p>
           </div>
         </div>
       </div>
@@ -242,170 +268,250 @@
   <!-- 6 THE VINYL ROOM -->
   <section class="page" id="vinylRoomPage">
     <div class="lyrics-header global-header">
-        <span class="gold-serif">FORGET THE ORIGINALS</span>
-        <h2 class="display italic-script">Nothing sounds as beautiful as you.</h2>
+      <span class="gold-serif">FORGET THE ORIGINALS</span>
+      <h2 class="display italic-script">Nothing sounds as beautiful as you.</h2>
     </div>
-    
+
     <div class="vinyl-room-layout">
-        <!-- Left: Vinyl Player -->
-        <div class="vinyl-col">
-            <!-- The heart will drop into the center of the player -->
-            <div class="vinyl-container">
-                <!-- The record disc that slides up -->
-                <div class="vinyl-disc" id="vinylDisc">
-                    <div class="vinyl-center-label">
-                        <div class="label-hole"></div>
-                    </div>
-                </div>
-                
-                <div class="vinyl-tonearm" id="vinylArm">
-                    <!-- needle visual -->
-                    <div class="arm-base"></div>
-                    <div class="arm-stick"></div>
-                    <div class="arm-head"></div>
-                </div>
+      <!-- Left: Vinyl Player -->
+      <div class="vinyl-col">
+        <!-- The heart will drop into the center of the player -->
+        <div class="vinyl-container">
+          <!-- The record disc that slides up -->
+          <div class="vinyl-disc" id="vinylDisc">
+            <div class="vinyl-center-label">
+              <div class="label-hole"></div>
             </div>
-            
-            <!-- Hidden Audio Elements -->
-            <audio id="audioTrack1" src="song/1-song%20(1).mp3" preload="auto"></audio>
-            <audio id="audioTrack2" src="song/2-song%20(1).mp3" preload="auto"></audio>
+          </div>
+
+          <div class="vinyl-tonearm" id="vinylArm">
+            <!-- needle visual -->
+            <div class="arm-base"></div>
+            <div class="arm-stick"></div>
+            <div class="arm-head"></div>
+          </div>
         </div>
-        
-        <!-- Right: Lyrics Engine -->
-        <div class="lyrics-col">
-            <div class="track-switcher">
-                <button class="track-btn active" id="track1Btn">
-                    <span class="track-title">Pehli Nazar Mein</span>
-                </button>
-                <button class="track-btn" id="track2Btn">
-                    <span class="track-title">Pehla Pyaar</span>
-                </button>
-            </div>
-            
-            <div class="lyrics-container" id="lyricsContainer">
-                <div class="lyrics-inner" id="lyricsInner">
-                    <!-- Lyrics will be injected here via JS -->
-                </div>
-            </div>
+
+        <!-- Hidden Audio Elements -->
+        <audio id="audioTrack1" src="song/1-song%20(1).mp3" preload="auto"></audio>
+        <audio id="audioTrack2" src="song/2-song%20(1).mp3" preload="auto"></audio>
+      </div>
+
+      <!-- Right: Lyrics Engine -->
+      <div class="lyrics-col">
+        <div class="track-switcher">
+          <button class="track-btn active" id="track1Btn">
+            <span class="track-title">Pehli Nazar Mein</span>
+          </button>
+          <button class="track-btn" id="track2Btn">
+            <span class="track-title">Pehla Pyaar</span>
+          </button>
         </div>
-        
+
+        <div class="lyrics-container" id="lyricsContainer">
+          <div class="lyrics-inner" id="lyricsInner">
+            <!-- Lyrics will be injected here via JS -->
+          </div>
+        </div>
+      </div>
+
     </div>
-    
+
     <!-- Centered Play/Pause + Next Game -->
     <div class="vinyl-center-controls">
-        <button id="vinylControlBtn" class="play-record-btn">
-            <span>Drop the Needle</span>
-        </button>
-        <button id="vinylNextGameBtn" class="btn vinyl-next-game-btn" onclick="startMemoryMatchTransition()">Next Game &rarr;</button>
+      <button id="vinylControlBtn" class="play-record-btn">
+        <span>Drop the Needle</span>
+      </button>
+      <button id="vinylNextGameBtn" class="btn vinyl-next-game-btn" onclick="startMemoryMatchTransition()">Next Game
+        &rarr;</button>
     </div>
   </section>
 
   <!-- 7 MEMORY MATCH GAME -->
   <section class="page" id="memoryMatchPage">
     <div class="memory-layout">
-        <!-- Left: Game Board & Win Heart -->
-        <div class="memory-col-left">
-            <div class="memory-grid-container">
-                <div class="memory-grid" id="memoryGrid">
-                    <!-- Cards injected via JS -->
-                </div>
-            </div>
-            
-            <!-- Win State Elements (Hidden Initially) -->
-            <div id="win-heart" class="hidden" onclick="go(6)">♥</div>
-            <p id="win-prompt" class="hidden">Tap the heart for your next gift ✨</p>
+      <!-- Left: Game Board & Win Heart -->
+      <div class="memory-col-left">
+        <div class="memory-grid-container">
+          <div class="memory-grid" id="memoryGrid">
+            <!-- Cards injected via JS -->
+          </div>
         </div>
 
-        <!-- Right: Instructions -->
-        <div class="memory-col-right">
-            <h2 class="display gold-serif" style="font-size: clamp(32px, 5vw, 48px); line-height: 1.2;">I have a lot<br>of names for you...</h2>
-            <p class="italic-script" style="font-size: clamp(20px, 3vw, 28px); color: #fff; margin-top: 20px; opacity: 0.9;">Find your name pair of two and unlock your next gift.</p>
-        </div>
+        <!-- Win State Elements (Hidden Initially) -->
+        <div id="win-heart" class="hidden" onclick="go(6)">♥</div>
+        <p id="win-prompt" class="hidden">Tap the heart for your next gift ✨</p>
+      </div>
+
+      <!-- Right: Instructions -->
+      <div class="memory-col-right">
+        <h2 class="display gold-serif" style="font-size: clamp(32px, 5vw, 48px); line-height: 1.2;">I have a lot<br>of
+          names for you...</h2>
+        <p class="italic-script"
+          style="font-size: clamp(20px, 3vw, 28px); color: #fff; margin-top: 20px; opacity: 0.9;">Find your name pair of
+          two and unlock your next gift.</p>
+      </div>
     </div>
-    <button class="btn ghost" onclick="winMemoryGame()" style="display:none !important; position: absolute; bottom: 20px; right: 20px; z-index: 100; font-size: 14px; padding: 8px 16px;">Skip &gt;&gt;</button>
+    <button class="btn ghost" onclick="winMemoryGame()"
+      style="display:none !important; position: absolute; bottom: 20px; right: 20px; z-index: 100; font-size: 14px; padding: 8px 16px;">Skip
+      &gt;&gt;</button>
   </section>
 
 
   <!-- 6 BOUQUET (Scene 8) -->
   <section class="page" id="bqPage">
     <div class="inner">
-        <span class="eyebrow" id="bqEyebrow" style="opacity:0;">just for you</span>
-        <h2 class="display gold-serif hidden" id="bqHeader" style="z-index: 20; text-shadow: 0 0 20px rgba(0,0,0,0.8);">Flowers fade, but this one is coded to last forever.</h2>
-        
-        <div id="bqWrap" class="bouquet-glow">
-            <svg id="bqSvg" viewBox="0 0 400 560" aria-label="a bouquet of roses"></svg>
-        </div>
-        
-        <div class="bqcap" id="bqCap" style="animation-delay:5s; opacity:0;">
-            <button class="btn ghost hidden" id="bqNextBtn" onclick="transitionToLetterGrid()" style="margin-top:14px; z-index: 20;">Next Chapter →</button>
-        </div>
+      <span class="eyebrow" id="bqEyebrow" style="opacity:0;">just for you</span>
+      <h2 class="display gold-serif hidden" id="bqHeader" style="z-index: 20; text-shadow: 0 0 20px rgba(0,0,0,0.8);">
+        Flowers fade, but this one is coded to last forever.</h2>
+
+      <div id="bqWrap" class="bouquet-glow">
+        <svg id="bqSvg" viewBox="0 0 400 560" aria-label="a bouquet of roses"></svg>
+      </div>
+
+      <div class="bqcap" id="bqCap" style="animation-delay:5s; opacity:0;">
+        <button class="btn ghost hidden" id="bqNextBtn" onclick="transitionToLetterGrid()"
+          style="margin-top:14px; z-index: 20;">Next Chapter →</button>
+      </div>
     </div>
   </section>
 
   <!-- 9 INTERACTIVE LETTER GRID (Overlays on Bouquet) -->
-  <div id="letterGridOverlay" style="display: none; position: absolute; inset: 0; z-index: 50; flex-direction: column; align-items: center; justify-content: center;">
+  <div id="letterGridOverlay"
+    style="display: none; position: absolute; inset: 0; z-index: 50; flex-direction: column; align-items: center; justify-content: center;">
     <div class="letter-modal" id="letterModal" style="opacity: 0; transform: translateY(40px);">
-        <div id="letterGridContent" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <h2 class="display gold-serif" style="font-size: clamp(32px, 6vw, 48px); text-align: center; color: #fffdf5;">Everything about you</h2>
-            <p class="sub" style="margin-top:6px; text-align: center; color: rgba(255,255,255,0.7); font-size: 20px;">tap each one 💗</p>
-            <div class="letter-grid" id="letterGrid">
-                <div class="letter-card" onclick="this.classList.toggle('open')"><div class="card-inner"><div class="card-front"><div class="ti">🌸</div><div class="title">Your Heart</div><div class="hint">tap</div></div><div class="card-back" style="font-size: 32px; padding: 30px; font-weight: 700; line-height: 1.3;">So pure, completely mine. ✨</div></div></div>
-                <div class="letter-card" onclick="this.classList.toggle('open')"><div class="card-inner"><div class="card-front"><div class="ti">💭</div><div class="title">Your Mind</div><div class="hint">tap</div></div><div class="card-back" style="font-size: 32px; padding: 30px; font-weight: 700; line-height: 1.3;">Always your safe place. 🤍</div></div></div>
-                <div class="letter-card" onclick="this.classList.toggle('open')"><div class="card-inner"><div class="card-front"><div class="ti">💔</div><div class="title">Our Fights</div><div class="hint">tap</div></div><div class="card-back" style="font-size: 32px; padding: 30px; font-weight: 700; line-height: 1.3;">Always ends in love. 🫂</div></div></div>
-                <div class="letter-card" onclick="this.classList.toggle('open')"><div class="card-inner"><div class="card-front"><div class="ti">💕</div><div class="title">Just You</div><div class="hint">tap</div></div><div class="card-back" style="font-size: 32px; padding: 30px; font-weight: 700; line-height: 1.3;">You are my world. 💖</div></div></div>
+      <div id="letterGridContent" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <h2 class="display gold-serif" style="font-size: clamp(32px, 6vw, 48px); text-align: center; color: #fffdf5;">
+          Everything about you</h2>
+        <p class="sub" style="margin-top:6px; text-align: center; color: rgba(255,255,255,0.7); font-size: 20px;">tap
+          each one 💗</p>
+        <div class="letter-grid" id="letterGrid">
+          <div class="letter-card" onclick="this.classList.toggle('open')">
+            <div class="card-inner">
+              <div class="card-front">
+                <div class="ti">🌸</div>
+                <div class="title">Your Heart</div>
+                <div class="hint">tap</div>
+              </div>
+              <div class="card-back" style="font-size: 32px; padding: 30px; font-weight: 700; line-height: 1.3;">So
+                pure, completely mine. ✨</div>
             </div>
-            <button class="btn ghost" onclick="transitionToEnvelope(event)" style="margin-top: 25px;">View the envelope &rarr;</button>
+          </div>
+          <div class="letter-card" onclick="this.classList.toggle('open')">
+            <div class="card-inner">
+              <div class="card-front">
+                <div class="ti">💭</div>
+                <div class="title">Your Mind</div>
+                <div class="hint">tap</div>
+              </div>
+              <div class="card-back" style="font-size: 32px; padding: 30px; font-weight: 700; line-height: 1.3;">Always
+                your safe place. 🤍</div>
+            </div>
+          </div>
+          <div class="letter-card" onclick="this.classList.toggle('open')">
+            <div class="card-inner">
+              <div class="card-front">
+                <div class="ti">💔</div>
+                <div class="title">Our Fights</div>
+                <div class="hint">tap</div>
+              </div>
+              <div class="card-back" style="font-size: 32px; padding: 30px; font-weight: 700; line-height: 1.3;">Always
+                ends in love. 🫂</div>
+            </div>
+          </div>
+          <div class="letter-card" onclick="this.classList.toggle('open')">
+            <div class="card-inner">
+              <div class="card-front">
+                <div class="ti">💕</div>
+                <div class="title">Just You</div>
+                <div class="hint">tap</div>
+              </div>
+              <div class="card-back" style="font-size: 32px; padding: 30px; font-weight: 700; line-height: 1.3;">You are
+                my world. 💖</div>
+            </div>
+          </div>
         </div>
+        <button class="btn ghost" onclick="transitionToEnvelope(event)" style="margin-top: 25px;">View the envelope
+          &rarr;</button>
+      </div>
     </div>
   </div>
 
-    <!-- Locked Diary (Removed) -->
-    
+  <!-- Locked Diary (Removed) -->
+
 
   <!-- 10 VINTAGE ENVELOPE (Replaces the Diary) -->
   <div id="vintageEnvelopeContainer" class="envelope-container" style="display: none; opacity: 0;">
-    
-    <h2 id="envelopePrompt" class="display gold-serif envelope-prompt-top">Tap to Open,<br>I Have Something<br>For Your Eyes to Read...</h2>
-    
+
+    <h2 id="envelopePrompt" class="display gold-serif envelope-prompt-top">Tap to Open,<br>I Have Something<br>For Your
+      Eyes to Read...</h2>
+
     <div class="envelope-wrapper" onclick="openWaxSeal()" style="cursor: pointer;">
-        <!-- Back side of the envelope -->
-        <div class="envelope-back"></div>
-        
-        <!-- The actual paper letter (hidden inside the envelope initially) -->
-        <div id="paperLetterContent" class="paper-letter-scroll">
-            <div class="paper-bg"></div>
-            <div class="clipboard-clip"></div>
-            
-            <div class="letter-text-container">
-                <div class="ink-doodle doodle-heart-1">♡</div>
-                <div class="ink-doodle doodle-heart-2">♡</div>
-                <div class="ink-doodle doodle-star-1">✦</div>
+      <!-- Back side of the envelope -->
+      <div class="envelope-back"></div>
 
-                <p class="letter-para lp-date">July 17th</p>
-                <p class="letter-para lp-greeting">Happy 18th Birthday my Cutie! 💗😻</p>
-                <p class="letter-para">Sabse pehle to I am so so so sorry yaarrr... Mujhe pata h kal raat ko jab tumne mujhse ek lamba paragraph likhne ko bola tha... to maine bohot ajeeb tarah se mana kr diya tha! I know it sounded very rude... aur tumko zaroor bura laga hoga but Please uske liye mujhe maaf kr do! 🫶🏻 I genuinely didn't mean to hurt your feelings... Sach batau to mai wo paragraph isliye nhi likhna chahta tha kyuki mai bohot time se tumhare liye ye puri website design kr rha tha... mai tumko sirf ek normal text bhej kr wish nhi krna chahta tha! Mujhe tumhe ek aisa surprise dena tha jo humesha ke liye special ban jaye bilkul tumhari tarah jitni tum special ho... ❤️👀🥰</p>
-                <p class="letter-para">Upar se mera PC ka data pura wipe out ho gaya tha you know that... to sab kuch wapas se build krne me thoda delay ho gya... mujhe ye surprise exact midnight par dena tha... par is delay ke liye I am extremely sorry! ❤️🩹 mai bas chahta tha ki mai tumko dikha sakun ki tum mere liye kitna matter krti ho... 😘🫶🏻</p>
-                <div class="ink-doodle doodle-squiggle">〰️</div>
-                <p class="letter-para">Tumko shayad andaza bhi nhi h ki tum kitni special ho! 💗 Meri nazaron me you are absolutely perfect... aur tumhare andar mujhe aaj tak koi flaw nhi dikha! 😻 Tum literally sabse pyaari aur cutest insaan ho jisse mai aaj tak mila hu... par ek baat bolu? mujhe pata h tum bohot zyada overthink krti ho... Please... mere liye ye overthinking krna thoda kam kr do I mean band hi krdo! aur haan... baat baat per roona to aaj se bilkul hi band kr do! Agar mai tumhare liye thoda sa bhi matter krta hu na... to please rona mat... ❤️🩹 Tumhara vo soft heart bohot precious h... aur tumhari aankhon me aansu bilkul acche nhi lagte! tumhari wo choti choti baaton pe sensitive ho jana cute lagta h... par mujhe tumhe khush dekhna h... humesha... 🥰😘</p>
-                <p class="letter-para">Koi bhi tumhari jagah kabhi nhi le sakta... aur koi tumhe replace kr nhi skta! ❤️ tumne mujhe jis tarah se special feel krwaya h vo mai kabhi bhul nhi sakta... Wo first time jab tumne mera haath pakda tha... us ek moment ne mujhe itna special feel krwaya tha ki mai usko words mein describe hi nhi kr sakta! 😻🫶🏻 Par mujhe pata h ki tum exactly samajh rhi ho mai kya kehna chahta hu... tum sach mein meri Rasmalai... meri Sweetheart... meri Jaan... aur meri sabse badi Cutie ho... 😘💗🥰</p>
-                <div class="ink-doodle doodle-heart-3">❤</div>
-                <p class="letter-para">Aaj tumhara 18th birthday h officially a grown up now! 🎉 Ye milestone bohot bada h... aur mai wish krta hu ki tumhari life ka ye naya chapter bohot saari khushiyan... success... aur pyaar lekar aaye mera wala ofc 👀❤️ Bhagwan kare tumhe duniya ki har wo chiz mile jo tumhara dil chahta h! mai chahta hoon ki life ke is naye phase mein tum aur bhi zyada strong bano... aur apni us beautiful smile ko kabhi fade mat hone dena! 🥰 Zindagi chahe kitni bhi aage badh jaye... mujhe tumhara pura saath chahiye... Mai chahta hoon ki tum meri is journey mein humesha mere saath raho... aur mai bhi promise krta hu ki chahe kuch bhi ho jaye... mai tumhare saath khada rahunga! 🫶🏻❤️🩹</p>
-                <p class="letter-para">You are irreplaceable! 😻 Once again... sorry for being a little late aur kal raat wese behave krne ke liye... I just wanted this to be absolutely perfect for you! 😘</p>
-                <p class="letter-para lp-closing">I love you so much baby! Happy 18th Birthday! 💗🥰❤️🫶🏻</p>
-                <div class="ink-doodle doodle-heart-bottom">♡</div>
-                <button class="letter-keep-going" id="letterPromiseBtn">Make me a promise &rarr;</button>
-            </div>
-        </div>
+      <!-- The actual paper letter (hidden inside the envelope initially) -->
+      <div id="paperLetterContent" class="paper-letter-scroll">
+        <div class="paper-bg"></div>
+        <div class="clipboard-clip"></div>
 
-        <!-- Front sides of the envelope -->
-        <div class="envelope-front-pocket"></div>
-        <div class="envelope-flap-top">
-            <div class="wax-seal" id="waxSeal">
-                <span>18</span>
-            </div>
+        <div class="letter-text-container">
+          <div class="ink-doodle doodle-heart-1">♡</div>
+          <div class="ink-doodle doodle-heart-2">♡</div>
+          <div class="ink-doodle doodle-star-1">✦</div>
+
+          <p class="letter-para lp-date">July 17th</p>
+          <p class="letter-para lp-greeting">Happy 18th Birthday my Cutie! 💗😻</p>
+          <p class="letter-para">Sabse pehle to I am so so so sorry yaarrr... Mujhe pata h kal raat ko jab tumne mujhse
+            ek lamba paragraph likhne ko bola tha... to maine bohot ajeeb tarah se mana kr diya tha! I know it sounded
+            very rude... aur tumko zaroor bura laga hoga but Please uske liye mujhe maaf kr do! 🫶🏻 I genuinely didn't
+            mean to hurt your feelings... Sach batau to mai wo paragraph isliye nhi likhna chahta tha kyuki mai bohot
+            time se tumhare liye ye puri website design kr rha tha... mai tumko sirf ek normal text bhej kr wish nhi
+            krna chahta tha! Mujhe tumhe ek aisa surprise dena tha jo humesha ke liye special ban jaye bilkul tumhari
+            tarah jitni tum special ho... ❤️👀🥰</p>
+          <p class="letter-para">Upar se mera PC ka data pura wipe out ho gaya tha you know that... to sab kuch wapas se
+            build krne me thoda delay ho gya... mujhe ye surprise exact midnight par dena tha... par is delay ke liye I
+            am extremely sorry! ❤️🩹 mai bas chahta tha ki mai tumko dikha sakun ki tum mere liye kitna matter krti
+            ho... 😘🫶🏻</p>
+          <div class="ink-doodle doodle-squiggle">〰️</div>
+          <p class="letter-para">Tumko shayad andaza bhi nhi h ki tum kitni special ho! 💗 Meri nazaron me you are
+            absolutely perfect... aur tumhare andar mujhe aaj tak koi flaw nhi dikha! 😻 Tum literally sabse pyaari aur
+            cutest insaan ho jisse mai aaj tak mila hu... par ek baat bolu? mujhe pata h tum bohot zyada overthink krti
+            ho... Please... mere liye ye overthinking krna thoda kam kr do I mean band hi krdo! aur haan... baat baat
+            per roona to aaj se bilkul hi band kr do! Agar mai tumhare liye thoda sa bhi matter krta hu na... to please
+            rona mat... ❤️🩹 Tumhara vo soft heart bohot precious h... aur tumhari aankhon me aansu bilkul acche nhi
+            lagte! tumhari wo choti choti baaton pe sensitive ho jana cute lagta h... par mujhe tumhe khush dekhna h...
+            humesha... 🥰😘</p>
+          <p class="letter-para">Koi bhi tumhari jagah kabhi nhi le sakta... aur koi tumhe replace kr nhi skta! ❤️ tumne
+            mujhe jis tarah se special feel krwaya h vo mai kabhi bhul nhi sakta... Wo first time jab tumne mera haath
+            pakda tha... us ek moment ne mujhe itna special feel krwaya tha ki mai usko words mein describe hi nhi kr
+            sakta! 😻🫶🏻 Par mujhe pata h ki tum exactly samajh rhi ho mai kya kehna chahta hu... tum sach mein meri
+            Rasmalai... meri Sweetheart... meri Jaan... aur meri sabse badi Cutie ho... 😘💗🥰</p>
+          <div class="ink-doodle doodle-heart-3">❤</div>
+          <p class="letter-para">Aaj tumhara 18th birthday h officially a grown up now! 🎉 Ye milestone bohot bada h...
+            aur mai wish krta hu ki tumhari life ka ye naya chapter bohot saari khushiyan... success... aur pyaar lekar
+            aaye mera wala ofc 👀❤️ Bhagwan kare tumhe duniya ki har wo chiz mile jo tumhara dil chahta h! mai chahta
+            hoon ki life ke is naye phase mein tum aur bhi zyada strong bano... aur apni us beautiful smile ko kabhi
+            fade mat hone dena! 🥰 Zindagi chahe kitni bhi aage badh jaye... mujhe tumhara pura saath chahiye... Mai
+            chahta hoon ki tum meri is journey mein humesha mere saath raho... aur mai bhi promise krta hu ki chahe kuch
+            bhi ho jaye... mai tumhare saath khada rahunga! 🫶🏻❤️🩹</p>
+          <p class="letter-para">You are irreplaceable! 😻 Once again... sorry for being a little late aur kal raat wese
+            behave krne ke liye... I just wanted this to be absolutely perfect for you! 😘</p>
+          <p class="letter-para lp-closing">I love you so much baby! Happy 18th Birthday! 💗🥰❤️🫶🏻</p>
+          <div class="ink-doodle doodle-heart-bottom">♡</div>
+          <button class="letter-keep-going" id="letterPromiseBtn">Make me a promise &rarr;</button>
         </div>
+      </div>
+
+      <!-- Front sides of the envelope -->
+      <div class="envelope-front-pocket"></div>
+      <div class="envelope-flap-top">
+        <div class="wax-seal" id="waxSeal">
+          <span>18</span>
+        </div>
+      </div>
     </div>
-    
+
   </div>
 
 
@@ -413,65 +519,68 @@
   <!-- FINALE CONTAINER -->
   <div id="finale-container" class="finale-hidden">
 
-      <!-- Part 2: Promise Screen -->
-      <div id="promise-scene" class="finale-scene" style="display: none;">
-          <div class="promise-card">
-              <div class="promise-icon">🐰</div>
-              <h2 class="promise-text">One last promise... From today onwards, no more crying. I mean it, no getting upset over silly little things. And absolutely no more overthinking too! Deal?</h2>
-              <div class="promise-buttons">
-                  <button class="btn promise-btn yes-btn" id="promiseYesBtn" onclick="acceptPromise()">Yes 💖</button>
-                  <button class="btn promise-btn no-btn" id="runawayBtn">No</button>
-              </div>
-              <div class="reaction" id="promiseReact" style="min-height:26px;margin-top:16px;font-weight:600;color:#FF7E9D;font-size:15px;text-align:center;"></div>
-          </div>
+    <!-- Part 2: Promise Screen -->
+    <div id="promise-scene" class="finale-scene" style="display: none;">
+      <div class="promise-card">
+        <div class="promise-icon">🐰</div>
+        <h2 class="promise-text">One last promise... From today onwards, no more crying. I mean it, no getting upset
+          over silly little things. And absolutely no more overthinking too! Deal?</h2>
+        <div class="promise-buttons">
+          <button class="btn promise-btn yes-btn" id="promiseYesBtn" onclick="acceptPromise()">Yes 💖</button>
+          <button class="btn promise-btn no-btn" id="runawayBtn">No</button>
+        </div>
+        <div class="reaction" id="promiseReact"
+          style="min-height:26px;margin-top:16px;font-weight:600;color:#FF7E9D;font-size:15px;text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- Part 3: End Screen -->
+    <div id="end-scene" class="finale-scene final-screen-content" style="display: none; gap: 1.2rem;">
+      <h1 class="end-title">Yes, that's my girl!</h1>
+
+      <div class="end-heart" style="font-size: clamp(28px, 5.4vw, 38px);">
+        <span style="display:inline-block;animation:beat 1.3s ease-in-out infinite">❤️</span>
       </div>
 
-      <!-- Part 3: End Screen -->
-      <div id="end-scene" class="finale-scene final-screen-content" style="display: none; gap: 1.2rem;">
-          <h1 class="end-title">Yes, that's my girl!</h1>
-          
-          <div class="end-heart" style="font-size: clamp(28px, 5.4vw, 38px);">
-              <span style="display:inline-block;animation:beat 1.3s ease-in-out infinite">❤️</span>
-          </div>
+      <p class="end-subtitle">
+        Now keep that promise forever.
+      </p>
 
-          <p class="end-subtitle">
-              Now keep that promise forever.
-          </p>
+      <p class="end-subtitle">
+        Love you so much...
+      </p>
 
-          <p class="end-subtitle">
-              Love you so much...
-          </p>
+      <p class="end-subtitle">
+        And sorry again. ✨
+      </p>
 
-          <p class="end-subtitle">
-              And sorry again. ✨
-          </p>
-
-          <div class="end-buttons">
-              <button class="btn end-btn end-primary" onclick="startFallingPetals()">Make Flowers Rain</button>
-          </div>
+      <div class="end-buttons">
+        <button class="btn end-btn end-primary" onclick="startFallingPetals()">Make Flowers Rain</button>
       </div>
+    </div>
   </div>
-  
+
   <!-- DEV SKIP BUTTON (Removed in favor of globalSkipBtn) -->
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
   <!-- GLOBAL OVERLAY ROOT -->
   <div id="overlay-root">
-      <div id="polaroidBackdrop"></div>
-      <div id="animation-layer"></div>
-      <div id="modal-root"></div>
+    <div id="polaroidBackdrop"></div>
+    <div id="animation-layer"></div>
+    <div id="modal-root"></div>
   </div>
 
-<script src="intro.js?v=101"></script>
-<script src="constellation_v3.js?v=101"></script>
-<script src="memories_v4.js?v=101"></script>
-<script src="petalpath.js?v=101"></script>
-<script src="vinyl.js?v=101"></script>
-<script src="memoryMatch.js?v=101"></script>
-<script src="bouquet.js?v=101"></script>
-<script src="script.js?v=101"></script>
+  <script src="intro.js?v=101"></script>
+  <script src="constellation_v3.js?v=101"></script>
+  <script src="memories_v4.js?v=101"></script>
+  <script src="petalpath.js?v=101"></script>
+  <script src="vinyl.js?v=101"></script>
+  <script src="memoryMatch.js?v=101"></script>
+  <script src="bouquet.js?v=101"></script>
+  <script src="script.js?v=101"></script>
 </body>
+
 </html>
