@@ -438,7 +438,7 @@ function openWaxSeal() {
     tl.to(promptText, { 
         opacity: 0, 
         duration: 0.5,
-        onComplete: () => { promptText.style.display = 'none'; }
+        onComplete: () => { promptText.remove(); }
     }, 0);
     tl.set(seal, { display: 'none' });
     
