@@ -711,6 +711,12 @@ function acceptPromise() {
             el.style.pointerEvents = 'none';
         }
     });
+
+    // Also completely hide any active .page elements so the background is clean like the first screen
+    document.querySelectorAll('.page').forEach(p => {
+        p.style.display = 'none';
+        p.style.opacity = '0';
+    });
     
     // Ensure finale container allows pointer events
     const finaleContainer = document.getElementById('finale-container');
