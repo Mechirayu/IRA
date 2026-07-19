@@ -1402,15 +1402,13 @@ body{
 @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
 #bqPage #bqNextBtn {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
+    display: flex;
     position: fixed !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     bottom: 32px !important;
     z-index: 9999 !important;
+    transition: opacity 1s ease;
 }
 
 .golden-seed {

@@ -342,8 +342,10 @@ function transitionToLetterGrid() {
     // Optimization: Hint to browser
     gsap.set(bqSvg, { willChange: "transform, filter, opacity" });
     
+    const bqNextBtn = document.getElementById('bqNextBtn');
+    
     // Fade out text elements and completely hide the original button
-    tl.to([bqHeader, bqCap, bqEyebrow], {
+    tl.to([bqHeader, bqCap, bqEyebrow, bqNextBtn], {
         opacity: 0,
         duration: 0.6,
         ease: "power2.inOut",
@@ -351,6 +353,7 @@ function transitionToLetterGrid() {
             if (bqHeader) bqHeader.style.display = 'none';
             if (bqCap) bqCap.style.display = 'none';
             if (bqEyebrow) bqEyebrow.style.display = 'none';
+            if (bqNextBtn) bqNextBtn.style.display = 'none';
         }
     }, 0);
     
