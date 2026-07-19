@@ -2861,9 +2861,9 @@ body{
     background: #000;
 }
 
-/* 2% zoom on landscape videos to crop out tiny baked-in borders */
+/* 10% zoom on landscape videos to crop out baked-in borders */
 .mem-video-frame.landscape .mem-media {
-    transform: scale(1.02);
+    transform: scale(1.1);
 }
 
 /* Spinning heart loader */
