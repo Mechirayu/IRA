@@ -65,18 +65,15 @@ function triggerBurst() {
         }).catch(e => console.log('Audio autoplay prevented'));
     }
 
-    // Hide UI
-    gsap.to('#welcomePage', { 
-        opacity: 0, 
-        duration: 0.5,
-        onComplete: () => {
-            const wp = document.getElementById('welcomePage');
-            if(wp) {
-                wp.style.display = 'none';
-                wp.style.pointerEvents = 'none';
-            }
-        }
-    });
+    // Disable UI interaction but keep it visible while loading
+    const wp = document.getElementById('welcomePage');
+    if(wp) {
+        wp.style.pointerEvents = 'none';
+        
+        // Optional: fade the text a bit so they know it worked, but don't hide the page
+        const wel5 = document.getElementById('wel5');
+        if (wel5) gsap.to(wel5, { opacity: 0.3, duration: 0.5 });
+    }
 
     // Start Canvas Physics
     startFloralPhysics();

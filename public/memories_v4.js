@@ -47,24 +47,39 @@ const EnvelopeClonePool = {
 };
 
 // ─────────────────────────────────────────────────────────
-// MEDIA MANAGER — AssetLoader Integration
+// MEDIA MANAGER — DOM-based preloading for instant playback
 // ─────────────────────────────────────────────────────────
 const MediaManager = {
+    cache: new Map(), // id -> { el: DOMElement, isVid: boolean, frame: string }
+
     init() {
-        console.log('[MediaManager] Eagerly queueing media for background load (Stage 1)...');
-        const assets = [];
+        console.log('[MediaManager] Creating hidden media elements for instant playback...');
         for (let i = 1; i <= Object.keys(MEMORY_CONFIG).length; i++) {
             const mem = MEMORY_CONFIG[i];
             const id = mem.video || mem.image;
-            assets.push({ id: id, url: id, type: mem.video ? 'video' : 'image' });
+            
+            if (mem.video) {
+                const vid = document.createElement('video');
+                vid.src = id;
+                vid.preload = 'metadata'; // Fetches headers, avoiding OOM on mobile
+                vid.playsInline = true;
+                vid.muted = true;
+                vid.loop = true;
+                this.cache.set(id, { el: vid, isVid: true, frame: mem.frame });
+            } else if (mem.image) {
+                const img = new Image();
+                img.src = id;
+                this.cache.set(id, { el: img, isVid: false, frame: mem.frame });
+            }
         }
-        window.AssetLoader.addStage(1, assets);
     },
 
+    // Returns the pre-initialized DOM element for instant appending
     get(memKey) {
         const k   = typeof memKey === 'number' ? memKey : Number(memKey);
         const mem = MEMORY_CONFIG[k];
         const id  = mem.video || mem.image;
+        if (this.cache.has(id)) return this.cache.get(id);
         
         return { src: id, isVid: !!mem.video, frame: mem.frame };
     },
@@ -259,44 +274,59 @@ function openPolaroidStrict(mediaObj, envElement, memKey, cloneElement, original
     closeBtn.innerHTML = '✕';
     wrapper.appendChild(closeBtn);
 
-    // Spinner shown while loading
-    const spinner = document.createElement('div');
-    spinner.className = 'mem-spinner';
-    spinner.innerHTML = '❤️';
-    frameEl.appendChild(spinner);
-
-    // ── Build media element asynchronously ────────────────────────────────
+    // ── Build media element ────────────────────────────────
     let mediaEl;
+    let spinner = null;
 
-    window.AssetLoader.loadAsset(mediaObj.src, mediaObj.src, isVid ? 'video' : 'image').then(loadedEl => {
-        if (spinner) spinner.style.display = 'none';
-        
-        mediaEl = loadedEl.cloneNode();
-        if (isVid) {
-            mediaEl.src = loadedEl.src;
+    if (isVid) {
+        // Use pre-cached DOM element if available
+        mediaEl = mediaObj.el || document.createElement('video');
+        if (!mediaObj.el) {
+            mediaEl.src = mediaObj.src;
             mediaEl.muted       = true;
             mediaEl.loop        = true;
             mediaEl.playsInline = true;
-            mediaEl.className   = 'mem-media';
-            frameEl.appendChild(mediaEl);
-
-            if (mediaEl.readyState >= 1) {
-                try { mediaEl.play(); } catch(e) {}
-            }
-            if (mediaEl.readyState === 0) {
-                mediaEl.load();
-                mediaEl.play();
-            }
-        } else {
-            mediaEl.className = 'mem-media';
-            frameEl.appendChild(mediaEl);
-            
-            gsap.fromTo(mediaEl,
-                { opacity: 0, filter: 'blur(8px)' },
-                { opacity: 1, filter: 'blur(0px)', duration: 0.6, ease: 'power2.out', delay: 0.1 }
-            );
+            mediaEl.preload     = 'metadata';
         }
-    });
+        mediaEl.className   = 'mem-media';
+
+        // Spinner shown while loading
+        spinner = document.createElement('div');
+        spinner.className = 'mem-spinner';
+        spinner.innerHTML = '❤️';
+        frameEl.appendChild(spinner);
+
+        // Append video to DOM FIRST
+        frameEl.appendChild(mediaEl);
+
+        // Bind all events
+        mediaEl.onloadedmetadata = async () => {
+            try { await mediaEl.play(); } catch (e) { mediaEl.controls = true; }
+        };
+        mediaEl.oncanplay = () => { if (spinner) spinner.style.display = 'none'; };
+        mediaEl.onwaiting = () => { if (spinner) spinner.style.display = 'flex'; };
+        mediaEl.onerror = () => {
+            console.error('[Memory] Video error code:', mediaEl.error?.code, 'src:', mediaEl.currentSrc);
+            if (spinner) spinner.innerHTML = '⚠️';
+        };
+
+        // Try playing immediately if metadata is already preloaded!
+        if (mediaEl.readyState >= 1) {
+            try { mediaEl.play(); } catch(e) {}
+        }
+        if (mediaEl.readyState >= 3) {
+            if (spinner) spinner.style.display = 'none';
+        }
+        if (mediaEl.readyState === 0) {
+            mediaEl.load();
+        }
+
+    } else {
+        mediaEl = mediaObj.el || new Image();
+        mediaEl.className = 'mem-media';
+        if (!mediaObj.el) mediaEl.src = mediaObj.src;
+        frameEl.appendChild(mediaEl);
+    }
 
     // ── Add to DOM and animate in ──────────────────────────
     document.body.classList.add('is-paused-background');
