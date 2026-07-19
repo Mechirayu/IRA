@@ -784,8 +784,8 @@ body{
 /* Number e.g. "03" */
 .scratch-num {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(16px, 2vw, 24px); /* Much smaller now */
-    font-weight: 500;
+    font-size: clamp(20px, 2.5vw, 28px);
+    font-weight: 700;
     font-style: italic;
     color: #e6b877; /* Subtle elegant gold */
     line-height: 1;
@@ -817,8 +817,8 @@ body{
 /* The main quote (Title) — MASSIVE */
 .scratch-quote {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(56px, 7vw, 96px);
-    font-weight: 500;
+    font-size: clamp(64px, 8vw, 110px);
+    font-weight: 600;
     font-style: italic;
     color: #fff;
     margin: 0 0 28px 0;
@@ -829,9 +829,9 @@ body{
 
 /* The sub text (Description) */
 .scratch-sub {
-    font-family: 'Outfit', sans-serif;
-    font-size: clamp(1.2rem, 2vw, 1.5rem);
-    font-weight: 600;
+    font-family: "SF Pro Display", "Inter", "Montserrat", system-ui, sans-serif;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 700;
     color: #ffffff;
     line-height: 1.6;
 }
@@ -2402,14 +2402,21 @@ body{
         padding: 15px !important;
         border-radius: 12px !important;
     }
+    .scratch-num {
+        font-size: clamp(20px, 5vw, 28px) !important;
+        font-weight: 700 !important;
+    }
     .scratch-quote {
         margin-bottom: 0 !important;
-        font-size: clamp(16px, 4vw, 22px) !important;
+        font-size: clamp(19px, 4.8vw, 26px) !important;
+        font-weight: 600 !important;
         text-shadow: 1px 1px 4px rgba(0,0,0,0.8) !important;
     }
     .scratch-sub {
         margin-top: 0 !important;
-        font-size: clamp(13px, 3.5vw, 18px) !important;
+        font-family: "SF Pro Display", "Inter", "Montserrat", system-ui, sans-serif !important;
+        font-size: clamp(17px, 4.5vw, 24px) !important;
+        font-weight: 700 !important;
         text-shadow: 1px 1px 4px rgba(0,0,0,0.8) !important;
     }
 
