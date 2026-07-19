@@ -162,20 +162,11 @@ function winMemoryGame() {
 }
 
 function startBouquetAnimation() {
-    // 1. Set nav state
-    const bqPage = document.getElementById('bqPage');
-    if (typeof current !== 'undefined') current = 6;
-    if (typeof dots !== 'undefined') dots.forEach((d,i)=>d.classList.toggle('active',i===6));
-    
-    // Switch active page safely
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(p => p.classList.remove('active'));
-    bqPage.classList.add('active');
-
-    // Build the original complex bouquet from script.js
-    if (typeof buildBouquet === 'function') {
-        buildBouquet();
+    // Just use the main navigation function which handles display/opacity safely
+    if (typeof go === 'function') {
+        go(6);
     }
+
 
     // Fade in text and next button after bouquet draws (approx 3.5s)
     setTimeout(() => {
