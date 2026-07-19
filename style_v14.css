@@ -1879,20 +1879,21 @@ body{
 
 .envelope-prompt-top {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(24px, 6vw, 34px);
-    font-weight: 600;
-    line-height: 1.25;
+    font-size: clamp(28px, 5.5vw, 38px) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+    line-height: 1.25 !important;
     text-align: center;
+    text-transform: uppercase !important;
     max-width: 88%;
     margin: 0 auto 24px;
-    color: #E9C46A;
-    text-shadow: 0 2px 10px rgba(233, 196, 106, 0.25);
+    color: #e8c57a !important;
+    text-shadow: 0 2px 10px rgba(0,0,0,.35) !important;
     padding-top: calc(env(safe-area-inset-top) + 24px);
     opacity: 0;
     width: 100%;
     pointer-events: none;
     z-index: 60;
-    /* Optional: If animation is still applied, it might use opacity */
 }
 
 @media (max-width: 768px) {
