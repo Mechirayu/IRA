@@ -57,6 +57,31 @@ body{
 /* Floral Canvas */
 .floral-canvas { position: fixed; inset: 0; z-index: 100; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
 
+/* Global Preloader */
+#globalPreloader {
+  position: fixed; inset: 0; z-index: 9999;
+  background: radial-gradient(circle at center, #59041a 0%, #110005 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: opacity 0.6s ease-in-out, visibility 0.6s;
+  color: var(--cream); font-family: 'Cormorant Garamond', serif;
+}
+#globalPreloader.hidden {
+  opacity: 0; visibility: hidden; pointer-events: none;
+}
+#globalPreloader .loader-heart {
+  font-size: 40px; animation: hbIdle 1.5s infinite ease-in-out; margin-bottom: 20px;
+}
+#globalPreloader p {
+  font-size: 22px; font-style: italic; letter-spacing: 1px;
+}
+#globalPreloader .loader-progress-bar {
+  width: 200px; height: 4px; background: rgba(255,255,255,0.1);
+  margin-top: 15px; border-radius: 4px; overflow: hidden;
+}
+#globalPreloader .loader-progress-fill {
+  height: 100%; width: 0%; background: var(--rose);
+  transition: width 0.3s ease-out;
+}
 
 .topbar{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;
   justify-content:center;padding:14px;gap:10px;}
@@ -1229,16 +1254,19 @@ body{
     font-style: italic;
     font-size: clamp(18px, 3vw, 27px);
     font-weight: 400;
-    color: rgba(255, 240, 200, 0.3); /* Dim/faded inactive state */
+    color: rgba(255, 240, 200, 0.8);
+    opacity: 0.2;
     text-align: center;
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateY(12px) scale(0.95);
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, color 0.4s ease-in-out;
     transform-origin: center;
 }
 .lyric-line.active {
     font-weight: 600;
     color: #fff;
-    transform: scale(1.15);
-    text-shadow: 0 0 10px rgba(232, 192, 125, 0.8), 0 0 20px rgba(232, 192, 125, 0.3);
+    opacity: 1;
+    transform: translateY(0) scale(1.15);
+    text-shadow: 0 0 10px rgba(232, 192, 125, 0.6), 0 0 20px rgba(232, 192, 125, 0.2);
 }
 
 /* ==========================================================================

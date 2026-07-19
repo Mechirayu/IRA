@@ -1,3 +1,75 @@
+/* Asset Loader */
+window.AssetLoader = {
+    cache: new Map(),
+    pending: 0,
+    total: 0,
+    onProgress: null,
+    onComplete: null,
+    
+    async loadAsset(id, url, type) {
+        if (this.cache.has(id)) return this.cache.get(id);
+        
+        return new Promise((resolve, reject) => {
+            if (type === 'image') {
+                const img = new Image();
+                img.onload = () => { this.cache.set(id, img); this.tick(); resolve(img); };
+                img.onerror = () => { console.warn("Retry img", url); this.retry(id, url, type, resolve); };
+                img.src = url;
+            } else if (type === 'video') {
+                // Fetch as blob for perfect caching & instant playback
+                fetch(url)
+                    .then(r => r.blob())
+                    .then(blob => {
+                        const blobUrl = URL.createObjectURL(blob);
+                        const vid = document.createElement('video');
+                        vid.src = blobUrl;
+                        vid.preload = 'auto';
+                        vid.playsInline = true;
+                        vid.muted = true;
+                        vid.loop = true;
+                        vid.oncanplaythrough = () => {
+                            if(!this.cache.has(id)) {
+                                this.cache.set(id, vid);
+                                this.tick();
+                                resolve(vid);
+                            }
+                        };
+                        vid.onerror = () => this.retry(id, url, type, resolve);
+                        vid.load();
+                    })
+                    .catch(() => this.retry(id, url, type, resolve));
+            } else if (type === 'audio') {
+                const aud = document.createElement('audio');
+                aud.src = url;
+                aud.preload = 'auto';
+                aud.oncanplaythrough = () => { this.cache.set(id, aud); this.tick(); resolve(aud); };
+                aud.onerror = () => this.retry(id, url, type, resolve);
+                aud.load();
+            }
+        });
+    },
+
+    retry(id, url, type, resolve) {
+        setTimeout(() => { this.loadAsset(id, url, type).then(resolve); }, 1000);
+    },
+
+    tick() {
+        this.pending--;
+        if (this.onProgress) this.onProgress((this.total - this.pending) / this.total);
+        if (this.pending === 0 && this.onComplete) this.onComplete();
+    },
+
+    loadBatch(assets, onProgress, onComplete) {
+        this.total = assets.length;
+        this.pending = assets.length;
+        this.onProgress = onProgress;
+        this.onComplete = onComplete;
+        if (assets.length === 0) return onComplete();
+        
+        assets.forEach(a => this.loadAsset(a.id, a.url, a.type));
+    }
+};
+
 /* stars */
 const starWrap=document.getElementById('stars');
 for(let i=0;i<55;i++){
@@ -78,7 +150,34 @@ window.skipScene = () => {
         }
     }
 };
-go(0);
+
+// GLOBAL PRELOADER LOGIC
+function startApp() {
+    const preloader = document.getElementById('globalPreloader');
+    const bar = document.getElementById('loaderProgressFill');
+    
+    const coreAssets = [
+        { id: 'her1', url: 'her1.jpg', type: 'image' },
+        { id: 'her2', url: 'her2.jpg', type: 'image' },
+        { id: 'song1', url: 'song/1-song (1).mp3', type: 'audio' },
+        { id: 'song2', url: 'song/2-song (1).mp3', type: 'audio' }
+    ];
+    
+    window.AssetLoader.loadBatch(
+        coreAssets,
+        (progress) => {
+            if(bar) bar.style.width = (progress * 100) + '%';
+        },
+        () => {
+            if(preloader) {
+                preloader.style.opacity = '0';
+                setTimeout(() => preloader.classList.add('hidden'), 600);
+            }
+            go(0);
+        }
+    );
+}
+startApp();
 backBtn.addEventListener('click',()=>{
     if(current>0) go(current-1);
 });

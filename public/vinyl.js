@@ -207,19 +207,27 @@ function initVinylPlayer() {
             controlBtn.classList.add('playing-state');
             
             setTimeout(() => {
-                // Start spinning
-                disc.classList.add('spinning');
-                
                 // Setup Audio & Lyrics if not already done
                 if (!currentAudio) {
                     currentAudio = document.getElementById('audioTrack1');
                     currentLyrics = LYRICS_TIMING_CONFIG.track1;
                     setupLyrics();
                 }
-                
-                currentAudio.play().catch(e => console.log("Audio autoplay blocked", e));
-                currentAudio.addEventListener('timeupdate', syncLyrics);
-                
+
+                // Wait for audio to be ready before spinning
+                const attemptPlay = () => {
+                    if (currentAudio.readyState >= 3) {
+                        btnText.innerText = 'PAUSE';
+                        disc.classList.add('spinning');
+                        currentAudio.play().catch(e => console.log("Audio autoplay blocked", e));
+                        currentAudio.addEventListener('timeupdate', syncLyrics);
+                    } else {
+                        btnText.innerText = 'LOADING...';
+                        currentAudio.load();
+                        currentAudio.addEventListener('canplaythrough', attemptPlay, { once: true });
+                    }
+                };
+                attemptPlay();
             }, 1200);
         } else {
             // Toggle play/pause
@@ -348,9 +356,19 @@ function switchTrack(trackNum) {
     setTimeout(() => {
         arm.classList.add('playing');
         setTimeout(() => {
-            disc.classList.add('spinning');
-            currentAudio.play().catch(e => console.log(e));
-            currentAudio.addEventListener('timeupdate', syncLyrics);
+            const attemptPlay = () => {
+                if (currentAudio.readyState >= 3) {
+                    btnText.innerText = 'PAUSE';
+                    disc.classList.add('spinning');
+                    currentAudio.play().catch(e => console.log(e));
+                    currentAudio.addEventListener('timeupdate', syncLyrics);
+                } else {
+                    btnText.innerText = 'LOADING...';
+                    currentAudio.load();
+                    currentAudio.addEventListener('canplaythrough', attemptPlay, { once: true });
+                }
+            };
+            attemptPlay();
         }, 1000);
     }, delay);
 }
