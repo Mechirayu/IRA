@@ -2228,12 +2228,12 @@ body{
 }
 .promise-card {
     background: rgba(43, 20, 30, 0.85);
-    border: 1px solid rgba(255, 194, 210, 0.4);
+    border: 1px solid rgba(246, 217, 156, 0.35);
     border-radius: 30px;
     padding: 60px 40px;
     max-width: 800px;
     width: 95%;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.6), inset 0 0 25px rgba(255, 194, 210, 0.2);
+    box-shadow: 0 0 35px rgba(246,217,156,.10), 0 0 70px rgba(246,217,156,.05);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
 }
@@ -2275,18 +2275,20 @@ body{
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .yes-btn {
-    background: linear-gradient(135deg, #FFC2D2, #FF7E9D);
-    color: #2a0c18;
-    box-shadow: 0 10px 25px rgba(255, 126, 157, 0.5);
+    background: linear-gradient(180deg, #F6D99C 0%, #F1CC7A 55%, #E7BB61 100%);
+    border: 1px solid #F6D99C;
+    color: #40221B;
+    box-shadow: 0 0 20px rgba(246,217,156,.28), 0 10px 25px rgba(0,0,0,0.4);
 }
 .yes-btn:hover {
     transform: scale(1.05) translateY(-3px);
-    box-shadow: 0 15px 30px rgba(255, 126, 157, 0.7);
+    box-shadow: 0 0 30px rgba(246,217,156,.4), 0 15px 30px rgba(0,0,0,0.5);
 }
 .no-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.3);
+    background: #4A2731;
+    color: #F8E4C0;
+    border: 1px solid rgba(246,217,156,.35);
+    box-shadow: 0 0 15px rgba(246,217,156,0.05);
     position: relative; /* Will be changed to absolute by JS */
 }
 
