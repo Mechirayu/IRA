@@ -1,3 +1,7 @@
+// Disable text selection and long press context menu
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('contextmenu', e => e.preventDefault());
+
 /* stars */
 const starWrap=document.getElementById('stars');
 for(let i=0;i<55;i++){
