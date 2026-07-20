@@ -3046,3 +3046,19 @@ body.is-paused-background .star,
 body.is-paused-background .heart {
     animation-play-state: paused !important;
 }
+
+/* Hotfixes for promise modal */
+.promise-text p { margin-bottom: 15px; }
+.promise-text p:last-child { margin-bottom: 0; }
+@media (max-width: 600px) {
+    #promise-scene, #end-scene {
+        overflow-y: auto !important;
+        padding-top: 60px !important;
+        padding-bottom: 30px !important;
+    }
+    #promise-scene::-webkit-scrollbar, #end-scene::-webkit-scrollbar { display: none; }
+    .promise-card { margin-top: 40px !important; }
+    .promise-icon { font-size: 3.5rem !important; margin-bottom: 15px !important; }
+    .promise-text { font-size: 0.95rem !important; }
+    .promise-text p { margin-bottom: 12px !important; }
+}
