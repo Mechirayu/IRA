@@ -532,27 +532,11 @@
     </div>
 
     <!-- Part 3: End Screen -->
-    <div id="end-scene" class="finale-scene final-screen-content" style="display: none; gap: 1.2rem;">
-      <h1 class="end-title">Yes, that's my girl!</h1>
-
-      <div class="end-heart" style="font-size: clamp(28px, 5.4vw, 38px);">
-        <span style="display:inline-block;animation:beat 1.3s ease-in-out infinite">❤️</span>
-      </div>
-
-      <p class="end-subtitle">
-        Now keep that promise forever.
-      </p>
-
-      <p class="end-subtitle">
-        Love you so much...
-      </p>
-
-      <p class="end-subtitle">
-        And sorry again. ✨
-      </p>
-
-      <div class="end-buttons">
-        <button class="btn end-btn end-primary" onclick="startFallingPetals()">Make Flowers Rain</button>
+    <div id="end-scene" class="finale-scene final-screen-content" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+      <div class="inner" style="max-width:600px; width:100%; margin:auto 0; text-align:center;">
+        <div class="hbd" style="font-size:clamp(40px,13vw,86px)">Yes, that's my girl! <span style="display:inline-block;animation:beat 1.3s ease-in-out infinite">❤️</span></div>
+        <p class="lede" style="margin-top: 14px; margin-bottom: 20px;">Now keep that promise forever...<br>Love you so much...<br>And sorry again. ✨</p>
+        <button class="btn gold" style="margin-top:10px" onclick="bigBurst()">make it rain 🎉</button>
       </div>
     </div>
   </div>
