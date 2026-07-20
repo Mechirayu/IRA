@@ -61,7 +61,8 @@ function go(n){
     if(n===BQ) {
         buildBouquet();
         // Fade in text and next button after bouquet draws (approx 3.5s)
-        setTimeout(() => {
+        if (window.bqTimeout) clearTimeout(window.bqTimeout);
+        window.bqTimeout = setTimeout(() => {
             const header = document.getElementById('bqHeader');
             const nextBtn = document.getElementById('bqNextBtn');
             const eyebrow = document.getElementById('bqEyebrow');
@@ -381,6 +382,7 @@ function buildBouquet(){
 }
 
 function transitionToLetterGrid() {
+    if (window.bqTimeout) clearTimeout(window.bqTimeout);
     const tl = gsap.timeline();
     const bqHeader = document.getElementById('bqHeader');
     const bqCap = document.getElementById('bqCap');
