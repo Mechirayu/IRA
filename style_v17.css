@@ -2287,22 +2287,117 @@ body{
     position: relative;
     z-index: 1;
 }
-.end-title {
-    font-family: 'Cormorant Garamond', serif;
-    color: #FFC2D2;
-    font-size: clamp(2.8rem, 5vw, 3.4rem);
+/* --- ELEGANT END SCENE --- */
+.elegant-title {
+    font-family: 'Great Vibes', cursive;
+    color: #f7e6d0;
+    font-size: clamp(3.5rem, 10vw, 5.5rem);
     font-weight: 400;
-    line-height: 1.05;
-    letter-spacing: 0.3px;
-    text-shadow: 0 0 20px rgba(255,180,210,.35);
-    text-align: center;
-    background: linear-gradient(90deg, #ffd6e8, #ffc7d7, #f8d08b);
-    background-size: 250% auto;
+    line-height: 1.1;
+    text-shadow: 0 0 15px rgba(247, 230, 208, 0.4), 0 0 30px rgba(247, 230, 208, 0.2);
+    background: linear-gradient(135deg, #FFF, #F3D0A3, #E3A36E);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: shim 6s linear infinite;
-    margin: 0 auto;
+    margin-bottom: 25px;
+    margin-top: -20px;
+}
+.elegant-heart {
+    font-size: clamp(40px, 8vw, 60px);
+    margin-bottom: 25px;
+    filter: drop-shadow(0 0 15px rgba(255, 0, 50, 0.8)) drop-shadow(0 0 30px rgba(255, 0, 50, 0.4));
+}
+.elegant-card {
+    position: relative;
+    border: 1px solid rgba(243, 208, 163, 0.5);
+    border-radius: 28px;
+    background: rgba(25, 4, 8, 0.6);
+    padding: 35px 20px;
+    max-width: 90%;
+    width: 380px;
+    margin: 0 auto 40px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(243, 208, 163, 0.05);
+}
+.elegant-card::before, .elegant-card::after {
+    content: '♦';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: rgba(243, 208, 163, 0.7);
+    line-height: 1;
+}
+.elegant-card::before { left: -7px; text-shadow: 0 0 10px rgba(243,208,163,0.5); }
+.elegant-card::after { right: -7px; text-shadow: 0 0 10px rgba(243,208,163,0.5); }
+.elegant-card-top-accent {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    background: #2a0c18; /* Approximate background color to break the border */
+    padding: 0 8px;
+    gap: 4px;
+}
+.elegant-accent-line {
+    width: 25px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(243, 208, 163, 0.6), transparent);
+}
+.elegant-accent-heart {
+    font-size: 12px;
+    color: rgba(243, 208, 163, 0.8);
+    position: relative;
+    top: -1px;
+}
+.elegant-text {
+    font-family: 'Cormorant Garamond', serif;
+    color: #F7EFE7;
+    font-size: 1.35rem;
+    line-height: 1.5;
+    margin: 0;
+    letter-spacing: 0.3px;
+}
+.elegant-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 18px 0;
+}
+.elegant-divider-line {
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(243, 208, 163, 0.5), transparent);
+}
+.elegant-divider-heart {
+    font-size: 10px;
+    color: rgba(243, 208, 163, 0.7);
+}
+.elegant-button {
+    background: linear-gradient(135deg, #F4D79B, #D2A465);
+    color: #3d1525;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    padding: 16px 45px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+    box-shadow: 0 10px 25px rgba(244, 215, 155, 0.25), inset 0 0 15px rgba(255,255,255,0.3);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.2s;
+    margin-top: 10px;
+}
+.elegant-button:hover {
+    transform: translateY(-4px) scale(1.03);
+}
+.elegant-button-icon {
+    font-size: 1.4rem;
 }
 @keyframes shim { to { background-position: 250% center; } }
 @keyframes beat { 0%,100%{transform:scale(1);} 25%{transform:scale(1.25);} 40%{transform:scale(1.1);} }
