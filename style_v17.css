@@ -1827,7 +1827,7 @@ body{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding: 50px 26px 40px 26px; /* Reduced L/R padding to use 85% width */
+    padding: 65px 7.5% 40px 7.5%;
     box-sizing: border-box;
     z-index: 5;
     scrollbar-width: thin;
@@ -1961,7 +1961,7 @@ body{
 
 @media (max-width: 768px) {
     .letter-text-container {
-        padding: 60px 14px 20px 14px; /* Reduced L/R padding */
+        padding: 70px 7.5% 20px 7.5%;
     }
 }
 
@@ -1993,12 +1993,11 @@ body{
 
 .paper-letter-scroll .lp-greeting {
     font-family: 'Great Vibes', cursive;
-    font-size: clamp(4.9rem, 8.8vw, 7.35rem) !important; /* Reduced size by ~2% */
+    font-size: clamp(4.7rem, 8.5vw, 7.1rem) !important;
     text-align: center;
     font-weight: 400;
     margin: 0 auto 3rem auto;
     width: 100%;
-    max-width: 480px; /* Forces visually balanced wrapping */
 }
 
 .paper-letter-scroll .lp-closing {
@@ -2815,7 +2814,7 @@ body{
         max-height: 85dvh !important;
     }
     .letter-text-container {
-        padding: 30px 18px 36px 18px !important; /* Reduced L/R padding */
+        padding: 45px 7.5% 36px 7.5% !important;
     }
     .letter-para {
         font-size: clamp(21px, 4.8vw, 26px) !important;
@@ -2824,12 +2823,9 @@ body{
         font-weight: 500 !important;
     }
     .lp-greeting {
-        font-size: clamp(51px, 9.8vw, 80px) !important; /* Reduced size by ~2% */
+        font-size: clamp(49px, 9.4vw, 77px) !important;
         line-height: 1.05 !important;
         text-align: center !important;
-        max-width: 90% !important; /* Forces visually balanced wrapping on mobile */
-        margin-left: auto !important;
-        margin-right: auto !important;
     }
 
     /* ---- 10. PROMISE & FINALE SCREENS ---- */
