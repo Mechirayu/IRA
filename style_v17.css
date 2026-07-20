@@ -3068,3 +3068,12 @@ body.is-paused-background .heart {
     .promise-text { font-size: 0.95rem !important; }
     .promise-text p { margin-bottom: 12px !important; }
 }
+
+/* Hide skip buttons globally for production */
+.skip-button, .skip-btn, #mainSkipBtn, .global-skip-btn, [data-action="skip"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
