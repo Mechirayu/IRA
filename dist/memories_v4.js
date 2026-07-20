@@ -51,6 +51,44 @@ const EnvelopeClonePool = {
 // ─────────────────────────────────────────────────────────
 const MediaManager = {
     cache: new Map(), // id -> { el: DOMElement, isVid: boolean, frame: string }
+    blobCache: new Map(), // originalUrl -> blobObjectUrl
+
+    async preloadSequentially() {
+        if (this.preloadStarted) return;
+        this.preloadStarted = true;
+        
+        const keys = Object.keys(MEMORY_CONFIG);
+        console.log(`[MediaManager] Starting sequential background preload for ${keys.length} items...`);
+        for (const key of keys) {
+            const mem = MEMORY_CONFIG[key];
+            const url = mem.video || mem.image;
+            if (!this.blobCache.has(url)) {
+                try {
+                    // Fetch sequentially: wait for one to finish before starting the next
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const objectUrl = URL.createObjectURL(blob);
+                        this.blobCache.set(url, objectUrl);
+                        
+                        // If we already created a media element for this, update its src
+                        // ONLY if it's not currently being viewed (not in DOM) to avoid interrupting playback
+                        if (this.cache.has(url)) {
+                            const cachedObj = this.cache.get(url);
+                            if (cachedObj && cachedObj.el && !document.body.contains(cachedObj.el)) {
+                                cachedObj.el.src = objectUrl;
+                                if (cachedObj.isVid) cachedObj.el.load();
+                            }
+                        }
+                        console.log(`[MediaManager] Preloaded ${url}`);
+                    }
+                } catch (e) {
+                    console.warn(`[MediaManager] Failed to preload ${url}`, e);
+                }
+            }
+        }
+        console.log('[MediaManager] Sequential preloading complete!');
+    },
 
     init() {
         console.log('[MediaManager] Creating hidden media elements for instant playback...');
@@ -58,17 +96,21 @@ const MediaManager = {
             const mem = MEMORY_CONFIG[i];
             const id = mem.video || mem.image;
             
+            if (this.cache.has(id)) continue;
+            
+            const srcToUse = this.blobCache.has(id) ? this.blobCache.get(id) : id;
+            
             if (mem.video) {
                 const vid = document.createElement('video');
-                vid.src = id;
-                vid.preload = 'metadata'; // Fetches headers, avoiding OOM on mobile
+                vid.src = srcToUse;
+                vid.preload = 'auto'; // Change to auto to encourage buffering if fetch failed
                 vid.playsInline = true;
                 vid.muted = true;
                 vid.loop = true;
                 this.cache.set(id, { el: vid, isVid: true, frame: mem.frame });
             } else if (mem.image) {
                 const img = new Image();
-                img.src = id;
+                img.src = srcToUse;
                 this.cache.set(id, { el: img, isVid: false, frame: mem.frame });
             }
         }
@@ -81,9 +123,18 @@ const MediaManager = {
         const id  = mem.video || mem.image;
         if (this.cache.has(id)) return this.cache.get(id);
         
-        return { src: id, isVid: !!mem.video, frame: mem.frame };
+        const srcToUse = this.blobCache.has(id) ? this.blobCache.get(id) : id;
+        return { src: srcToUse, isVid: !!mem.video, frame: mem.frame };
     },
 };
+
+// Start sequential preloading automatically on window load
+window.addEventListener('load', () => {
+    // Small delay to ensure intro animations get CPU priority
+    setTimeout(() => {
+        MediaManager.preloadSequentially();
+    }, 2000);
+});
 
 // ─────────────────────────────────────────────────────────
 // INIT MEMORIES PAGE
